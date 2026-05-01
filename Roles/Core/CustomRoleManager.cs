@@ -812,6 +812,7 @@ public enum CustomRoles
     Slugger,
     Chaser,
     Samurai,
+    Rocket,
     //TOH-K
     Bomber,
     TeleportKiller,

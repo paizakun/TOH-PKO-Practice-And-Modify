@@ -86,8 +86,26 @@ public sealed class Chatter : RoleBase
                 DestroyableSingleton<HudManager>.Instance.Chat.AddChat(Player, msg);
             }
 
-            PlayerState.GetByPlayerId(Player.PlayerId).DeathReason = CustomDeathReason.Suicide;
-            Player.RpcMurderPlayerV2(Player);
+            var playerState = PlayerState.GetByPlayerId(Player.PlayerId);
+            playerState.DeathReason = CustomDeathReason.Suicide;
+            Player.SetRealKiller(Player);
+            MeetingVoteManager.ResetVoteManager(Player.PlayerId);
+
+            _ = new LateTask(() =>
+            {
+                if (!Player.IsModClient() && !Player.AmOwner)
+                    Player.RpcMeetingKill(Player);
+                CustomRoleManager.OnMurderPlayer(Player, Player);
+
+                _ = new LateTask(() =>
+                {
+                    foreach (var pl in PlayerCatch.AllPlayerControls)
+                    {
+                        Utils.SendMessage(UtilsName.GetPlayerColor(Player, true) + " が沈黙に耐えきれず息絶えた", pl.PlayerId, "チャッター");
+                    }
+                }, 0.1f, "ChatterDeathMsg");
+            }, Main.LagTime, "ChatterKill");
+
             UtilsGameLog.AddGameLog("Chatter", $"{UtilsName.GetPlayerColor(Player)} は無言に耐えきれず息絶えた");
 
             timeSinceLastChat = -9999f;
@@ -144,11 +162,14 @@ public static class Chatter_RpcSendChat_Patch
     public static void Postfix(PlayerControl __instance, string chatText)
     {
         if (!AmongUsClient.Instance.AmHost) return;
+        if (__instance.GetRoleClass() is not Chatter chatter) return;
+        if (!__instance.IsAlive()) return;
 
-        if (__instance.GetRoleClass() is Chatter chatter && __instance.IsAlive())
-        {
-            chatter.ResetTimer();
-        }
+        // ★ /cmd を含むメッセージはコマンドなのでリセットしない
+        if (chatText != null && chatText.TrimStart().StartsWith("/cmd"))
+            return;
+
+        chatter.ResetTimer();
     }
 }
 

@@ -7,6 +7,7 @@ using TownOfHost.Roles.Core.Interfaces;
 using UnityEngine;
 
 namespace TownOfHost.Roles.Crewmate;
+
 public sealed class Sage : RoleBase
 {
     public static readonly SimpleRoleInfo RoleInfo =
@@ -41,7 +42,10 @@ public sealed class Sage : RoleBase
 
     bool isBarrierActive;
     float barrierTimer;
-    Vector2 savedPosition; // バリア中の固定位置
+    Vector2 savedPosition;
+
+    // ★ デフォルトペットID（ペットがない人に付与）
+    private const string DefaultPetId = "pet_Crewmate";
 
     enum OptionName
     {
@@ -55,6 +59,32 @@ public sealed class Sage : RoleBase
             new(1f, 15f, 0.5f), 5f, false).SetValueFormat(OptionFormat.Seconds);
         OptionBarrierCooldown = FloatOptionItem.Create(RoleInfo, 11, OptionName.SageBarrierCooldown,
             new(2.5f, 60f, 2.5f), 20f, false).SetValueFormat(OptionFormat.Seconds);
+    }
+
+    public override void Add()
+    {
+        // ★ PetActionManager登録
+        PetActionManager.Register(Player.PlayerId, ActivateBarrier);
+
+        // ★ ペットがない場合は自動付与
+        if (AmongUsClient.Instance.AmHost)
+        {
+            _ = new LateTask(() =>
+            {
+                if (Player == null || !Player.IsAlive()) return;
+                string currentPet = Player.Data?.DefaultOutfit?.PetId ?? "";
+                if (string.IsNullOrEmpty(currentPet))
+                {
+                    PetsHelper.SetPet(Player, DefaultPetId);
+                    Logger.Info($"{Player.Data.GetLogPlayerName()} にデフォルトペット付与: {DefaultPetId}", "Sage");
+                }
+            }, 1.5f, "Sage.SetDefaultPet", true);
+        }
+    }
+
+    public override void OnDestroy()
+    {
+        PetActionManager.Unregister(Player.PlayerId);
     }
 
     public override void ApplyGameOptions(IGameOptions opt)
@@ -75,9 +105,13 @@ public sealed class Sage : RoleBase
         barrierTimer = 0f;
         savedPosition = Player.GetTruePosition();
 
-        Main.AllPlayerSpeed[Player.PlayerId] = 0f;
+        // ★ 速度を0にしてアニメを止める
+        Main.AllPlayerSpeed[Player.PlayerId] = Main.MinSpeed;
         Player.MarkDirtySettings();
         Player.SyncSettings();
+
+        // ★ 念のため即座に位置をスナップ
+        SnapPlayerToSaved();
 
         Utils.SendMessage(
             $"<color=#aaddff>【聖なるバリア】発動！\n{BarrierDuration}秒間キルを反射します。</color>",
@@ -85,11 +119,9 @@ public sealed class Sage : RoleBase
 
         SendRpc();
         UtilsNotifyRoles.NotifyRoles(OnlyMeName: true);
-
         Logger.Info($"{Player.Data.GetLogPlayerName()} がバリアを発動", "Sage");
     }
 
-    // ★ バリア解除
     private void DeactivateBarrier(bool resetCooldown = true)
     {
         if (!isBarrierActive) return;
@@ -97,19 +129,33 @@ public sealed class Sage : RoleBase
         barrierTimer = 0f;
 
         // ★ 速度を元に戻す
-        Main.AllPlayerSpeed[Player.PlayerId] = Main.RealOptionsData?.GetFloat(FloatOptionNames.PlayerSpeedMod) ?? 1f;
+        Main.AllPlayerSpeed[Player.PlayerId] =
+            Main.RealOptionsData?.GetFloat(FloatOptionNames.PlayerSpeedMod) ?? 1f;
         Player.MarkDirtySettings();
         Player.SyncSettings();
 
         if (resetCooldown)
         {
-            // ★ CDリセット（ベントCD = バリアCD）
             AURoleOptions.EngineerCooldown = BarrierCooldown;
             Player.RpcResetAbilityCooldown();
         }
 
         SendRpc();
         UtilsNotifyRoles.NotifyRoles(OnlyMeName: true);
+    }
+
+    // ★ 位置スナップをまとめたヘルパー
+    private void SnapPlayerToSaved()
+    {
+        if (Player == null) return;
+        try { Player.NetTransform.SnapTo(savedPosition); } catch { }
+
+        ushort sid = (ushort)(Player.NetTransform.lastSequenceId + 2U);
+        var writer = AmongUsClient.Instance.StartRpcImmediately(
+            Player.NetTransform.NetId, (byte)RpcCalls.SnapTo, SendOption.Reliable);
+        NetHelpers.WriteVector2(savedPosition, writer);
+        writer.Write(sid);
+        AmongUsClient.Instance.FinishRpcImmediately(writer);
     }
 
     public override void OnFixedUpdate(PlayerControl player)
@@ -120,17 +166,18 @@ public sealed class Sage : RoleBase
 
         barrierTimer += Time.fixedDeltaTime;
 
-        // ★ バリア中は位置を固定
+        // ★ バリア中は毎フレーム位置を固定（走りアニメ抑制）
         var currentPos = Player.GetTruePosition();
-        if (Vector2.Distance(currentPos, savedPosition) > 0.05f)
+        if (Vector2.Distance(currentPos, savedPosition) > 0.02f)
         {
-            Player.NetTransform.SnapTo(savedPosition);
-            ushort sid = (ushort)(Player.NetTransform.lastSequenceId + 2U);
-            var writer = AmongUsClient.Instance.StartRpcImmediately(
-                Player.NetTransform.NetId, (byte)RpcCalls.SnapTo, Hazel.SendOption.Reliable);
-            NetHelpers.WriteVector2(savedPosition, writer);
-            writer.Write(sid);
-            AmongUsClient.Instance.FinishRpcImmediately(writer);
+            SnapPlayerToSaved();
+        }
+
+        // ★ 速度が戻っていたら再度0にする（他MODとの競合対策）
+        if (Main.AllPlayerSpeed.TryGetValue(Player.PlayerId, out float spd) && spd > Main.MinSpeed)
+        {
+            Main.AllPlayerSpeed[Player.PlayerId] = Main.MinSpeed;
+            Player.MarkDirtySettings();
         }
 
         // ★ 時間切れで解除
@@ -143,20 +190,17 @@ public sealed class Sage : RoleBase
         }
     }
 
-    // ★ キルされそうになったとき → バリア中なら反射
     public override bool OnCheckMurderAsTarget(MurderInfo info)
     {
-        if (!isBarrierActive) return true; // バリアなし → 通常キル
+        if (!isBarrierActive) return true;
 
         var killer = info.AttemptKiller;
         if (killer == null) return true;
 
-        // ★ キルを防ぐ
         info.DoKill = false;
 
-        Logger.Info($"{Player.Data.GetLogPlayerName()} がバリアでキルを反射！ → {killer.Data.GetLogPlayerName()}", "Sage");
+        Logger.Info($"{Player.Data.GetLogPlayerName()} がバリアでキルを反射 → {killer.Data.GetLogPlayerName()}", "Sage");
 
-        // ★ 攻撃者をキル
         _ = new LateTask(() =>
         {
             if (!killer.IsAlive()) return;
@@ -166,13 +210,12 @@ public sealed class Sage : RoleBase
                 $"{UtilsName.GetPlayerColor(Player)}のバリアが{UtilsName.GetPlayerColor(killer)}のキルを反射した");
         }, 0.1f, "Sage.ReflectKill", true);
 
-        // ★ バリアは1回反射したら解除
         Utils.SendMessage(
             $"<color=#aaddff>【聖なるバリア】キルを反射しました！</color>",
             Player.PlayerId);
         DeactivateBarrier();
 
-        return false; // キルをキャンセル
+        return false;
     }
 
     public override void OnStartMeeting()
@@ -224,7 +267,6 @@ public sealed class Sage : RoleBase
         using var sender = CreateSender();
         sender.Writer.Write(isBarrierActive);
         sender.Writer.Write(barrierTimer);
-        // ★ X座標とY座標を別々にFloatとして書き込む
         sender.Writer.Write(savedPosition.x);
         sender.Writer.Write(savedPosition.y);
     }
@@ -233,20 +275,8 @@ public sealed class Sage : RoleBase
     {
         isBarrierActive = reader.ReadBoolean();
         barrierTimer = reader.ReadSingle();
-        // ★ X座標とY座標を別々にFloatとして読み込み、Vector2を再構築する
         float x = reader.ReadSingle();
         float y = reader.ReadSingle();
         savedPosition = new Vector2(x, y);
-    }
-
-    // ★ PetActionManagerへの登録はAdd()で行う
-    public override void Add()
-    {
-        PetActionManager.Register(Player.PlayerId, ActivateBarrier);
-    }
-
-    public override void OnDestroy()
-    {
-        PetActionManager.Unregister(Player.PlayerId);
     }
 }

@@ -21,7 +21,7 @@ public sealed class Samurai : RoleBase, IImpostor, IUsePhantomButton
             SetupOptionItem,
             "sam",
             "#ff1919",
-            (3, 16),
+            OptionSort: (3, 16),
             introSound: () => GetIntroSound(RoleTypes.Shapeshifter),
             from: From.SuperNewRoles
         );
@@ -96,7 +96,7 @@ public sealed class Samurai : RoleBase, IImpostor, IUsePhantomButton
         var origin = Player.GetTruePosition();
         var forward = Player.cosmetics.FlipX ? Vector2.left : Vector2.right;
 
-        List<PlayerControl> targets =
+        var targets =
             PlayerCatch.AllAlivePlayerControls
                 .Where(target => target != null && target.PlayerId != Player.PlayerId)
                 .Where(target => IsTargetInSlashArea(target, origin, forward))
@@ -111,11 +111,8 @@ public sealed class Samurai : RoleBase, IImpostor, IUsePhantomButton
             if (!target.IsAlive()) continue;
             if (target.GetCustomRole().IsImpostor() && !SuddenDeathMode.NowSuddenDeathMode) continue;
             if (SuddenDeathMode.NowSuddenDeathTemeMode && SuddenDeathMode.IsSameteam(target.PlayerId, Player.PlayerId)) continue;
-
-            if (CustomRoleManager.OnCheckMurder(Player, target, Player, target, true, Killpower: 1, deathReason: CustomDeathReason.Kill))
-            {
-                killCount++;
-            }
+            CustomRoleManager.OnCheckMurder(Player, target, target, target, true, true, 1, CustomDeathReason.Kill);
+            killCount++;
         }
 
         return killCount;

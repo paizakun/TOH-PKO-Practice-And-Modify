@@ -1,4 +1,5 @@
 using AmongUs.GameOptions;
+using Hazel;
 using TownOfHost.Modules;
 using TownOfHost.Roles.Core;
 using TownOfHost.Roles.Core.Interfaces;
@@ -107,18 +108,34 @@ public sealed class DoubleKiller : RoleBase, IImpostor, IUsePhantomButton
 
         if (nearest == null) return;
 
-        float savedKillCooldown = Player.killTimer;
-
         hasUsedPhantom = true;
-        Player.RpcSetRole(RoleTypes.Impostor);
-        Player.RpcMurderPlayer(nearest);
+        float savedKillTimer = Player.killTimer;
+        Vector2 targetPos = nearest.GetTruePosition();
+        CustomRoleManager.OnCheckMurder(Player, nearest, nearest, nearest, true, true, 1, CustomDeathReason.Kill);
+
+        // ★ 死体の位置にワープ（通常キルに見せる）
+        SnapToPosition(targetPos);
 
         _ = new LateTask(() =>
         {
             if (!Player.IsAlive()) return;
-            Player.SetKillCooldown(savedKillCooldown);
-            Main.AllPlayerKillCooldown[Player.PlayerId] = savedKillCooldown;
-        }, 0.15f, "DoubleKillerRestoreCD", true);
+            Player.SetKillCooldown(savedKillTimer);
+            Main.AllPlayerKillCooldown[Player.PlayerId] = savedKillTimer;
+            Player.SyncSettings();
+        }, 0.2f, "DoubleKillerRestoreCD", true);
+    }
+
+    // ★ 位置をSnapToでワープ（全クライアントに送信）
+    private void SnapToPosition(Vector2 position)
+    {
+        Player.NetTransform.SnapTo(position);
+
+        ushort sid = (ushort)(Player.NetTransform.lastSequenceId + 2U);
+        var writer = AmongUsClient.Instance.StartRpcImmediately(
+            Player.NetTransform.NetId, (byte)RpcCalls.SnapTo, Hazel.SendOption.Reliable);
+        NetHelpers.WriteVector2(position, writer);
+        writer.Write(sid);
+        AmongUsClient.Instance.FinishRpcImmediately(writer);
     }
 
     public override string GetProgressText(bool comms = false, bool GameLog = false)
