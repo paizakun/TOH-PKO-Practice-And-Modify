@@ -209,6 +209,7 @@ public abstract class RoleDescription
                 case "GiveGuarding":
                 case "GiveClumsy":
                 case "GiveSlacker":
+                case "GiveStamina":
                 case "GiveSunglasses": continue;
             }
 

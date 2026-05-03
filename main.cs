@@ -324,6 +324,7 @@ namespace TownOfHost
                     {CustomRoles.Water,"#003f8e"},
                     {CustomRoles.Clumsy,"#942343"},
                     {CustomRoles.Slacker,"#980098"},
+                    {CustomRoles.Stamina, "#88ccff" },
                     {CustomRoles.Elector,"#544a47"},
                     {CustomRoles.Transparent,"#7b7c7d"},
                     {CustomRoles.Amnesia,"#4682b4"},

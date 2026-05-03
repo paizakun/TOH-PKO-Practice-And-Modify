@@ -10,7 +10,6 @@ namespace TownOfHost.Roles.Crewmate;
 
 public sealed class Santa : RoleBase, IKiller
 {
-    // ★ 追加：内部的にキラー扱いにする（TOH-P のキルキャンセルを防ぐ）
     bool IKiller.IsKiller => true;
     bool IKiller.CanKill => true;
 
@@ -28,7 +27,6 @@ public sealed class Santa : RoleBase, IKiller
             (6, 0),
             from: From.SuperNewRoles,
             isDesyncImpostor: true
-
         );
 
     public Santa(PlayerControl player)
@@ -36,6 +34,7 @@ public sealed class Santa : RoleBase, IKiller
     {
         KillCooldown = OptKillCooldown.GetFloat();
         taskCompleted = false;
+        giftCount = 0;
     }
 
     static OptionItem OptKillCooldown;
@@ -46,18 +45,27 @@ public sealed class Santa : RoleBase, IKiller
     static OptionItem OptLighterRate;
     static OptionItem OptUltraStarRate;
     static OptionItem OptExpressRate;
+    static OptionItem OptNiceGuesserRate;
+    static OptionItem OptGiftLimit;
+    static OptionItem OptCanGiftLovers;
+    static OptionItem OptCanGiftMadmate;
 
     bool taskCompleted;
+    int giftCount;
+
     private enum OptionName
     {
         SantaGiftRateBalancer,
         SantaGiftRateSheriff,
         SantaGiftRateLighter,
         SantaGiftRateUltraStar,
-        SantaGiftRateExpress
+        SantaGiftRateExpress,
+        SantaGiftRateNiceGuesser,
+        SantaGiftLimit,
+        SantaCanGiftLovers,
+        SantaCanGiftMadmate,
     }
 
-    // UltraStar化前の元色を保持
     private static readonly Dictionary<byte, int> RememberedColorByPlayerId = new();
 
     private static void SetupOptionItem()
@@ -87,14 +95,35 @@ public sealed class Santa : RoleBase, IKiller
             new(0, 100, 5), 20, false
         ).SetValueFormat(OptionFormat.Percent);
 
+        OptNiceGuesserRate = IntegerOptionItem.Create(
+            RoleInfo, 16, OptionName.SantaGiftRateNiceGuesser,
+            new(0, 100, 5), 20, false
+        ).SetValueFormat(OptionFormat.Percent);
+
         OptKillCooldown = FloatOptionItem.Create(
             RoleInfo, 10, "SantaKillCooldown",
             new(0.5f, 60f, 0.5f), 25f, false
         ).SetValueFormat(OptionFormat.Seconds);
+        OptGiftLimit = IntegerOptionItem.Create(
+            RoleInfo, 17, OptionName.SantaGiftLimit,
+            new(1, 100, 1), 3, false
+        ).SetValueFormat(OptionFormat.Times);
+
+        OptCanGiftLovers = BooleanOptionItem.Create(
+            RoleInfo, 18, OptionName.SantaCanGiftLovers,
+            false, false
+        );
+
+        OptCanGiftMadmate = BooleanOptionItem.Create(
+            RoleInfo, 19, OptionName.SantaCanGiftMadmate,
+            false, false
+        );
 
         OverrideTasksData.Create(RoleInfo, 200);
     }
+
     public float CalculateKillCooldown() => KillCooldown;
+
     private static int GetGiftRate(CustomRoles role) => role switch
     {
         CustomRoles.Balancer => OptBalancerRate?.GetInt() ?? 0,
@@ -102,6 +131,7 @@ public sealed class Santa : RoleBase, IKiller
         CustomRoles.Lighter => OptLighterRate?.GetInt() ?? 0,
         CustomRoles.UltraStar => OptUltraStarRate?.GetInt() ?? 0,
         CustomRoles.Express => OptExpressRate?.GetInt() ?? 0,
+        CustomRoles.NiceGuesser => OptNiceGuesserRate?.GetInt() ?? 0,
         _ => 0
     };
 
@@ -119,10 +149,7 @@ public sealed class Santa : RoleBase, IKiller
             .ToArray();
 
         if (weightedRoles.Length == 0)
-        {
-            // 全部0%の場合は従来どおり等確率にフォールバック
             return giftRoles[IRandom.Instance.Next(giftRoles.Length)];
-        }
 
         var totalWeight = weightedRoles.Sum(x => x.Weight);
         var roll = IRandom.Instance.Next(totalWeight);
@@ -136,19 +163,23 @@ public sealed class Santa : RoleBase, IKiller
 
         return weightedRoles[weightedRoles.Length - 1].Role;
     }
-    // ★ タスク完了後のみキルボタンを使える
-    public bool CanUseKillButton() => Player.IsAlive() && taskCompleted;
+
+    // ★ タスク完了後・配布上限未達成のみキルボタンを使える
+    public bool CanUseKillButton()
+    {
+        if (!Player.IsAlive() || !taskCompleted) return false;
+        var limit = OptGiftLimit?.GetInt() ?? 3;
+        if (limit == 0) return true; // 0 = 無制限
+        return giftCount < limit;
+    }
     public bool CanUseSabotageButton() => false;
     public bool CanUseImpostorVentButton() => false;
 
     public override RoleTypes? AfterMeetingRole => taskCompleted ? RoleTypes.Impostor : RoleTypes.Crewmate;
 
-    // ★ タスク完了時にデシンクでインポスターにする
     public override bool OnCompleteTask(uint taskid)
     {
-        // ★ 死んでいたら絶対にタスク完了扱いにしない
-        if (!Player.IsAlive())
-            return true;
+        if (!Player.IsAlive()) return true;
 
         if (IsTaskFinished && !taskCompleted)
         {
@@ -156,34 +187,28 @@ public sealed class Santa : RoleBase, IKiller
 
             if (!AmongUsClient.Instance.AmHost) return true;
 
-            // ★ 生存中のみデシンクでインポスター化
             Player.RpcSetRoleDesync(RoleTypes.Impostor, Player.GetClientId());
-
             Player.ResetKillCooldown();
             Player.SetKillCooldown();
-
             UtilsNotifyRoles.NotifyRoles(OnlyMeName: true, SpecifySeer: Player);
         }
         return true;
     }
+
     public override void ApplyGameOptions(IGameOptions opt)
     {
         opt.SetVision(false);
     }
 
-    // ★ 会議後も内部ロールは変えない
     public override void ChengeRoleAdd()
     {
         base.ChengeRoleAdd();
-
-        // ★ ホストだけ会議後に内部ロールが戻るので再デシンク
         if (taskCompleted && Player.IsAlive() && AmongUsClient.Instance.AmHost)
         {
             Player.RpcSetRoleDesync(RoleTypes.Impostor, Player.GetClientId());
         }
     }
 
-    // ★ キルボタン → プレゼント処理
     public void OnCheckMurderAsKiller(MurderInfo info)
     {
         var (killer, target) = info.AttemptTuple;
@@ -191,49 +216,48 @@ public sealed class Santa : RoleBase, IKiller
 
         if (target.PlayerId == killer.PlayerId) return;
 
-        // ★ 追加：クルー以外にプレゼントしようとしたら自爆
-        if (target.GetCustomRole().GetCustomRoleTypes() != CustomRoleTypes.Crewmate)
+        var targetRoleType = target.GetCustomRole().GetCustomRoleTypes();
+        bool isLovers = target.Is(CustomRoles.Lovers) || target.Is(CustomRoles.MadonnaLovers) || target.Is(CustomRoles.OneLove);
+        bool isMadmate = targetRoleType == CustomRoleTypes.Madmate;
+        bool isCrew = targetRoleType == CustomRoleTypes.Crewmate;
+        bool canGift = isCrew;
+        if (!canGift && isLovers && (OptCanGiftLovers?.GetBool() ?? false)) canGift = true;
+        if (!canGift && isMadmate && (OptCanGiftMadmate?.GetBool() ?? false)) canGift = true;
+
+        if (!canGift)
         {
             PlayerState.GetByPlayerId(Player.PlayerId).DeathReason = CustomDeathReason.Suicide;
             killer.RpcMurderPlayerV2(killer);
             return;
         }
+        var limit = OptGiftLimit?.GetInt() ?? 3;
+        if (limit > 0 && giftCount >= limit) return;
 
-        // ランダム付与候補
         CustomRoles[] giftRoles =
         {
             CustomRoles.Balancer,
             CustomRoles.Sheriff,
             CustomRoles.Lighter,
             CustomRoles.UltraStar,
-            CustomRoles.Express
+            CustomRoles.Express,
+            CustomRoles.NiceGuesser,
         };
 
-        var rand = IRandom.Instance;
         var role = RollGiftRole(giftRoles);
-
         var beforeRole = target.GetCustomRole();
 
-        // UltraStar化する直前に元色を記録（初回のみ）
         if (role == CustomRoles.UltraStar && beforeRole != CustomRoles.UltraStar)
-        {
             RememberedColorByPlayerId[target.PlayerId] = target.Data.DefaultOutfit.ColorId;
-        }
 
-        // Express -> 非Express になる場合は速度をバニラへ戻す
         bool resetExpressSpeed = beforeRole == CustomRoles.Express && role != CustomRoles.Express;
         if (resetExpressSpeed)
-        {
             Main.AllPlayerSpeed[target.PlayerId] = Main.NormalOptions.PlayerSpeedMod;
-        }
 
         if (!Utils.RoleSendList.Contains(target.PlayerId))
             Utils.RoleSendList.Add(target.PlayerId);
 
-        // 役職付与
         target.RpcSetCustomRole(role, log: null);
 
-        // UltraStar -> 非UltraStar になったら元色へ戻す
         if (beforeRole == CustomRoles.UltraStar &&
             role != CustomRoles.UltraStar &&
             RememberedColorByPlayerId.TryGetValue(target.PlayerId, out var originalColorId))
@@ -242,7 +266,6 @@ public sealed class Santa : RoleBase, IKiller
             RememberedColorByPlayerId.Remove(target.PlayerId);
         }
 
-        // ★ UltraStar の RoleBase を生成（全員に UltraStar 表記を見せるため）
         if (role == CustomRoles.UltraStar)
         {
             var field = typeof(UltraStar).GetField("CanseeAllplayer", BindingFlags.NonPublic | BindingFlags.Static);
@@ -250,15 +273,23 @@ public sealed class Santa : RoleBase, IKiller
         }
 
         if (resetExpressSpeed)
-        {
             UtilsOption.MarkEveryoneDirtySettings();
-        }
+
+        giftCount++;
 
         killer.ResetKillCooldown();
         killer.SetKillCooldown();
         killer.RpcResetAbilityCooldown();
 
         _ = new LateTask(() => UtilsNotifyRoles.NotifyRoles(ForceLoop: true), 0.2f, "Santa Gift");
+    }
+
+    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    {
+        if (!taskCompleted) return "";
+        var limit = OptGiftLimit?.GetInt() ?? 3;
+        if (limit == 0) return $"<color=#f29c9f>({giftCount})</color>";
+        return $"<color=#f29c9f>({giftCount}/{limit})</color>";
     }
 
     public bool OverrideKillButtonText(out string text)

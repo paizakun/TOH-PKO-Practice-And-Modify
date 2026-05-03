@@ -54,6 +54,7 @@ class GhostRoleCore
         Water.Init();
         SlowStarter.Init();
         Slacker.Init();
+        Stamina.Init();
         Transparent.Init();
         Clumsy.Init();
         OneWolf.Init();
@@ -108,6 +109,7 @@ class GhostRoleCore
         Water.SetupCustomOption();
         Clumsy.SetupCustomOption();
         Slacker.SetupCustomOption();
+        Stamina.SetupCustomOption();
         //ゆーれーやくしょく
         ObjectOptionitem.Create(1_000_118, "Madmate", true, null, TabGroup.GhostRoles)
             .SetOptionName(() => "Mad Ghost").SetColor(ModColors.MadMateOrenge).SetTag(CustomOptionTags.Role);

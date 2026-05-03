@@ -463,6 +463,7 @@ namespace TownOfHost
                         case "GiveGuarding": continue;
                         case "GiveClumsy": continue;
                         case "GiveSlacker": continue;
+                        case "GiveStamina": continue;
                         case "GiveSunglasses": continue;
                         default: if (getbool) continue; break;
                     }
@@ -689,6 +690,7 @@ namespace TownOfHost
             if (player.Is(CustomRoles.Water)) sb.Append(juncture + AddonInfo(CustomRoles.Water, "Ｗ", pc: player) + "\n");
             if (player.Is(CustomRoles.Clumsy)) sb.Append(juncture + AddonInfo(CustomRoles.Clumsy, "Ｃ", From.TownOfHost_Y, pc: player) + "\n");
             if (player.Is(CustomRoles.Slacker)) sb.Append(juncture + AddonInfo(CustomRoles.Slacker, "ＳＬ", pc: player) + "\n");
+            if (player.Is(CustomRoles.Stamina)) sb.Append(juncture + AddonInfo(CustomRoles.Stamina, "ＳＴ", pc: player) + "\n");
             if (player.Is(CustomRoles.Sunglasses)) sb.Append(juncture + AddonInfo(CustomRoles.Sunglasses, "Ｓ", From.TheOtherRoles, pc: player) + "\n");
 
             CheckPageChange(player.PlayerId, sb, title: AddRoleInfoTitle);
@@ -756,6 +758,7 @@ namespace TownOfHost
                 CustomRoles.Water => AddonInfo(role, "Ｗ"),
                 CustomRoles.Clumsy => AddonInfo(role, "Ｃ", From.TownOfHost_Y),
                 CustomRoles.Slacker => AddonInfo(role, "ＳＬ"),
+                CustomRoles.Stamina => AddonInfo(role, "ＳＴ"),
                 CustomRoles.News => AddonInfo(role, "Ｎ"),
                 CustomRoles.Sunglasses => AddonInfo(role, "Ｓ", From.TheOtherRoles),
                 //第三属性

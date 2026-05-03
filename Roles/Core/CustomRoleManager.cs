@@ -542,6 +542,7 @@ public static class CustomRoleManager
                 case CustomRoles.Water: Water.Add(pc.PlayerId); break;
                 case CustomRoles.Clumsy: Clumsy.Add(pc.PlayerId); break;
                 case CustomRoles.Slacker: Slacker.Add(pc.PlayerId); break;
+                case CustomRoles.Stamina: Stamina.Add(pc.PlayerId); break;
                 case CustomRoles.Elector: Elector.Add(pc.PlayerId); break;
                 case CustomRoles.Amnesia: Amnesia.Add(pc.PlayerId); break;
                 case CustomRoles.News: News.Add(pc.PlayerId); break;
@@ -1060,6 +1061,7 @@ public enum CustomRoles
     InfoPoor,
     News,
     Sunglasses,
+    Stamina,
 
     //GhostRoles
 

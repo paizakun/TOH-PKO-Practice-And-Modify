@@ -92,6 +92,7 @@ namespace TownOfHost
                 roleCommands.Add(CustomRoles.Water, "wt");
                 roleCommands.Add(CustomRoles.Transparent, "tr");
                 roleCommands.Add(CustomRoles.Slacker, "sl");
+                roleCommands.Add(CustomRoles.Stamina, "st");
                 roleCommands.Add(CustomRoles.Clumsy, "lb");
                 roleCommands.Add(CustomRoles.Elector, "El");
                 roleCommands.Add(CustomRoles.Amnesia, "am");

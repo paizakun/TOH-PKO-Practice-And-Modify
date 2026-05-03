@@ -68,6 +68,8 @@ namespace TownOfHost
         public OptionItem GiveClumsy;
         //スラッカー
         public OptionItem GiveSlacker;
+        //スタミナー
+        public OptionItem GiveStamina;
         //ムーン
         public OptionItem GiveMoon;
         //ライティング
@@ -131,6 +133,7 @@ namespace TownOfHost
             GiveWater = BooleanOptionItem.Create(idStart++, "GiveWater", MadMate, tab, false).SetParentRole(role).SetParent(GiveAddons);
             GiveClumsy = BooleanOptionItem.Create(idStart++, "GiveClumsy", MadMate, tab, false).SetParentRole(role).SetParent(GiveAddons);
             GiveSlacker = BooleanOptionItem.Create(idStart++, "GiveSlacker", false, tab, false).SetParentRole(role).SetParent(GiveAddons);
+            GiveStamina = BooleanOptionItem.Create(idStart++, "GiveStamina", false, tab, false).SetParentRole(role).SetParent(GiveAddons);
             GiveSunglasses = BooleanOptionItem.Create(idStart++, "GiveSunglasses", false, tab, false).SetParentRole(role).SetParent(GiveAddons);
             SunglassesVisionmagnification = FloatOptionItem.Create(idStart++, "SunglassesVisionmagnification", new(1f, 100f, 1f), 75, tab, false).SetParent(GiveSunglasses).SetParentRole(role).SetValueFormat(OptionFormat.Percent)
                     .SetTooltip(() => string.Format(Translator.GetString("SunglassesVisionmagnification_Info"), Main.NormalOptions.CrewLightMod, Main.NormalOptions.CrewLightMod * SunglassesVisionmagnification.GetFloat() * 0.01f, Main.NormalOptions.ImpostorLightMod, Main.NormalOptions.ImpostorLightMod * SunglassesVisionmagnification.GetFloat() * 0.01f));
@@ -318,6 +321,7 @@ namespace TownOfHost
                         case CustomRoles.Water: olddata.GiveWater = olddata.GiveWater.InfoGetBool() == false ? newdata.GiveWater : olddata.GiveWater; break;
                         case CustomRoles.Clumsy: olddata.GiveClumsy = olddata.GiveClumsy.InfoGetBool() == false ? newdata.GiveClumsy : olddata.GiveClumsy; break;
                         case CustomRoles.Slacker: olddata.GiveSlacker = olddata.GiveSlacker.InfoGetBool() == false ? newdata.GiveSlacker : olddata.GiveSlacker; break;
+                        case CustomRoles.Stamina: olddata.GiveStamina = olddata.GiveStamina.InfoGetBool() == false ? newdata.GiveStamina : olddata.GiveStamina; break;
                         case CustomRoles.InfoPoor: olddata.GiveInfoPoor = olddata.GiveInfoPoor.InfoGetBool() == false ? newdata.GiveInfoPoor : olddata.GiveInfoPoor; break;
                     }
             }
@@ -341,6 +345,7 @@ namespace TownOfHost
                 olddata.GiveWater = olddata.GiveWater.InfoGetBool() == false ? newdata.GiveWater : olddata.GiveWater;
                 olddata.GiveClumsy = olddata.GiveClumsy.InfoGetBool() == false ? newdata.GiveClumsy : olddata.GiveClumsy;
                 olddata.GiveSlacker = olddata.GiveSlacker.InfoGetBool() == false ? newdata.GiveSlacker : olddata.GiveSlacker;
+                olddata.GiveStamina = olddata.GiveStamina.InfoGetBool() == false ? newdata.GiveStamina : olddata.GiveStamina;
                 olddata.GiveInfoPoor = olddata.GiveInfoPoor.InfoGetBool() == false ? newdata.GiveInfoPoor : olddata.GiveInfoPoor;
             }
         }

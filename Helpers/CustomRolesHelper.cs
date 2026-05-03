@@ -96,6 +96,7 @@ namespace TownOfHost
                 CustomRoles.Elector or
                 CustomRoles.Water or
                 CustomRoles.Slacker or
+                CustomRoles.Stamina or
                 CustomRoles.Transparent or
                 CustomRoles.Amnesia or
                 CustomRoles.Clumsy or
@@ -136,6 +137,7 @@ namespace TownOfHost
                 CustomRoles.Elector or
                 CustomRoles.Water or
                 CustomRoles.Slacker or
+                CustomRoles.Stamina or
                 CustomRoles.Transparent or
                 CustomRoles.Amnesia or
                 CustomRoles.Clumsy or
