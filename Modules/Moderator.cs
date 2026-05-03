@@ -24,6 +24,7 @@ public static class Moderator
     private static readonly Dictionary<byte, string> LastAppliedModeratorNames = new();
     private static readonly Dictionary<byte, string> ChatSendingOriginalNames = new();
     private static float NextModeratorNameRefreshTime;
+    private static bool IsNameStrippedForStart = false;
 
     [PluginModuleInitializer]
     public static void Init()
@@ -33,6 +34,7 @@ public static class Moderator
         LastAppliedModeratorNames.Clear();
         ChatSendingOriginalNames.Clear();
         NextModeratorNameRefreshTime = 0f;
+        IsNameStrippedForStart = false;
         Load();
     }
 
@@ -142,7 +144,6 @@ public static class Moderator
         if (player == null) return false;
         if (!player.IsModClient()) return false;
 
-        // Host is always allowed. Non-host authorization is validated on host when command arrives.
         if (IsHostPlayer(player)) return true;
         return true;
     }
@@ -444,7 +445,6 @@ public static class Moderator
             return;
         }
 
-        // ★ 即時スタートの場合は先に名前を除去してから開始
         if (sec <= 0)
         {
             StripModeratorDisplayNamesForGame();
@@ -639,6 +639,8 @@ public static class Moderator
     private static void RefreshModeratorDisplayNames(bool force = false)
     {
         if (!AmongUsClient.Instance.AmHost || !GameStates.IsLobby) return;
+        if (IsNameStrippedForStart) return;
+
         if (!force && Time.time < NextModeratorNameRefreshTime) return;
 
         NextModeratorNameRefreshTime = Time.time + 0.5f;
@@ -677,6 +679,7 @@ public static class Moderator
     {
         if (!AmongUsClient.Instance.AmHost) return;
 
+        IsNameStrippedForStart = true;
         ChatSendingOriginalNames.Clear();
 
         foreach (var pc in PlayerCatch.AllPlayerControls)
@@ -694,7 +697,6 @@ public static class Moderator
             Main.AllPlayerNames[pc.PlayerId] = baseName;
             LastAppliedModeratorNames[pc.PlayerId] = baseName;
 
-            // ★ Camouflageのスキンキャッシュも更新
             if (Camouflage.PlayerSkins.TryGetValue(pc.PlayerId, out var skin))
             {
                 skin.PlayerName = baseName;
@@ -949,7 +951,6 @@ public static class Moderator
         }
     }
 
-    // ★ ゲーム開始直前に名前を除去（暗転防止）
     [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.StartGame))]
     private static class AmongUsClientStartGamePatch
     {
@@ -974,6 +975,24 @@ public static class Moderator
         public static void Prefix()
         {
             SanitizeNameCachesForResult();
+        }
+    }
+
+    [HarmonyPatch(typeof(LobbyBehaviour), nameof(LobbyBehaviour.Start))]
+    private static class LobbyBehaviourStartPatch
+    {
+        public static void Postfix()
+        {
+            IsNameStrippedForStart = false;
+        }
+    }
+
+    [HarmonyPatch(typeof(GameStartManager), nameof(GameStartManager.ResetStartState))]
+    private static class GameStartManagerResetPatch
+    {
+        public static void Postfix()
+        {
+            IsNameStrippedForStart = false;
         }
     }
 

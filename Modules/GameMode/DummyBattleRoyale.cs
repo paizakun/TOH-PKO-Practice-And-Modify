@@ -53,22 +53,21 @@ namespace TownOfHost
             // ★ エラー修正：TOH-Pの正しいオプション作成フォーマットに変更しました！
             // CustomOptionTags.DummyBattleRoyale を付けたので、専用モードの時だけ表示されます。
 
-            OptionEnable = BooleanOptionItem.Create(10000, "DummyBattleRoyaleEnable", false, TabGroup.MainSettings, false)
+            OptionEnable = BooleanOptionItem.Create(210000, "DummyBattleRoyaleEnable", false, TabGroup.MainSettings, false)
                 .SetOptionName(() => "ダミーバトルロワイヤル有効")
                 .SetTag(CustomOptionTags.DummyBattleRoyale);
 
-            OptionTimeLimit = FloatOptionItem.Create(10001, "DummyBattleRoyaleTimeLimit", new(10f, 300f, 10f), 60f, TabGroup.MainSettings, false)
+            OptionTimeLimit = FloatOptionItem.Create(210001, "DummyBattleRoyaleTimeLimit", new(10f, 300f, 10f), 60f, TabGroup.MainSettings, false)
                 .SetOptionName(() => "制限時間")
                 .SetValueFormat(OptionFormat.Seconds)
                 .SetTag(CustomOptionTags.DummyBattleRoyale)
                 .SetParent(OptionEnable);
 
-            OptionDummyCount = FloatOptionItem.Create(10002, "DummyBattleRoyaleDummyCount", new(1f, 30f, 1f), 5f, TabGroup.MainSettings, false)
+            OptionDummyCount = FloatOptionItem.Create(210002, "DummyBattleRoyaleDummyCount", new(1f, 30f, 1f), 5f, TabGroup.MainSettings, false)
                 .SetOptionName(() => "ダミーの設置数")
                 .SetTag(CustomOptionTags.DummyBattleRoyale)
                 .SetParent(OptionEnable);
-
-            OptionShowArrow = BooleanOptionItem.Create(10003, "DummyBattleRoyaleShowArrow", true, TabGroup.MainSettings, false)
+            OptionShowArrow = BooleanOptionItem.Create(210003, "DummyBattleRoyaleShowArrow", true, TabGroup.MainSettings, false)
                 .SetOptionName(() => "一番近いダミーに矢印を表示")
                 .SetTag(CustomOptionTags.DummyBattleRoyale)
                 .SetParent(OptionEnable);

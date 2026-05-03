@@ -163,6 +163,64 @@ namespace TownOfHost
             {
                 switch (args[0])
                 {
+                    case "/kickprev":
+                    case "/kp":
+                        canceled = true;
+                        PreviousSessionDetector.KickAllDetected();
+                        break;
+
+                    case "/allowjoin":
+                    case "/aj":
+                        canceled = true;
+                        PreviousSessionDetector.EnableTemporaryAllow();
+                        break;
+                    case "/exempt":
+                    case "/ex":
+                        canceled = true;
+                        if (args.Length < 2)
+                        {
+                            // 引数なしで一覧表示
+                            SendMessage(PreviousSessionDetector.GetExemptList(), PlayerControl.LocalPlayer.PlayerId,
+                                "<color=#00c1ff>免除リスト</color>");
+                            break;
+                        }
+                        subArgs = string.Join(" ", args.Skip(1)).Trim();
+                        if (subArgs is "list" or "l")
+                        {
+                            SendMessage(PreviousSessionDetector.GetExemptList(), PlayerControl.LocalPlayer.PlayerId,
+                                "<color=#00c1ff>免除リスト</color>");
+                            break;
+                        }
+                        // ★ delete/del/remove で免除解除
+                        bool isRemove = subArgs.StartsWith("delete ") || subArgs.StartsWith("del ") || subArgs.StartsWith("remove ");
+                        if (isRemove)
+                            subArgs = subArgs.Substring(subArgs.IndexOf(' ') + 1).Trim();
+
+                        var exemptTarget = PreviousSessionDetector.FindTargetAuto(subArgs);
+                        if (exemptTarget == null)
+                        {
+                            SendMessage($"対象が見つかりません: {subArgs}", PlayerControl.LocalPlayer.PlayerId);
+                            break;
+                        }
+                        if (isRemove)
+                        {
+                            bool removed = PreviousSessionDetector.RemoveExempt(exemptTarget);
+                            SendMessage(
+                                removed
+                                    ? $"<color=#ffaa00>{exemptTarget.Data?.PlayerName} の免除を解除しました。</color>"
+                                    : $"{exemptTarget.Data?.PlayerName} は免除リストにいません。",
+                                PlayerControl.LocalPlayer.PlayerId);
+                        }
+                        else
+                        {
+                            bool added = PreviousSessionDetector.AddExempt(exemptTarget);
+                            SendMessage(
+                                added
+                                    ? $"<color=#00c1ff>{exemptTarget.Data?.PlayerName} を免除リストに追加しました。</color>"
+                                    : $"FC/PUIDが取得できません: {exemptTarget.Data?.PlayerName}",
+                                PlayerControl.LocalPlayer.PlayerId);
+                        }
+                        break;
                     case "/nc":
                         canceled = true;
 
@@ -1622,6 +1680,11 @@ namespace TownOfHost
                     break;
                 case "/pko":
                     canceled = true;
+                    if (!Options.OptionCanUsePKOCommand.GetBool())
+                    {
+                        TownOfHost.Utils.SendMessage("<color=#ff0000>現在このコマンドはホストによって無効化されています。</color>", player.PlayerId);
+                        break;
+                    }
                     string userMsg = string.Join(" ", args.Skip(1));
                     TownOfHost.Modules.Aiserver.Send(userMsg, player.PlayerId);
                     break;

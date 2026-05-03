@@ -96,46 +96,12 @@ public sealed class Chatter : RoleBase
                 if (!Player.IsModClient() && !Player.AmOwner)
                     Player.RpcMeetingKill(Player);
                 CustomRoleManager.OnMurderPlayer(Player, Player);
-
-                _ = new LateTask(() =>
-                {
-                    foreach (var pl in PlayerCatch.AllPlayerControls)
-                    {
-                        Utils.SendMessage(UtilsName.GetPlayerColor(Player, true) + " が沈黙に耐えきれず息絶えた", pl.PlayerId, "チャッター");
-                    }
-                }, 0.1f, "ChatterDeathMsg");
             }, Main.LagTime, "ChatterKill");
 
             UtilsGameLog.AddGameLog("Chatter", $"{UtilsName.GetPlayerColor(Player)} は無言に耐えきれず息絶えた");
 
             timeSinceLastChat = -9999f;
         }
-    }
-
-    public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)
-    {
-        seen ??= seer;
-        if (!Is(seer) || seer.PlayerId != seen.PlayerId || !Player.IsAlive()) return "";
-
-        string size = isForHud ? "" : "<size=60%>";
-
-        if (MeetingHud.Instance == null)
-            return $"{size}<color={RoleInfo.RoleColorCode}>【チャッター】会議中のみカウントされます</color>";
-
-        if ((int)MeetingHud.Instance.state >= 3)
-            return $"{size}<color={RoleInfo.RoleColorCode}>【チャッター】タイマー停止中</color>";
-
-        if (meetingActiveTimer <= 10f)
-        {
-            float waitTime = 10f - meetingActiveTimer;
-            return $"{size}<color={RoleInfo.RoleColorCode}>カウント開始まで: {waitTime:F1}s</color>";
-        }
-
-        float remaining = Mathf.Max(0f, ChatTimeLimit - timeSinceLastChat);
-        if (remaining <= 5f)
-            return $"{size}<color=#FF0000>沈黙死まで: {remaining:F1}s</color>";
-
-        return $"{size}<color={RoleInfo.RoleColorCode}>沈黙まで: {remaining:F1}s</color>";
     }
 
     public static bool CheckWin(ref GameOverReason reason)
@@ -156,14 +122,15 @@ public sealed class Chatter : RoleBase
     }
 }
 
-[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.RpcSendChat))]
-public static class Chatter_RpcSendChat_Patch
+[HarmonyPatch(typeof(ChatController), nameof(ChatController.AddChat))]
+public static class Chatter_AddChat_Patch
 {
-    public static void Postfix(PlayerControl __instance, string chatText)
+    public static void Postfix(PlayerControl sourcePlayer, string chatText)
     {
         if (!AmongUsClient.Instance.AmHost) return;
-        if (__instance.GetRoleClass() is not Chatter chatter) return;
-        if (!__instance.IsAlive()) return;
+        if (sourcePlayer == null) return;
+        if (sourcePlayer.GetRoleClass() is not Chatter chatter) return;
+        if (!sourcePlayer.IsAlive()) return;
 
         // ★ /cmd を含むメッセージはコマンドなのでリセットしない
         if (chatText != null && chatText.TrimStart().StartsWith("/cmd"))

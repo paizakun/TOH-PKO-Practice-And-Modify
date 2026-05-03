@@ -296,7 +296,12 @@ namespace TownOfHost
                 + $"\n/cmd addwhite(aw) - {GetString("Command.addwhite")}"
                 + $"\n/cmd set rule(s r) - {GetString("Command.set_rule")}"
                 + $"\n/cmd mod id|name|color - {GetString("Command.modadd")}"
-                + $"\n/cmd mod delete id|name|color - {GetString("Command.moddel")}";
+                + $"\n/cmd mod delete id|name|color - {GetString("Command.moddel")}"
+                + $"\n/cmd exempt(ex) - {GetString("Command.exempt")}"
+                + $"\n/cmd exempt(ex) id|name|color - {GetString("Command.exempt")}"
+                + $"\n/cmd exempt(ex) delete id|name|color - {GetString("Command.exempt")}"
+                + $"\n/cmd kp - {GetString("Command.kp")}"
+                + $"\n/cmd aj - {GetString("Command.aj")}";
                 //導入者
                 text += $"<size=80%></line-height>\n<#028760>【~~~~~~~{GetString("OnlyClient")}~~~~~~~】</color></size><line-height=1.3pic>"
                 + $"\n/cmd dump - {GetString("Command.dump")}";

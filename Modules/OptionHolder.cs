@@ -505,6 +505,7 @@ namespace TownOfHost
         public static OptionItem OptionCanChangeName;
         public static OptionItem OptionNameCharLimit;
         public static OptionItem OptionCanUseTpCommand;
+        public static OptionItem OptionCanUsePKOCommand;
         public static OptionItem OptionAutoStartSetting;
         public static OptionItem OptionAutoStartGM;
         public static OptionItem OptionAutoStartLimit;
@@ -512,6 +513,14 @@ namespace TownOfHost
         public static OptionItem OptionAutoStartLimitAnother;
         public static OptionItem OptionAutoReturnRoom;
         public static OptionItem OptionAutoReturnRoomGM;
+        public static OptionItem OptionStreamerSetting;
+        public static OptionItem OptionGMAutoChat;
+        public static OptionItem OptionGMAutoPossess;
+        public static OptionItem OptionJoinKick;
+        public static OptionItem OptionNotifyJoinKick;
+        public static OptionItem OptionNotModeJoinKick;
+        public static OptionItem OptionDrawJoinKick;
+        public static OptionItem OptionManualJoinKick;
         public static OptionItem ConvenientOptions;
         public static OptionItem FirstTurnMeeting;
         public static bool firstturnmeeting;
@@ -1258,6 +1267,11 @@ namespace TownOfHost
                 .SetColorcode("#00c1ff")
                 .SetOptionName(() => "/tp o,i ルームでのワープを許可");
 
+            OptionCanUsePKOCommand = BooleanOptionItem.Create(1_300_133, "CanUsePKOCommand", false, TabGroup.MainSettings, true)
+                .SetParent(OptionCommandSetting)
+                .SetColorcode("#00c1ff")
+                .SetOptionName(() => "/pko pkoコマンドを許可");
+
             OptionAutoStartSetting = BooleanOptionItem.Create(1_300_200, "AutoStartSetting", false, TabGroup.MainSettings, true)
                 .SetHeader(true)
                 .SetColorcode("#00c1ff")
@@ -1292,6 +1306,46 @@ namespace TownOfHost
                 .SetParent(OptionAutoReturnRoom)
                 .SetColorcode("#00c1ff")
                 .SetOptionName(() => "GMの場合のみ自動で部屋に戻る");
+
+            OptionStreamerSetting = BooleanOptionItem.Create(1_300_270, "StreamerSetting", false, TabGroup.MainSettings, true)
+                .SetHeader(true)
+                .SetColorcode("#00c1ff")
+                .SetOptionName(() => "配信者向けオプション");
+
+            OptionGMAutoChat = BooleanOptionItem.Create(1_300_280, "GMAutoChat", false, TabGroup.MainSettings, true)
+                .SetParent(OptionStreamerSetting)
+                .SetColorcode("#00c1ff")
+                .SetOptionName(() => "GM中会議スタート時チャットを開く");
+
+            OptionGMAutoPossess = BooleanOptionItem.Create(1_300_290, "GMAutoPossess", false, TabGroup.MainSettings, true)
+                .SetParent(OptionStreamerSetting)
+                .SetColorcode("#00c1ff")
+                .SetOptionName(() => "GM中タスクターン中生存者の\n誰かに憑依する");
+
+            OptionJoinKick = BooleanOptionItem.Create(1_300_300, "JoinKick", false, TabGroup.MainSettings, true)
+                .SetParent(OptionStreamerSetting)
+                .SetColorcode("#00c1ff")
+                .SetOptionName(() => "連続参加のプレイヤーをキック");
+
+            OptionNotifyJoinKick = BooleanOptionItem.Create(1_300_310, "NotifyJoinKick", false, TabGroup.MainSettings, true)
+                .SetParent(OptionJoinKick)
+                .SetColorcode("#00c1ff")
+                .SetOptionName(() => "キックではなく検知だけにする");
+
+            OptionNotModeJoinKick = BooleanOptionItem.Create(1_300_320, "NotModeJoinKick", false, TabGroup.MainSettings, true)
+                .SetParent(OptionJoinKick)
+                .SetColorcode("#00c1ff")
+                .SetOptionName(() => "モデレーターはキックしない");
+
+            OptionDrawJoinKick = BooleanOptionItem.Create(1_300_330, "DrawJoinKick", false, TabGroup.MainSettings, true)
+                .SetParent(OptionJoinKick)
+                .SetColorcode("#00c1ff")
+                .SetOptionName(() => "廃村した試合はカウントしない");
+            OptionManualJoinKick = BooleanOptionItem.Create(1_300_340, "ManualJoinKick", false, TabGroup.MainSettings, true)
+                .SetParent(OptionJoinKick)
+                .SetColorcode("#00c1ff")
+                .SetOptionName(() => "自動キックではなくコマンド(手動)で\n連続参加のプレイヤーを一括キックする");
+
 
             ApplyDenyNameList = BooleanOptionItem.Create(1_000_100, "ApplyDenyNameList", true, TabGroup.MainSettings, true)
                 .SetHeader(true)
