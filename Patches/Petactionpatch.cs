@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using AmongUs.GameOptions;
 using HarmonyLib;
-using Hazel;
 using TownOfHost.Roles.Core;
 
 namespace TownOfHost.Patches;
@@ -92,8 +91,7 @@ internal static class ExternalRpcPetPatch
 }
 
 /// <summary>
-/// ペットIDをRPCで変更するヘルパー
-/// EHRのPetsHelper.SetPetを参考に実装
+/// ペットIDを変更するヘルパー
 /// </summary>
 public static class PetsHelper
 {
@@ -102,21 +100,11 @@ public static class PetsHelper
     {
         if (pc == null) return;
 
-        try { pc.SetPet(petId); }
-        catch { }
-
-        try { pc.Data.DefaultOutfit.PetSequenceId += 10; }
-        catch { }
-
-        var sender = CustomRpcSender.Create("PetsHelper.SetPet", SendOption.Reliable);
-        sender.AutoStartRpc(pc.NetId, (byte)RpcCalls.SetPetStr)
-            .Write(petId)
-            .Write(pc.GetNextRpcSequenceId(RpcCalls.SetPetStr))
-            .EndRpc();
-        sender.SendMessage();
+        // Vanilla RPC経路を使ってシーケンス不整合を避ける
+        pc.RpcSetPet(petId);
     }
 
-    // ★ 死亡したプレイヤーのペットを外す
+    // しんだらペットを外す
     public static void RemovePet(PlayerControl pc)
     {
         if (pc == null || !pc.Data.IsDead || pc.IsAlive()) return;
@@ -131,24 +119,144 @@ public static class PetsHelper
 /// </summary>
 public static class PetActionManager
 {
-    // PlayerId → ペット撫でアクション
-    public static readonly Dictionary<byte, System.Action> Handlers = new();
+    // EHR: Modules/OptionHolder.cs の PetToAssign を引用
+    private static readonly string[] EhrPetIds =
+    [
+        "pet_Goose",
+        "pet_Bedcrab",
+        "pet_DancingSkeletonPet",
+        "pet_BredPet",
+        "pet_YuleGoatPet",
+        "pet_Bush",
+        "pet_Charles",
+        "pet_ChewiePet",
+        "pet_clank",
+        "pet_coaltonpet",
+        "pet_Creb",
+        "pet_Cube",
+        "pet_lny_dragon",
+        "pet_Doggy",
+        "pet_Ellie",
+        "pet_Strawb",
+        "pet_frankendog",
+        "pet_D2GhostPet",
+        "pet_test",
+        "pet_GuiltySpark",
+        "pet_Stickmin",
+        "pet_HamPet",
+        "pet_Hamster",
+        "pet_Alien",
+        "pet_poro",
+        "pet_Crow",
+        "pet_Lava",
+        "pet_Crewmate",
+        "pet_Mister",
+        "pet_nancy",
+        "pet_napstamate",
+        "pet_Pip",
+        "pet_pocketCircuitCar",
+        "pet_D2PoukaPet",
+        "pet_Pusheen",
+        "pet_Pate",
+        "pet_Rammy",
+        "pet_Robot",
+        "pet_Snow",
+        "pet_spaceCat",
+        "pet_Squig",
+        "pet_Stormy",
+        "pet_nuggetPet",
+        "pet_Charles_Red",
+        "pet_UFO",
+        "pet_D2WormPet"
+    ];
 
-    // ★ ハンドラを登録（役職のコンストラクタで呼ぶ）
-    public static void Register(byte playerId, System.Action action)
+    private const string DefaultPetIdForPetAction = "pet_test"; // EHRのGlitch Pet ID
+
+    public static readonly Dictionary<byte, Action> Handlers = new();
+    private static readonly HashSet<byte> AutoPetSent = new();
+
+    public static void Register(byte playerId, Action action)
     {
         Handlers[playerId] = action;
+        EnsureDefaultPet(playerId);
     }
 
     // ★ ハンドラを解除（役職のOnDestroyで呼ぶ）
     public static void Unregister(byte playerId)
     {
         Handlers.Remove(playerId);
+        AutoPetSent.Remove(playerId);
     }
 
     // ★ 全ハンドラをクリア（ゲーム終了時）
     public static void Reset()
     {
         Handlers.Clear();
+        AutoPetSent.Clear();
+    }
+
+    public static void EnsureDefaultPet(byte playerId)
+    {
+        if (!AmongUsClient.Instance.AmHost) return;
+        if (!GameStates.IsInGame || GameStates.IsLobby) return;
+        if (AutoPetSent.Contains(playerId)) return;
+
+        var pc = PlayerCatch.GetPlayerById(playerId);
+        if (pc == null || !pc.IsAlive()) return;
+        if (HasPet(pc))
+        {
+            AutoPetSent.Add(playerId);
+            return;
+        }
+
+        if (Array.IndexOf(EhrPetIds, DefaultPetIdForPetAction) < 0)
+        {
+            Logger.Warn($"ペットIDがリストに見つかりません: {DefaultPetIdForPetAction}", "PetActionPatch");
+        }
+
+        PetsHelper.SetPet(pc, DefaultPetIdForPetAction);
+        UpdatePetIdInCamouflageCache(playerId, DefaultPetIdForPetAction);
+        AutoPetSent.Add(playerId);
+        Logger.Info($"{pc.Data?.GetLogPlayerName()} にGlitchペットを自動付与: {DefaultPetIdForPetAction}", "PetActionPatch");
+    }
+
+    private static bool HasPet(PlayerControl pc)
+    {
+        string currentPet = pc.Data?.DefaultOutfit?.PetId ?? pc.CurrentOutfit?.PetId ?? "";
+        if (string.IsNullOrEmpty(currentPet)) return false;
+
+        string petId = currentPet.ToLowerInvariant();
+        return petId != "none" &&
+               petId != "pet_none" &&
+               petId != "pet_emptypet" &&
+               petId != "pet_enmptypet";
+    }
+
+    private static void UpdatePetIdInCamouflageCache(byte playerId, string petId)
+    {
+        if (!Camouflage.PlayerSkins.TryGetValue(playerId, out var outfit)) return;
+        outfit.PetId = petId;
+        Camouflage.PlayerSkins[playerId] = outfit;
+    }
+}
+
+[HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.OnDestroy))]
+internal static class AutoPetAssignPatch
+{
+    public static void Postfix()
+    {
+        if (!AmongUsClient.Instance.AmHost) return;
+
+        _ = new LateTask(() =>
+        {
+            foreach (var pc in PlayerCatch.AllAlivePlayerControls)
+                PetActionManager.EnsureDefaultPet(pc.PlayerId);
+        }, 0.6f, "AutoPetAssignAfterIntro", true);
+
+        _ = new LateTask(() =>
+        {
+            foreach (var pc in PlayerCatch.AllAlivePlayerControls)
+                PetActionManager.EnsureDefaultPet(pc.PlayerId);
+        }, 2.0f, "AutoPetAssignAfterIntroRetry", true);
     }
 }
