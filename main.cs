@@ -518,6 +518,7 @@ namespace TownOfHost
         Monika = CustomRoles.Monika,
         LoversBreaker = CustomRoles.LoversBreaker,
         Chatter = CustomRoles.Chatter,
+        Suicider = CustomRoles.Suicider,
 
         HASTroll = CustomRoles.HASTroll,
         TaskPlayerB = CustomRoles.TaskPlayerB,

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
@@ -117,27 +118,35 @@ public sealed class Oblivion : RoleBase, IKillFlashSeeable
 
     void TransformWithResync(CustomRoles newRole, PlayerControl deadPlayer)
     {
-        var playerId = Player.PlayerId;
+        try
+        {
+            var playerId = Player.PlayerId;
 
-        if (!Utils.RoleSendList.Contains(playerId))
-            Utils.RoleSendList.Add(playerId);
+            // ★ RoleSendList の null ガード
+            if (Utils.RoleSendList != null && !Utils.RoleSendList.Contains(playerId))
+                Utils.RoleSendList.Add(playerId);
 
-        Player.RpcSetCustomRole(newRole, log: null);
-        ForceRoleSync(playerId, newRole, applyStartGameTasks: true, applyTaskStateSync: true);
+            Player.RpcSetCustomRole(newRole, log: null);
+            ForceRoleSync(playerId, newRole, applyStartGameTasks: true, applyTaskStateSync: true);
 
-        UtilsGameLog.AddGameLog(
-            "Oblivion",
-            $"{UtilsName.GetPlayerColor(Player)} transformed into {UtilsRoleText.GetRoleName(newRole)} by reporting {UtilsName.GetPlayerColor(deadPlayer)}"
-        );
+            UtilsGameLog.AddGameLog(
+                "Oblivion",
+                $"{UtilsName.GetPlayerColor(Player)} transformed into {UtilsRoleText.GetRoleName(newRole)} by reporting {UtilsName.GetPlayerColor(deadPlayer)}"
+            );
 
-        Utils.SendMessage(
-            string.Format(GetString("OblivionTransformed"), UtilsRoleText.GetRoleName(newRole)),
-            Player.PlayerId
-        );
+            Utils.SendMessage(
+                string.Format(GetString("OblivionTransformed"), UtilsRoleText.GetRoleName(newRole)),
+                Player.PlayerId
+            );
 
-        QueueRoleResync(playerId, newRole, 0.25f, 1);
-        QueueRoleResync(playerId, newRole, 0.70f, 2);
-        QueueRoleResync(playerId, newRole, 1.50f, 3);
+            QueueRoleResync(playerId, newRole, 0.25f, 1);
+            QueueRoleResync(playerId, newRole, 0.70f, 2);
+            QueueRoleResync(playerId, newRole, 1.50f, 3);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"Oblivion.TransformWithResync failed: {ex}", "Oblivion");
+        }
     }
 
     static void QueueRoleResync(byte playerId, CustomRoles role, float delay, int index)
@@ -155,35 +164,43 @@ public sealed class Oblivion : RoleBase, IKillFlashSeeable
     {
         if (!AmongUsClient.Instance.AmHost) return;
 
-        var player = GetPlayerById(playerId);
-        if (player == null || player.Data == null) return;
-
-        if (!Utils.RoleSendList.Contains(playerId))
-            Utils.RoleSendList.Add(playerId);
-
-        if (player.GetCustomRole() != role)
-            player.RpcSetCustomRole(role, log: null);
-
-        var roleClass = player.GetRoleClass();
-        if (applyStartGameTasks)
-            roleClass?.StartGameTasks();
-
-        if (applyTaskStateSync)
-            RefreshTaskStateAfterTransform(player);
-
-        player.MarkDirtySettings();
-        player.SyncSettings();
-        player.ResetKillCooldown();
-        player.SetKillCooldown(delay: true, force: true);
-        player.RpcResetAbilityCooldown(Sync: true);
-
-        if (applyTaskStateSync)
+        try
         {
-            GameData.Instance?.RecomputeTaskCounts();
-            GameManager.Instance?.CheckTaskCompletion();
-        }
+            var player = GetPlayerById(playerId);
+            if (player == null || player.Data == null) return;
 
-        UtilsNotifyRoles.NotifyRoles(ForceLoop: true, OnlyMeName: true, SpecifySeer: player);
+            // ★ RoleSendList の null ガード
+            if (Utils.RoleSendList != null && !Utils.RoleSendList.Contains(playerId))
+                Utils.RoleSendList.Add(playerId);
+
+            if (player.GetCustomRole() != role)
+                player.RpcSetCustomRole(role, log: null);
+
+            var roleClass = player.GetRoleClass();
+            if (applyStartGameTasks)
+                roleClass?.StartGameTasks();
+
+            if (applyTaskStateSync)
+                RefreshTaskStateAfterTransform(player);
+
+            player.MarkDirtySettings();
+            player.SyncSettings();
+            player.ResetKillCooldown();
+            player.SetKillCooldown(delay: true, force: true);
+            player.RpcResetAbilityCooldown(Sync: true);
+
+            if (applyTaskStateSync)
+            {
+                GameData.Instance?.RecomputeTaskCounts();
+                GameManager.Instance?.CheckTaskCompletion();
+            }
+
+            UtilsNotifyRoles.NotifyRoles(ForceLoop: true, OnlyMeName: true, SpecifySeer: player);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"Oblivion.ForceRoleSync failed for playerId={playerId}: {ex}", "Oblivion");
+        }
     }
 
     static void RefreshTaskStateAfterTransform(PlayerControl player, bool allowRetry = true)

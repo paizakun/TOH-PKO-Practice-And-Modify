@@ -77,14 +77,13 @@ public sealed class Chatter : RoleBase
         {
             string msg = $"<color=#FFCC00><b>【=== おい!!見ろ!!あいつが!! ===】</b></color>\n{UtilsName.GetPlayerColor(Player)}が急に意識を失った。\nどうしたんだろうな。";
 
-            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(Player.NetId, (byte)RpcCalls.SendChat, SendOption.Reliable, -1);
+            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(
+                Player.NetId, (byte)RpcCalls.SendChat, SendOption.Reliable, -1);
             writer.Write(msg);
             AmongUsClient.Instance.FinishRpcImmediately(writer);
 
             if (DestroyableSingleton<HudManager>.Instance && DestroyableSingleton<HudManager>.Instance.Chat)
-            {
                 DestroyableSingleton<HudManager>.Instance.Chat.AddChat(Player, msg);
-            }
 
             var playerState = PlayerState.GetByPlayerId(Player.PlayerId);
             playerState.DeathReason = CustomDeathReason.Suicide;
@@ -93,12 +92,14 @@ public sealed class Chatter : RoleBase
 
             _ = new LateTask(() =>
             {
+                // ★ アンチチート回避: 自分→自分ではなくホスト(LocalPlayer)→チャッターの形でキル
                 if (!Player.IsModClient() && !Player.AmOwner)
-                    Player.RpcMeetingKill(Player);
+                    PlayerControl.LocalPlayer.RpcMeetingKill(Player);
                 CustomRoleManager.OnMurderPlayer(Player, Player);
             }, Main.LagTime, "ChatterKill");
 
-            UtilsGameLog.AddGameLog("Chatter", $"{UtilsName.GetPlayerColor(Player)} は無言に耐えきれず息絶えた");
+            UtilsGameLog.AddGameLog("Chatter",
+                $"{UtilsName.GetPlayerColor(Player)} は無言に耐えきれず息絶えた");
 
             timeSinceLastChat = -9999f;
         }

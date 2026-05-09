@@ -56,7 +56,6 @@ public sealed class TimeSleeper : RoleBase, IImpostor, IUsePhantomButton
 
     Dictionary<byte, List<Vector2>> positionHistory;
     HashSet<byte> rewindSkipPlayers;
-    // ★ REC中にぬーん・ジップラインを使用したプレイヤー
     HashSet<byte> movingPlatformUsedDuringRec;
 
     enum OptionName
@@ -87,20 +86,16 @@ public sealed class TimeSleeper : RoleBase, IImpostor, IUsePhantomButton
 
     bool IUsePhantomButton.IsPhantomRole => true;
 
-    // ★ ぬーん・ジップライン・梯子使用中か判定
     static bool IsUsingMovingPlatform(PlayerControl pc)
     {
         if (pc.MyPhysics.Animations.IsPlayingAnyLadderAnimation()) return true;
         if (pc.onLadder) return true;
-        // ★ CharismaStar方式：エアシップの昇降機座標チェック
         if ((MapNames)Main.NormalOptions.MapId == MapNames.Airship
             && Vector2.Distance(pc.GetTruePosition(), new Vector2(7.76f, 8.56f)) <= 1.9f) return true;
-        // ★ ジップライン判定（inMovingPlatを使う）
         if (pc.inMovingPlat) return true;
         return false;
     }
 
-    // ★ 波動砲系がビーム・チャージ中か判定
     static bool IsBeamingOrCharging(PlayerControl pc)
     {
         if (pc.GetRoleClass() is HadouHo hh)
@@ -126,7 +121,6 @@ public sealed class TimeSleeper : RoleBase, IImpostor, IUsePhantomButton
 
         foreach (var pc in PlayerCatch.AllAlivePlayerControls)
         {
-            // ★ REC開始時点でジップライン使用中はRECしない
             if (IsUsingMovingPlatform(pc))
             {
                 rewindSkipPlayers.Add(pc.PlayerId);
@@ -152,7 +146,6 @@ public sealed class TimeSleeper : RoleBase, IImpostor, IUsePhantomButton
             {
                 foreach (var pc in PlayerCatch.AllAlivePlayerControls)
                 {
-                    // ★ REC中にぬーん・ジップライン使用中になったプレイヤーを記録
                     if (IsUsingMovingPlatform(pc))
                     {
                         movingPlatformUsedDuringRec.Add(pc.PlayerId);
@@ -164,8 +157,7 @@ public sealed class TimeSleeper : RoleBase, IImpostor, IUsePhantomButton
                     if (!positionHistory.ContainsKey(pc.PlayerId))
                         positionHistory[pc.PlayerId] = new List<Vector2>();
 
-                    var pos = pc.GetTruePosition();
-                    pos.y += 0.47f;
+                    var pos = pc.transform.position;
                     positionHistory[pc.PlayerId].Add(pos);
                 }
             }
@@ -210,15 +202,10 @@ public sealed class TimeSleeper : RoleBase, IImpostor, IUsePhantomButton
                     if (pc == null || !pc.IsAlive()) continue;
                     if (rewindIndex >= kvp.Value.Count) continue;
 
-                    // ★ REC開始時スキップ
                     if (rewindSkipPlayers.Contains(pc.PlayerId)) continue;
-                    // ★ REC中にぬーん使用
                     if (movingPlatformUsedDuringRec.Contains(pc.PlayerId)) continue;
-                    // ★ 巻き戻し中に梯子・ジップライン使用中
                     if (IsUsingMovingPlatform(pc)) continue;
-                    // ★ ベント中
                     if (pc.inVent) continue;
-                    // ★ 波動砲系がビーム・チャージ中
                     if (IsBeamingOrCharging(pc)) continue;
 
                     var targetPos = kvp.Value[rewindIndex];

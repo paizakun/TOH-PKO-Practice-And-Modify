@@ -238,17 +238,13 @@ public sealed class Seer : RoleBase, IKillFlashSeeable
 
         if (MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount) is false) return "";
 
-        string soulText = ShowSoul && SoulObjects.Count > 0
-            ? $"<color=#c8a2c8> 霊魂{SoulObjects.Count}</color>"
-            : "";
-
         if (DelayMode)
         {
             var delays = GetDelay(out var _delays) ? _delays : (-1, -1);
-            if (delays.Maxdelay < 0) return soulText;
-            return $" <{RoleInfo.RoleColorCode}>({Math.Round(delays.Mindelay)}~{Math.Round(delays.Maxdelay + delays.Mindelay)})</color>{soulText}";
+            if (delays.Maxdelay < 0) return "";
+            return $" <{RoleInfo.RoleColorCode}>({Math.Round(delays.Mindelay)}~{Math.Round(delays.Maxdelay + delays.Mindelay)})</color>";
         }
-        return $" <{RoleInfo.RoleColorCode}>(〇)</color>{soulText}";
+        return $" <{RoleInfo.RoleColorCode}>(〇)</color>";
     }
 
     public override CustomRoles Misidentify() => Awakened ? CustomRoles.NotAssigned : CustomRoles.Crewmate;

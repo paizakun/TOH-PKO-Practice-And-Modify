@@ -948,6 +948,7 @@ public enum CustomRoles
     Pukupuku,
     Medium,
     SheriffHadouHo,
+    Hitchhiker,
     //DEBUG only Crewmate
     Analyzer,
     //Neutral
@@ -979,6 +980,7 @@ public enum CustomRoles
     PoisonedBakery,
     Monika,
     LoversBreaker,
+    Suicider,
     //TOH-K
     Remotekiller,
     Chef,

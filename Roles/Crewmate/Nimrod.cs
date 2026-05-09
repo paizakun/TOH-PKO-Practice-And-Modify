@@ -21,6 +21,7 @@ public sealed class Nimrod : RoleBase
             SetUpOptionItem,
             "nm",
             "#9fcc5b",
+            (3, 6),
             from: From.TownOfHost_Y
         );
 
@@ -29,24 +30,12 @@ public sealed class Nimrod : RoleBase
     {
         ExecutionMeetingPlayerId = byte.MaxValue;
         PendingExecutionMeetingPlayerId = byte.MaxValue;
-        KillImpostor = OptionKillImpostor.GetBool();
     }
 
     static byte ExecutionMeetingPlayerId = byte.MaxValue;
     static byte PendingExecutionMeetingPlayerId = byte.MaxValue;
 
-    static OptionItem OptionKillImpostor;
-    static bool KillImpostor;
-
-    enum OptionName
-    {
-        NimrodKillImpostor,
-    }
-
-    static void SetUpOptionItem()
-    {
-        OptionKillImpostor = BooleanOptionItem.Create(RoleInfo, 10, OptionName.NimrodKillImpostor, false, false);
-    }
+    static void SetUpOptionItem() { }
 
     public static bool IsExecutionMeeting() => ExecutionMeetingPlayerId != byte.MaxValue;
 
@@ -93,9 +82,6 @@ public sealed class Nimrod : RoleBase
             var target = GetPlayerById(sourceVotedForId);
             if (target != null)
             {
-                if (!KillImpostor && target.GetCustomRole().IsImpostor() && !SuddenDeathMode.NowSuddenDeathMode)
-                    return baseVote;
-
                 target.SetRealKiller(Player);
                 PlayerState.GetByPlayerId(sourceVotedForId).DeathReason = CustomDeathReason.Execution;
                 Logger.Info($"{Player.GetNameWithRole()} : exile {target.GetNameWithRole()} by Nimrod", "Nimrod");

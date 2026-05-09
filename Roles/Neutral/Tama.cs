@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using AmongUs.GameOptions;
 using Hazel;
 using UnityEngine;
@@ -41,6 +42,7 @@ public sealed class Tama : RoleBase, IKiller
     public byte OwnerId;
     public bool hasLoaded;
     bool isLoading;
+    int snapFrame = 0;
 
     static OptionItem OptLoadCooldown;
     static float LoadCooldown;
@@ -158,7 +160,6 @@ public sealed class Tama : RoleBase, IKiller
             return;
         }
 
-        // ★ オーナーが死亡または転職（JackalHadouHoでなくなった）したら昇格
         if (player.IsAlive() && (owner == null || !owner.IsAlive() || owner.GetCustomRole() != CustomRoles.JackalHadouHo))
         {
             OwnerId = byte.MaxValue;
@@ -175,8 +176,19 @@ public sealed class Tama : RoleBase, IKiller
         if (!hasLoaded) return;
         if (owner == null || !owner.IsAlive() || !player.IsAlive()) return;
 
-        var position = owner.transform.position;
-        player.RpcSnapToForced(position, SendOption.None);
+        snapFrame++;
+        if (snapFrame % 3 == 0)
+        {
+            var targetPos = owner.transform.position;
+            player.NetTransform.SnapTo(targetPos);
+
+            ushort sid = (ushort)(player.NetTransform.lastSequenceId + 2U);
+            var writer = AmongUsClient.Instance.StartRpcImmediately(
+                player.NetTransform.NetId, (byte)RpcCalls.SnapTo, SendOption.None);
+            NetHelpers.WriteVector2(targetPos, writer);
+            writer.Write(sid);
+            AmongUsClient.Instance.FinishRpcImmediately(writer);
+        }
     }
 
     public override void OnStartMeeting()
