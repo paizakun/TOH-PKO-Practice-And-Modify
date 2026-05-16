@@ -123,6 +123,20 @@ public sealed class Hitchhiker : RoleBase
 
         if (TargetPlayer != null)
         {
+            // ★ ターゲットが移動制限中に解除しようとしたら自殺
+            if (IsTargetOnRestrictedMove(TargetPlayer))
+            {
+                PlayerState.GetByPlayerId(Player.PlayerId).DeathReason = CustomDeathReason.Suicide;
+                Player.SetRealKiller(Player);
+                Player.RpcExileV3();
+                PlayerState.GetByPlayerId(Player.PlayerId).SetDead();
+                ReleaseTarget();
+                SendRpc();
+                UtilsGameLog.AddGameLog("Hitchhiker",
+                    $"{UtilsName.GetPlayerColor(Player)} が移動制限中に離脱しようとして自滅した");
+                return;
+            }
+
             ReleaseTarget();
             currentCooldown = CooldownTimerLimit;
             Player.MarkDirtySettings();

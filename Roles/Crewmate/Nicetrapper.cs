@@ -100,7 +100,6 @@ public sealed class NiceTrapper : RoleBase
     readonly Dictionary<byte, float> effectTimers = new();
     readonly Dictionary<byte, float> savedSpeeds = new();
 
-    // ─── Add / OnSpawn ───────────────────────────────────────────
     public override void Add()
     {
         placedCount = 0;
@@ -122,6 +121,7 @@ public sealed class NiceTrapper : RoleBase
         PetActionManager.Unregister(Player.PlayerId);
         DespawnAll();
     }
+
     public override void ApplyGameOptions(IGameOptions opt)
     {
         AURoleOptions.EngineerCooldown = cooldownTimer > 0f ? cooldownTimer : 0.1f;
@@ -131,7 +131,6 @@ public sealed class NiceTrapper : RoleBase
     public override bool CanClickUseVentButton => false;
     public override bool OnEnterVent(PlayerPhysics physics, int ventId) => false;
 
-    // ─── ペットアクション → 設置 ──────────────────────────────────
     void OnPetAction()
     {
         if (!Player.IsAlive()) return;
@@ -150,7 +149,6 @@ public sealed class NiceTrapper : RoleBase
             Active = false,
             Position = pos,
         };
-        // ★ 設置直後はオーナーのみ見える（activated=false）
         data.Obj = new TrapNetObject(pos, type, Player, activated: false);
         traps.Add(data);
 
@@ -163,18 +161,17 @@ public sealed class NiceTrapper : RoleBase
         Logger.Info($"{Player.Data.GetLogPlayerName()} トラップ設置 [{type}]", "NiceTrapper");
     }
 
-    // ─── FixedUpdate ─────────────────────────────────────────────
     public override void OnFixedUpdate(PlayerControl player)
     {
         if (!AmongUsClient.Instance.AmHost) return;
         if (!GameStates.IsInTask || GameStates.IsMeeting) return;
+
         if (cooldownTimer > 0f)
         {
             cooldownTimer -= Time.fixedDeltaTime;
             if (cooldownTimer < 0f) cooldownTimer = 0f;
         }
 
-        // 速度効果タイマー
         foreach (var pid in effectTimers.Keys.ToArray())
         {
             effectTimers[pid] -= Time.fixedDeltaTime;
@@ -185,7 +182,6 @@ public sealed class NiceTrapper : RoleBase
             }
         }
 
-        // トラップ判定
         foreach (var trap in traps.ToArray())
         {
             if (!trap.Active || trap.Obj == null) continue;
@@ -208,18 +204,15 @@ public sealed class NiceTrapper : RoleBase
         {
             case NiceTrapperTrapType.Speed:
                 ApplySpeedEffect(target, SpeedBoost);
-                UtilsGameLog.AddGameLog("NiceTrapper",
-                    $"{UtilsName.GetPlayerColor(target)} が加速トラップを踏んだ");
+                UtilsGameLog.AddGameLog("NiceTrapper", $"{UtilsName.GetPlayerColor(target)} が加速トラップを踏んだ");
                 break;
             case NiceTrapperTrapType.Slow:
                 ApplySpeedEffect(target, SpeedDown);
-                UtilsGameLog.AddGameLog("NiceTrapper",
-                    $"{UtilsName.GetPlayerColor(target)} が減速トラップを踏んだ");
+                UtilsGameLog.AddGameLog("NiceTrapper", $"{UtilsName.GetPlayerColor(target)} が減速トラップを踏んだ");
                 break;
             case NiceTrapperTrapType.Notify:
                 NotifyTrapper(target);
-                UtilsGameLog.AddGameLog("NiceTrapper",
-                    $"{UtilsName.GetPlayerColor(target)} が通知トラップを踏んだ");
+                UtilsGameLog.AddGameLog("NiceTrapper", $"{UtilsName.GetPlayerColor(target)} が通知トラップを踏んだ");
                 break;
         }
     }
@@ -247,19 +240,16 @@ public sealed class NiceTrapper : RoleBase
         var targetPos = target.GetTruePosition();
         GetArrow.Add(Player.PlayerId, targetPos);
         UtilsNotifyRoles.NotifyRoles(OnlyMeName: true, SpecifySeer: Player);
-
         _ = new LateTask(() =>
         {
             GetArrow.Remove(Player.PlayerId, targetPos);
             UtilsNotifyRoles.NotifyRoles(OnlyMeName: true, SpecifySeer: Player);
         }, 2f, "NiceTrapper.RemoveArrow", true);
-
         Utils.SendMessage(
             $"<color=#66ddaa>【通知トラップ】{UtilsName.GetPlayerColor(target, true)}がトラップを踏みました！</color>",
             Player.PlayerId);
     }
 
-    // ─── 会議 ─────────────────────────────────────────────────────
     public override void OnStartMeeting()
     {
         foreach (var pid in effectTimers.Keys.ToArray()) RemoveEffect(pid);
@@ -271,9 +261,6 @@ public sealed class NiceTrapper : RoleBase
     {
         if (!AmongUsClient.Instance.AmHost) return;
 
-        // ★ 各トラップをActivate：古いダミーを消して新しいダミーを作り直す
-        //   会議後に位置ズレ・名前消えを防ぐためダミーを再生成
-        //   Speed/SlowはActivated=trueで全員に見える、NotifyはOwnerのみ
         for (int i = 0; i < traps.Count; i++)
         {
             var trap = traps[i];
@@ -285,18 +272,13 @@ public sealed class NiceTrapper : RoleBase
 
             _ = new LateTask(() =>
             {
-                // 古いダミーを消す
                 try { oldObj?.Despawn(); } catch { }
-
-                // ★ 新しいダミーを作り直す（activated=trueで適切な表示）
                 trap.Obj = new TrapNetObject(pos, type, Player, activated: true);
-
             }, idx * 0.6f + 1.0f, $"NiceTrapper.Activate.{idx}", true);
         }
 
         cooldownTimer = PlaceCooldown;
         Player.RpcResetAbilityCooldown(Sync: true);
-
         SendRpc();
     }
 
@@ -314,7 +296,6 @@ public sealed class NiceTrapper : RoleBase
         traps.Clear();
     }
 
-    // ─── テキスト ─────────────────────────────────────────────────
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null,
         bool isForMeeting = false, bool isForHud = false)
     {
@@ -328,10 +309,8 @@ public sealed class NiceTrapper : RoleBase
 
         if (remaining <= 0)
             return $"{size}<color={color}>設置数が上限です</color>";
-
         if (cooldownTimer > 0f)
             return $"{size}<color=#888888>設置CD中...</color>";
-
         return $"{size}<color={color}>ペットなで → トラップ設置 (残り{remaining}個)</color>";
     }
 
@@ -346,7 +325,6 @@ public sealed class NiceTrapper : RoleBase
         return $"<color={RoleInfo.RoleColorCode}>{txt}</color>";
     }
 
-    // ─── RPC ─────────────────────────────────────────────────────
     void SendRpc()
     {
         if (!AmongUsClient.Instance.AmHost) return;
@@ -378,11 +356,9 @@ public sealed class NiceTrapper : RoleBase
     }
 }
 
-// ─── トラップダミー ───────────────────────────────────────────────────
 public sealed class TrapNetObject : CustomNetObject
 {
-    // Speed=青(1), Slow=赤(0), Notify=黄(5)
-    static readonly int[] TrapColorIds = { 1, 0, 5 };
+    static readonly int[] TrapColorIds = { 1, 0, 5 }; // Speed=青, Slow=赤, Notify=黄
 
     readonly NiceTrapperTrapType _type;
     readonly PlayerControl _owner;
@@ -402,16 +378,8 @@ public sealed class TrapNetObject : CustomNetObject
     {
         if (PlayerControl == null) return;
 
-        // ★ 色設定
         PlayerControl.RpcSetColor((byte)TrapColorIds[(int)_type]);
 
-        // ★ スキン・ハット・バイザー・ペットを消す
-        PlayerControl.RpcSetHat("");
-        PlayerControl.RpcSetSkin("");
-        PlayerControl.RpcSetVisor("");
-        PlayerControl.RpcSetPet("");
-
-        // ★ 名前ラベル
         string label = _type switch
         {
             NiceTrapperTrapType.Speed => "<color=#4488ff>▲</color>",
@@ -422,20 +390,16 @@ public sealed class TrapNetObject : CustomNetObject
         SetName(label);
         SnapToPosition(_pos);
 
-        // ★ 表示制御
-        // 非Activate時: オーナーのみ見える
-        // Activate後 Speed/Slow: 全員に見える
-        // Activate後 Notify: オーナーのみ見える
-        bool showToAll = _activated && _type != NiceTrapperTrapType.Notify;
-
+        // Speed/Slow かつ Activated なら全員に見せる。それ以外はオーナーのみ
+        bool showAll = _activated && _type != NiceTrapperTrapType.Notify;
         foreach (var pc in PlayerCatch.AllPlayerControls)
         {
             if (pc.notRealPlayer) continue;
-            if (showToAll) continue; // 全員に見える → Hideしない
-            if (pc.PlayerId != _owner.PlayerId)
+            if (!showAll && pc.PlayerId != _owner.PlayerId)
                 Hide(pc);
         }
     }
+
 
     public override void OnMeeting() { } // 会議でも消えない
 }

@@ -19,7 +19,8 @@ public sealed class Moving : RoleBase
             SetupOptionItem,
             "mv",
             "#00FF00",
-            (6, 8)
+            (6, 8),
+            from: From.SuperNewRoles
         );
 
     public Moving(PlayerControl player) : base(RoleInfo, player)
