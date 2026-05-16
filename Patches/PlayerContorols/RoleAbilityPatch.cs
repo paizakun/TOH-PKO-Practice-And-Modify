@@ -1,17 +1,17 @@
 using System.Collections.Generic;
 using System.Linq;
-
-using Hazel;
-using HarmonyLib;
-using UnityEngine;
 using AmongUs.GameOptions;
-
+using HarmonyLib;
+using Hazel;
 using TownOfHost.Modules;
+using TownOfHost.Patches.ISystemType;
+using TownOfHost.Roles.AddOns.Common;
 using TownOfHost.Roles.Core;
 using TownOfHost.Roles.Core.Interfaces;
 using TownOfHost.Roles.Ghost;
-using TownOfHost.Roles.AddOns.Common;
-using TownOfHost.Patches.ISystemType;
+using TownOfHost.Roles.Impostor;
+using UnityEngine;
+
 using TownOfHost.Roles.Neutral;
 
 namespace TownOfHost

@@ -1,17 +1,7 @@
 {
     "AllVersion": {
         "Unavailable": false,
-        "NotAvailableOnline": false,
-        "Events": [
-            {
-                "RoleId": 117,
-                "Period": {
-                    "Month": 4,
-                    "StartDay": 1,
-                    "EndDay": 8
-                }
-            }
-        ]
+        "NotAvailableOnline": false
     },
     "1.0.0.0": {
         "Unavailable": true,
@@ -48,8 +38,16 @@
         "NotAvailableOnline": false,
         "AnnounceText": "Test Text"
     },
-    "3.23.11.28": {
+    "4.27.13.57": {
         "Unavailable": true,
+        "NotAvailableOnline": false
+    },
+    "51.14.32.33": {
+        "Unavailable": false,
+        "NotAvailableOnline": false
+    },
+    "51.14.32.34": {
+        "Unavailable": false,
         "NotAvailableOnline": false
     }
 }

@@ -24,6 +24,7 @@ public sealed class JackalWolf : RoleBase, ILNKiller, IUsePhantomButton, IDouble
             "#00b4eb",
             (1, 3),
             true,
+            from: From.TownOfHost_K,
             countType: CountTypes.Jackal,
             assignInfo: new RoleAssignInfo(CustomRoles.JackalWolf, CustomRoleTypes.Neutral)
             {
@@ -60,7 +61,7 @@ public sealed class JackalWolf : RoleBase, ILNKiller, IUsePhantomButton, IDouble
         {
             if (data.Key.IsImpostor() is false && data.Key is not CustomRoles.NotAssigned) continue;
             if (data.Key is CustomRoles.AlienHijack or CustomRoles.EvilSatellite or CustomRoles.ConnectSaver
-            or CustomRoles.Limiter or CustomRoles.Assassin or CustomRoles.Amnesiac)
+            or CustomRoles.Limiter or CustomRoles.Assassin or CustomRoles.Amnesiac or CustomRoles.Driver)
             {
                 InvalidRoles.Add(data.Key);
                 continue;
@@ -82,6 +83,7 @@ public sealed class JackalWolf : RoleBase, ILNKiller, IUsePhantomButton, IDouble
         OptionJJackalCanKillMafia = BooleanOptionItem.Create(RoleInfo, 14, JackalMafia.JackalOption.JackalCanKillMafia, false, false);
         OptionJJackalMafiaCanAlsoBeExposedToJackal = BooleanOptionItem.Create(RoleInfo, 15, JackalMafia.JackalOption.JackalMafiaCanAlsoBeExposedToJackal, false, false);
         OptionJackalCanAlsoBeExposedToJMafia = BooleanOptionItem.Create(RoleInfo, 16, JackalMafia.JackalOption.JackalCanAlsoBeExposedToJMafia, true, false);
+        RoleAddAddons.Create(RoleInfo, 25, NeutralKiller: true);
     }
     public override void Add()
     {

