@@ -859,6 +859,7 @@ public enum CustomRoles
     DummySpawner,
     Reverser,
     EvilSanta,
+    SmokeMaker,
     //DEBUG only Impostor
     //Madmate
     MadGuardian,

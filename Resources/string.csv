@@ -85,6 +85,7 @@
 "EvilSanta","Evil Santa","イビルサンタ"
 "Samurai","Samurai","侍"
 "Rocket","Rocket","ロケット"
+"SmokeMaker","SmokeMaker","スモークメーカー"
 "#ImpostorName"
 
 "# マッドメイト系役職"
@@ -424,6 +425,7 @@
 "ChaserInfo","I will chase you to the ends of the earth.","地の果てまで追いかける…","","","",""
 "SamuraiInfo","Let's rip the crew apart!","クルーを切り裂こう！","","","",""
 "RocketInfo","Soar high into the sky!","空高く打ち上がれ！"
+"SmokeMakerInfo","Smoke and confuse the crew","煙でクルーを混乱させよう","","","",""
 "#ImpostorInfo"
 
 "# マッドメイト系役職"
@@ -722,6 +724,7 @@
 "ChaserInfoLong","A role that allows you to warp by transforming.\nDetects a nearby vent with a transformed target and warps there.\nYou can also return to the original position in the settings.\nIt would be funny if there were other players in front of you.\n","近くに移動したいターゲットをシェイプボタンで選択すると、そのターゲットから一番近いベントにワープすることができる。ワープ時、他視点からチェイサーはそのベントから出てきたように見える(ベント開閉あり)。\n元の位置に戻る設定がONの時、設定時間後に元居た場所の近くのベントに戻る。"
 "SamuraiInfoLong",samurai is very saikyou(?)","ファントムボタンを押し自分の前方にいるプレイヤーを範囲キルすることができます\n設定によりサボタージュやベントを使用することができません。"
 "RocketInfoLong","This role normally cannot perform kills.\nLike the Imposter Penguin, you can drag other crew members around using the kill button.\nThere is no time limit on how long you can hold someone. You can hold any number of people.\nIf a meeting is called before you can use the launch ability, you will miss the launch.\nIf you are not expelled from the meeting and the meeting ends, you will launch the person you were holding at the end of the meeting.\nYou can use the Phantom button to launch the person you are holding into the air and kill them.\nNo body remains. An explosion sound like fireworks will occur from the launch location.","この役職は通常キルが出来ない。\nインポスター役職ペンギンのように他クルーをキルボタンで連れ回すことが出来る。\n掴んでいられる時間に制限はない。何人でも掴むことが出来る。\n打ち上げる能力を使用前に会議を呼ばれてしまうと打ち上げ損なってしまう。\nその会議で追放されずに会議が終了すれば会議終了時点で掴んでいた人を打ち上げる。\nファントムボタンで掴んでいる人を上に打ち上げてキルすることができる。\n死体は残らない。打ち上げた場所から花火のような爆発音が鳴る。"
+"SmokeMakerInfoLong","","スモークを発生させるインポスター。\nペットを撫でることでスモークを設置。設置されたスモークはファントムボタンで起爆させることができる。\nアモングアスの仕様でスモークの下の方は名前表示されるらしい。\nスモーク設置クールタイムは名前の右に表示されるよ"
 "#ImpostorInfoLong"
 
 "# マッドメイト系役職"
@@ -1627,6 +1630,11 @@
 "HitchhikerDuration","Ride Duration (0=Unlimited)","乗車時間 (0=無制限)"
 "HitchhikerTargetSpeedUp","Speed Up Target","対象の速度を上げる"
 "HitchhikerTargetSpeedMultiplier","Target Speed Multiplier","対象の速度倍率"
+"SmokeMakerPlaceCooldown","Place Cooldown","設置クールタイム"
+"SmokeMakerSmokeCooldown","Smoke Cooldown","スモーククールタイム"
+"SmokeMakerSmokeDuration","Smoke Duration","スモーク持続時間"
+"SmokeMakerSmokeSize","Smoke Size","スモークサイズ"
+"SmokeMakerMaxDummies","Max Dummies","最大設置数"
 
 "## MadMate Role Setting"
 "MadmateOption","MadMate Options","マッドメイト系役職の設定"
