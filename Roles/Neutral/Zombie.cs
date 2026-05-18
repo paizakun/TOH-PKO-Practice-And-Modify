@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+/*using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
 using TownOfHost.Attributes;
@@ -17,12 +17,11 @@ public sealed class Zombie : RoleBase
             CustomRoles.Zombie,
             () => RoleTypes.Engineer,
             CustomRoleTypes.Neutral,
-            30200,
+            130200,
             SetupOptionItem,
             "zb",
             "#6f8f4d",
             (6, 2),
-            from: From.TownOfHost_Pko,
             countType: CountTypes.None
         );
 
@@ -151,4 +150,4 @@ public sealed class Zombie : RoleBase
         reason = GameOverReason.ImpostorsByKill;
         return true;
     }
-}
+}*/

@@ -815,6 +815,7 @@ public enum CustomRoles
     Chaser,
     Samurai,
     Rocket,
+    EvilMoving,
     //TOH-K
     Bomber,
     TeleportKiller,
@@ -854,12 +855,12 @@ public enum CustomRoles
     //TOH-P
     EvilGuesser,
     TimeSleeper,
-    StandMaster,
     EvilBlender,
     DummySpawner,
     Reverser,
     EvilSanta,
     SmokeMaker,
+    Stand,
     //DEBUG only Impostor
     //Madmate
     MadGuardian,
@@ -986,7 +987,6 @@ public enum CustomRoles
     Monika,
     LoversBreaker,
     Suicider,
-    BatGirl,
     //TOH-K
     Remotekiller,
     Chef,
@@ -1016,7 +1016,9 @@ public enum CustomRoles
     JackalWolf,
     TaskPlayerB,
     //TOH-P
+    StandMaster,
     Chatter,
+    BatGirl,
     //DEBUG only Neutral.
     //HideAndSeek
     HASFox,

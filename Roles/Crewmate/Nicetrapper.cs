@@ -260,10 +260,6 @@ public sealed class NiceTrapper : RoleBase
             activeNotifyArrows.Remove(arrowData);
             UtilsNotifyRoles.NotifyRoles(OnlyMeName: true, SpecifySeer: Player);
         }, 3f, "NiceTrapper.RemoveArrow", true);
-
-        Utils.SendMessage(
-            $"<color=#66ddaa>【通知トラップ】{UtilsName.GetPlayerColor(target, true)}がトラップを踏みました！</color>",
-            Player.PlayerId);
     }
 
     public override void OnStartMeeting()

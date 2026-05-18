@@ -50,6 +50,20 @@ public class ModNewsHistory
             {
                 var news = new ModNews
                 {
+                    Number = 100073,
+                    Title = "ぬーん",
+                    SubTitle = "<color=#FF9631>Town Of Host-Pko v4.28.14.60</color>",
+                    ShortTitle = "<color=#FF9631>●TOH-Pko v4.28.14.60</color>",
+                    Text = "・未完成の役職の削除\n"
+                    +"・新役職スモークメーカーの追加\n"
+                    ,
+                    Date = "2026-5-17"
+                };
+                AllModNews.Add(news);
+            }
+            {
+                var news = new ModNews
+                {
                     Number = 100072,
                     Title = "そーりー",
                     SubTitle = "<color=#FF9631>Town Of Host-Pko v4.28.14.59</color>",

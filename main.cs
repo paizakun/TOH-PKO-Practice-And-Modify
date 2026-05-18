@@ -59,8 +59,8 @@ namespace TownOfHost
         public static ConfigEntry<string> ExplosionKeyInput { get; private set; }
 
         public const string PluginGuid = "com.satokazoku.TownOfHost-Pko";
-        public const string PluginVersion = "4.28.14.59";//ほんとはx.y.z表記にしたかったけどx.y.z.km.ks表記だと警告だされる
-        public const string PluginShowVersion = "4.28.14.59";
+        public const string PluginVersion = "4.28.14.60";//ほんとはx.y.z表記にしたかったけどx.y.z.km.ks表記だと警告だされる
+        public const string PluginShowVersion = "4.28.14.60";
         public const string ModVersion = ".1.1";//リリースver用バージョン変更
 
         /// 配布するデバッグ版なのであればtrue。リリース時にはfalseにすること。
@@ -531,6 +531,7 @@ namespace TownOfHost
         Chatter = CustomRoles.Chatter,
         Suicider = CustomRoles.Suicider,
         BatGirl = CustomRoles.BatGirl,
+        StandMaster = CustomRoles.StandMaster,
 
         HASTroll = CustomRoles.HASTroll,
         TaskPlayerB = CustomRoles.TaskPlayerB,
