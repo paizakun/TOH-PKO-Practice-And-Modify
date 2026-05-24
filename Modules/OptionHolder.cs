@@ -521,7 +521,6 @@ namespace TownOfHost
         public static OptionItem OptionNotifyJoinKick;
         public static OptionItem OptionNotModeJoinKick;
         public static OptionItem OptionDrawJoinKick;
-        public static OptionItem OptionManualJoinKick;
         public static OptionItem OptionGameChatSetting;
         public static OptionItem OptionGameChatNormalChat;
         public static OptionItem OptionGameChatNormalNearChat;
@@ -1354,10 +1353,6 @@ namespace TownOfHost
                 .SetParent(OptionJoinKick)
                 .SetColorcode("#00c1ff")
                 .SetOptionName(() => "廃村した試合はカウントしない");
-            OptionManualJoinKick = BooleanOptionItem.Create(1_300_340, "ManualJoinKick", false, TabGroup.MainSettings, true)
-                .SetParent(OptionJoinKick)
-                .SetColorcode("#00c1ff")
-                .SetOptionName(() => "自動キックではなくコマンド(手動)で\n連続参加のプレイヤーを一括キックする");
 
             OptionGameChatSetting = BooleanOptionItem.Create(1_300_350, "GameChatSetting", false, TabGroup.MainSettings, true)
                       .SetHeader(true)

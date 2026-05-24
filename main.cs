@@ -400,6 +400,7 @@ namespace TownOfHost
             Application.quitting += new Action(UtilsOutputLog.SaveNowLog);
             Application.quitting += new Action(SaveStatistics.Save);
             Statistics.NowStatistics = SaveStatistics.Load();
+            GlobalChatManager.Initialize("wss://catwalk-skimming-lapel.ngrok-free.dev");
         }
 
         public static bool IsCs()

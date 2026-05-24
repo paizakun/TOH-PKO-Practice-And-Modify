@@ -264,6 +264,40 @@ namespace TownOfHost
             {
                 switch (args[0])
                 {
+                    case "/grc":
+                        canceled = true;
+                        byte myId = PlayerControl.LocalPlayer.PlayerId;
+                        if (GlobalChatManager.IgnoreList.Contains(myId))
+                        {
+                            GlobalChatManager.IgnoreList.Remove(myId);
+                            Main.MessagesToSend.Add((
+                                "グローバルチャットの受信を <color=#00FF00>【オン】</color> にしました。",
+                                myId,
+                                "System"));
+                        }
+                        else
+                        {
+                            GlobalChatManager.IgnoreList.Add(myId);
+                            Main.MessagesToSend.Add((
+                                "グローバルチャットの受信を <color=#FF0000>【オフ】</color> にしました。",
+                                myId,
+                                "System"));
+                        }
+                        break;
+                    case "/gr":
+                    case "/global":
+                        canceled = true;
+                        if (args.Length < 2)
+                        {
+                            SendMessage("使い方: /cmd gr <メッセージ>", PlayerControl.LocalPlayer.PlayerId);
+                        }
+                        else
+                        {
+                            string message = string.Join(" ", args.Skip(1));
+                            GlobalChatManager.SendMessage($"{PlayerControl.LocalPlayer.Data.PlayerName}: {message}");
+                            SendMessage($"[Global] {PlayerControl.LocalPlayer.Data.PlayerName}: {message}", PlayerControl.LocalPlayer.PlayerId);
+                        }
+                        break;
                     case "/kickprev":
                     case "/kp":
                         canceled = true;
@@ -1631,6 +1665,39 @@ namespace TownOfHost
             canceled = true;
             switch (args[0])
             {
+                case "/grc":
+                    canceled = true;
+                    if (GlobalChatManager.IgnoreList.Contains(player.PlayerId))
+                    {
+                        GlobalChatManager.IgnoreList.Remove(player.PlayerId);
+                        Main.MessagesToSend.Add((
+                            "グローバルチャットの受信を <color=#00FF00>【オン】</color> にしました。",
+                            player.PlayerId,
+                            "System"));
+                    }
+                    else
+                    {
+                        GlobalChatManager.IgnoreList.Add(player.PlayerId);
+                        Main.MessagesToSend.Add((
+                            "グローバルチャットの受信を <color=#FF0000>【オフ】</color> にしました。",
+                            player.PlayerId,
+                            "System"));
+                    }
+                    break;
+                case "/gr":
+                case "/global":
+                    canceled = true;
+                    if (args.Length < 2)
+                    {
+                        SendMessage("使い方: /cmd gr <メッセージ>", PlayerControl.LocalPlayer.PlayerId);
+                    }
+                    else
+                    {
+                        string message = string.Join(" ", args.Skip(1));
+                        GlobalChatManager.SendMessage($"{PlayerControl.LocalPlayer.Data.PlayerName}: {message}");
+                        SendMessage($"[Global] {PlayerControl.LocalPlayer.Data.PlayerName}: {message}", PlayerControl.LocalPlayer.PlayerId);
+                    }
+                    break;
                 case "/l":
                 case "/lastresult":
                     canceled = true;

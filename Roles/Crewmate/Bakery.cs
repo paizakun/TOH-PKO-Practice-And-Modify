@@ -47,9 +47,7 @@ public sealed class Bakery : RoleBase
         ).SetValueFormat(OptionFormat.Percent);
 
         ObjectOptionitem.Create(RoleInfo, 20, "PoisonedBakeryOption", true, "")
-    .SetOptionName(() => "PoisonedBakery Option");
-        PoisonedBakery.OptionHighWinPriority = BooleanOptionItem.Create(
-            RoleInfo, 21, PoisonedBakery.OptionName.PoisonedBakeryHighWinPriority, false, false);
+            .SetOptionName(() => "PoisonedBakery Option");
 
         PoisonedBakery.HideRoleOptions(CustomRoles.PoisonedBakery);
     }
@@ -191,22 +189,11 @@ public sealed class PoisonedBakery : RoleBase
     public static List<PoisonedBakery> Bakeries = new();
     public static List<byte> PoisonedPlayerIds = new();
 
-    public PoisonedBakery(PlayerControl player) : base(RoleInfo, player)
-    {
-        HighWinPriority = OptionHighWinPriority?.GetBool() ?? false;
-    }
+    public PoisonedBakery(PlayerControl player) : base(RoleInfo, player) { }
 
     private static void SetupOptionItem()
     {
         HideRoleOptions(CustomRoles.PoisonedBakery);
-    }
-
-    public static OptionItem OptionHighWinPriority;
-    public static bool HighWinPriority;
-
-    public enum OptionName
-    {
-        PoisonedBakeryHighWinPriority,
     }
 
     public static void HideRoleOptions(CustomRoles role)
@@ -253,14 +240,6 @@ public sealed class PoisonedBakery : RoleBase
     {
         if (!AmongUsClient.Instance.AmHost) return;
         if (!Player.IsAlive()) return;
-
-        if (HighWinPriority)
-        {
-            CustomWinnerHolder.WinnerIds.Clear();
-            CustomWinnerHolder.NeutralWinnerIds.Clear();
-            CustomWinnerHolder.AdditionalWinnerRoles.Clear();
-        }
-
         CheckWin(ref reason);
     }
 

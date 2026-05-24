@@ -13,7 +13,6 @@ public static class PreviousSessionDetector
     private static readonly Dictionary<string, int> ContinuousCount = new();
     private static readonly List<(int ClientId, string PlayerName)> DetectedPlayers = new();
 
-    // ★ キック免除リスト（FC/PUID）
     private static readonly HashSet<string> ExemptKeys = new();
 
     private static bool IsEnabled => Options.OptionJoinKick.GetBool();
@@ -23,15 +22,36 @@ public static class PreviousSessionDetector
 
     public static bool TemporaryAllowAll = false;
 
+    private static string GetKey(ClientData client)
+    {
+        if (client == null) return "";
+        string fc = client.FriendCode?.Trim().ToUpper() ?? "";
+        if (!string.IsNullOrEmpty(fc)) return fc;
+        return client.ProductUserId?.Trim() ?? "";
+    }
+
+    private static string GetKey(PlayerControl pc)
+    {
+        return GetKey(pc?.GetClient());
+    }
+
     public static void OnGameStart()
     {
         CurrentSessionKeys.Clear();
         DetectedPlayers.Clear();
-        foreach (var pc in PlayerCatch.AllPlayerControls)
+
+        foreach (var client in AmongUsClient.Instance.allClients)
         {
-            var key = GetKey(pc);
+            var key = GetKey(client);
             if (!string.IsNullOrEmpty(key))
+            {
                 CurrentSessionKeys.Add(key);
+                Logger.Info($"セッション記録: {client.PlayerName} ({key})", "PreviousSession");
+            }
+            else
+            {
+                Logger.Warn($"キー取得失敗（FriendCode/PUID 未ロード）: {client.PlayerName}", "PreviousSession");
+            }
         }
         Logger.Info($"現在のセッション参加者: {CurrentSessionKeys.Count}人", "PreviousSession");
     }
@@ -56,41 +76,46 @@ public static class PreviousSessionDetector
         Logger.Info($"前セッション記録: {PreviousSessionKeys.Count}人", "PreviousSession");
     }
 
-    public static void OnPlayerJoined(PlayerControl pc)
+    public static void OnPlayerJoined(ClientData client)
     {
         if (!AmongUsClient.Instance.AmHost) return;
         if (!IsEnabled) return;
-        if (pc == null || PreviousSessionKeys.Count == 0) return;
-
+        if (client == null || PreviousSessionKeys.Count == 0) return;
         if (TemporaryAllowAll)
         {
-            Logger.Info($"一時許可中のためスキップ: {pc.Data?.PlayerName}", "PreviousSession");
+            Logger.Info($"一時許可中のためスキップ: {client.PlayerName}", "PreviousSession");
             return;
         }
 
-        var key = GetKey(pc);
-        if (string.IsNullOrEmpty(key)) return;
+        var key = GetKey(client);
+        if (string.IsNullOrEmpty(key))
+        {
+            Logger.Warn($"キー取得失敗のためスキップ: {client.PlayerName}", "PreviousSession");
+            return;
+        }
+
         if (!PreviousSessionKeys.Contains(key)) return;
 
-        // ★ 免除リストにいればスキップ
         if (ExemptKeys.Contains(key))
         {
-            Logger.Info($"免除リストのためスキップ: {pc.Data?.PlayerName}", "PreviousSession");
+            Logger.Info($"免除リストのためスキップ: {client.PlayerName}", "PreviousSession");
             return;
         }
 
-        if (SkipModerator && Moderator.IsModerator(pc))
+        var pc = PlayerCatch.AllPlayerControls.FirstOrDefault(p => p.GetClientId() == client.Id);
+
+        if (SkipModerator && pc != null && Moderator.IsModerator(pc))
         {
-            Logger.Info($"モデレーターのためスキップ: {pc.Data?.PlayerName}", "PreviousSession");
+            Logger.Info($"モデレーターのためスキップ: {client.PlayerName}", "PreviousSession");
             return;
         }
 
         if (!ContinuousCount.ContainsKey(key)) ContinuousCount[key] = 0;
         ContinuousCount[key]++;
 
-        string playerName = pc.Data?.PlayerName ?? "???";
+        string playerName = client.PlayerName ?? "???";
         int count = ContinuousCount[key];
-        int clientId = pc.GetClientId();
+        int clientId = client.Id;
 
         Logger.Warn($"前試合参加者が再参加: {playerName} ({key}) {count}回目", "PreviousSession");
 
@@ -128,7 +153,11 @@ public static class PreviousSessionDetector
         }, 0.5f, "PreviousSession.Kick", true);
     }
 
-    // ★ 免除追加
+    public static void OnPlayerJoined(PlayerControl pc)
+    {
+        OnPlayerJoined(pc?.GetClient());
+    }
+
     public static bool AddExempt(PlayerControl pc)
     {
         var key = GetKey(pc);
@@ -139,7 +168,6 @@ public static class PreviousSessionDetector
         return true;
     }
 
-    // ★ 免除解除
     public static bool RemoveExempt(PlayerControl pc)
     {
         var key = GetKey(pc);
@@ -149,7 +177,6 @@ public static class PreviousSessionDetector
         return removed;
     }
 
-    // ★ 免除リスト表示
     public static string GetExemptList()
     {
         if (ExemptKeys.Count == 0) return "免除リストは空です。";
@@ -203,7 +230,6 @@ public static class PreviousSessionDetector
             if (byId != null) return byId;
         }
 
-        // FriendCode検索
         var normalizedFc = key.Trim().ToUpper();
         var byFc = PlayerCatch.AllPlayerControls.FirstOrDefault(pc =>
         {
@@ -213,7 +239,6 @@ public static class PreviousSessionDetector
         });
         if (byFc != null) return byFc;
 
-        // 色検索
         int colorId = key.ToLower() switch
         {
             "red" or "レッド" or "赤" => 0,
@@ -243,7 +268,6 @@ public static class PreviousSessionDetector
             if (byColor != null) return byColor;
         }
 
-        // 名前検索
         return PlayerCatch.AllPlayerControls.FirstOrDefault(pc =>
             string.Equals(
                 (pc.Data?.PlayerName ?? "").RemoveHtmlTags().Trim(),
@@ -259,15 +283,6 @@ public static class PreviousSessionDetector
         DetectedPlayers.Clear();
         ExemptKeys.Clear();
         TemporaryAllowAll = false;
-    }
-
-    private static string GetKey(PlayerControl pc)
-    {
-        var client = pc?.GetClient();
-        if (client == null) return "";
-        string fc = client.FriendCode?.Trim().ToUpper() ?? "";
-        if (!string.IsNullOrEmpty(fc)) return fc;
-        return client.ProductUserId?.Trim() ?? "";
     }
 }
 
@@ -303,16 +318,13 @@ public static class PreviousSessionJoinPatch
         {
             try
             {
-                var pc = PlayerCatch.AllPlayerControls
-                    .FirstOrDefault(p => p.GetClientId() == client.Id);
-                if (pc != null)
-                    PreviousSessionDetector.OnPlayerJoined(pc);
+                PreviousSessionDetector.OnPlayerJoined(client);
             }
             catch (System.Exception e)
             {
                 Logger.Error(e.ToString(), "PreviousSession");
             }
-        }, 0.8f, "PreviousSession.Check", true);
+        }, 0.5f, "PreviousSession.Check", true);
     }
 }
 

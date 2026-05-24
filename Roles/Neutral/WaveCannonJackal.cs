@@ -29,7 +29,6 @@ public sealed class JackalHadouHo : RoleBase, ILNKiller, IUsePhantomButton
             assignInfo: new RoleAssignInfo(CustomRoles.JackalHadouHo, CustomRoleTypes.Neutral)
             {
                 AssignCountRule = new(1, 1, 1),
-                AssignUnitRoles = [CustomRoles.Tama]
             },
             from: From.SuperNewRoles
         );
@@ -355,7 +354,7 @@ public sealed class JackalHadouHo : RoleBase, ILNKiller, IUsePhantomButton
         if (rt == null) return;
         var tmp = rt.GetComponent<TMPro.TextMeshPro>();
         if (tmp == null) return;
-        if (beaming) { tmp.text = "<alpha=#00> </alpha>"; rt.SetLocalY(0.35f); }
+        if (beaming) { tmp.text = "<alpha=#00>　</alpha>"; rt.SetLocalY(0.35f); }
         else { tmp.enabled = true; rt.SetLocalY(0.35f); }
     }
 
@@ -678,7 +677,7 @@ public sealed class JackalHadouHo : RoleBase, ILNKiller, IUsePhantomButton
         {
             bool fl = seer.PlayerId == Player.PlayerId ? Player.cosmetics.FlipX : BeamFacingLeft;
             string bigStar = $"<size=800%><color={myColor}>★</color></size>";
-            string blank = "   ";
+            string blank = "　　　";
             name = "<line-height=1200%>\n" + (fl ? bigStar + blank : blank + bigStar) + "</line-height>";
             NoMarker = true; return true;
         }
@@ -707,11 +706,11 @@ public sealed class JackalHadouHo : RoleBase, ILNKiller, IUsePhantomButton
         string beam = IsSuperBeam ? "<#f00>━━━━━</color>" : "<#00CFFF>━━━━━━━</color>";
         string finalBeam = IsSuperBeam ? beam : beam + beam;
 
-        string blank = IsSuperBeam ? "<size=1800%> </size>" : "<size=1200%> </size>";
+        string blank = IsSuperBeam ? "<size=1800%>　</size>" : "<size=1200%>　</size>";
         string sB = fl ? star + blank : blank + star;
         string lB = fl ? finalBeam + sB : sB + finalBeam;
 
-        string hugeBlank = "<alpha=#00>" + new string(' ', IsSuperBeam ? 3 : 10) + "</alpha>";
+        string hugeBlank = "<alpha=#00>" + new string('　', IsSuperBeam ? 3 : 10) + "</alpha>";
 
         string ls;
         if (IsSuperBeam)
@@ -795,12 +794,7 @@ public sealed class Tama : RoleBase, IKiller
             (1, 5),
             from: From.SuperNewRoles,
             isDesyncImpostor: true,
-            countType: CountTypes.Crew,
-            assignInfo: new RoleAssignInfo(CustomRoles.Tama, CustomRoleTypes.Neutral)
-            {
-                IsInitiallyAssignableCallBack = () => false,
-                AssignCountRule = new(0, 0, 1)
-            }
+            countType: CountTypes.Crew
         );
 
     private static void SetupOptionItem()

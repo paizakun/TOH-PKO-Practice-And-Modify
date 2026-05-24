@@ -124,10 +124,6 @@ public sealed class Sage : RoleBase
 
         SnapPlayerToSaved();
 
-        Utils.SendMessage(
-            $"<color=#aaddff>【聖なるバリア】発動！\n{BarrierDuration}秒間キルを反射します。</color>",
-            Player.PlayerId);
-
         SendRpc();
         UtilsNotifyRoles.NotifyRoles(OnlyMeName: true);
         Logger.Info($"{Player.Data.GetLogPlayerName()} がバリアを発動", "Sage");
@@ -196,9 +192,6 @@ public sealed class Sage : RoleBase
 
         if (barrierTimer >= BarrierDuration)
         {
-            Utils.SendMessage(
-                $"<color=#aaddff>【聖なるバリア】解除。</color>",
-                Player.PlayerId);
             DeactivateBarrier();
         }
     }
@@ -223,9 +216,6 @@ public sealed class Sage : RoleBase
                 $"{UtilsName.GetPlayerColor(Player)}のバリアが{UtilsName.GetPlayerColor(killer)}のキルを反射した");
         }, 0.1f, "Sage.ReflectKill", true);
 
-        Utils.SendMessage(
-            $"<color=#aaddff>【聖なるバリア】キルを反射しました！</color>",
-            Player.PlayerId);
         DeactivateBarrier();
 
         return false;
