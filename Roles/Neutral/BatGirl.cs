@@ -1,4 +1,4 @@
-/*using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
 using Hazel;
@@ -172,8 +172,8 @@ public sealed class BatGirl : RoleBase, ISelfVoter, IUsePhantomButton, IAddition
     {
         if (!AmongUsClient.Instance.AmHost) return;
 
-        // 莨夊ｭｰ蠕碁≦蟒ｶ豁ｻ繧ｭ繝･繝ｼ縺ｫ蜈･縺｣縺滓凾轤ｹ縺ｧ蜷後ち繝ｼ繝ｳ豁ｻ莠｡縺ｨ縺励※蜈亥叙繧・        if (princeId != byte.MaxValue && Main.AfterMeetingDeathPlayers.ContainsKey(princeId))
-        MarkPrinceDeathThisTurn();
+        if (princeId != byte.MaxValue && Main.AfterMeetingDeathPlayers.ContainsKey(princeId))
+            MarkPrinceDeathThisTurn();
         if (Main.AfterMeetingDeathPlayers.ContainsKey(Player.PlayerId))
             MarkBatGirlDeathThisTurn();
 
@@ -307,7 +307,6 @@ public sealed class BatGirl : RoleBase, ISelfVoter, IUsePhantomButton, IAddition
         MeetingHudPatch.TryAddAfterMeetingDeathPlayers(CustomDeathReason.FollowingSuicide, Player.PlayerId);
         followQueued = true;
 
-        // 邇句ｭ先ｧ倥′縺薙・繧ｿ繝ｼ繝ｳ縺ｧ豁ｻ繧薙〒縺・ｋ蝣ｴ蜷医∝ｾ瑚ｿｽ縺・ｭｻ繧貞酔繧ｿ繝ｼ繝ｳ謇ｱ縺・→縺励※蜈医↓謌千ｫ九＆縺帙ｋ
         if (princeDiedThisTurn)
         {
             batGirlDiedThisTurn = true;
@@ -425,7 +424,6 @@ public sealed class BatGirl : RoleBase, ISelfVoter, IUsePhantomButton, IAddition
     {
         if (!OptionAddWin.GetBool()) return false;
 
-        // AddWin ON時は「同ターン死亡(旧solo条件)」でも追加勝利として扱う
         if (CanSoloWinNow())
         {
             winnerRole = CustomRoles.BatGirl;
@@ -506,6 +504,3 @@ public sealed class BatGirl : RoleBase, ISelfVoter, IUsePhantomButton, IAddition
         followQueued = reader.ReadBoolean();
     }
 }
-
-
-*/

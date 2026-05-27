@@ -321,7 +321,9 @@ namespace TownOfHost
             + $"\n/cmd 8ball - {GetString("Command.8ball")}"
             + $"\n/cmd pko - {GetString("Command.pko")}"
             + $"\n/cmd rename(r) - {GetString("Command.rename")}"
-            + $"\n/cmd rule(rl) - {GetString("Command.rule")}";
+            + $"\n/cmd rule(rl) - {GetString("Command.rule")}"
+            + $"\n/cmd global(gr) - {GetString("Command.global")}"
+            + $"\n/cmd global chat(grc) - {GetString("Command.globalchat")}";
             if (CustomRolesHelper.CheckGuesser() || CustomRoles.Guesser.IsPresent()) text += $"\n/cmd bt - {GetString("Command.bt")}";
             if (Options.ImpostorHideChat.GetBool()) text += $"\n/cmd ic - {GetString("Command.impchat")}";
             if (Options.JackalHideChat.GetBool()) text += $"\n/cmd jc - {GetString("Command.jacchat")}";

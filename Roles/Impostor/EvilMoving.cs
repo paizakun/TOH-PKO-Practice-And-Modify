@@ -30,7 +30,6 @@ public sealed class EvilMoving : RoleBase, IImpostor, IUsePhantomButton
         markedPos = null;
         hasMarked = false;
         cooldownLeft = 0f;
-        PetActionManager.Register(Player.PlayerId, OnPet);
     }
 
     static OptionItem OptionTeleportCooldown;

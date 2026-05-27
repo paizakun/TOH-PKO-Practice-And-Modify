@@ -1,4 +1,4 @@
-using AmongUs.GameOptions;
+/*using AmongUs.GameOptions;
 using Hazel;
 using TownOfHost.Modules;
 using TownOfHost.Patches;
@@ -516,4 +516,4 @@ public sealed class SheriffHadouHo : RoleBase, IUsePhantomButton
         ShotLimit = reader.ReadInt32();
         beamMode = reader.ReadBoolean();
     }
-}
+}*/

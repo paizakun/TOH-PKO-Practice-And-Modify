@@ -384,6 +384,26 @@ public class ModNewsHistory
                 };
                 AllModNews.Add(news);
             }
+            {
+                var news = new ModNews
+                {
+                    Number = 100084,
+                    Title = "私にはまだ早かったみたい(一旦ダミー役職削除)",
+                    SubTitle = "<color=#FF9631>Town Of Host-Pko v4.30.14.64</color>",
+                    ShortTitle = "<color=#FF9631>●TOH-Pko v4.30.14.64</color>",
+                    Text = "・波動砲ジャッカルではなく弾が排出されるバグの修正、その他バグ修正\n"
+                    + "・ジャンボのバグ修正\n"
+                    + "・ムービングがベントできたバグの修正\n"
+                    + "・イビルムービングのキルクがおかしかったバグの修正\n"
+                    + "・毒パン屋の修正、翻訳、バグ修正\n"
+                    + "・村長のバグ修正\n"
+                    + "・ナイステレポーターの仕様変更\n"
+                    + "・テレポーターの仕様変更\n"
+                    ,
+                    Date = "2026-5-25"
+                };
+                AllModNews.Add(news);
+            }
             AnnouncementPopUp.UpdateState = AnnouncementPopUp.AnnounceState.NotStarted;
         }
     }

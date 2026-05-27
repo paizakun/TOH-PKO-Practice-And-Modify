@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
 using Hazel;
@@ -30,7 +31,6 @@ public sealed class Teleporter : RoleBase, IImpostor, IUsePhantomButton
     public Teleporter(PlayerControl player)
         : base(RoleInfo, player)
     {
-        KillCooldown = OptionKillCooldown.GetFloat();
         AbilityCooldown = OptionAbilityCooldown.GetFloat();
         WaitingTime = OptionWaitingTime.GetFloat();
 
@@ -40,8 +40,6 @@ public sealed class Teleporter : RoleBase, IImpostor, IUsePhantomButton
         CustomRoleManager.LowerOthers.Add(GetLowerTextOthers);
     }
 
-    static OptionItem OptionKillCooldown;
-    static float KillCooldown;
     static OptionItem OptionAbilityCooldown;
     static float AbilityCooldown;
     static OptionItem OptionWaitingTime;
@@ -60,15 +58,13 @@ public sealed class Teleporter : RoleBase, IImpostor, IUsePhantomButton
 
     static void SetupOptionItem()
     {
-        OptionKillCooldown = FloatOptionItem.Create(RoleInfo, 10, GeneralOption.KillCooldown,
-            new(2.5f, 60f, 2.5f), 30f, false).SetValueFormat(OptionFormat.Seconds);
-        OptionAbilityCooldown = FloatOptionItem.Create(RoleInfo, 11, OptionName.TeleporterAbilityCooldown,
+        OptionAbilityCooldown = FloatOptionItem.Create(RoleInfo, 10, OptionName.TeleporterAbilityCooldown,
             new(5f, 120f, 5f), 45f, false).SetValueFormat(OptionFormat.Seconds);
-        OptionWaitingTime = FloatOptionItem.Create(RoleInfo, 12, OptionName.TeleporterWaitingTime,
+        OptionWaitingTime = FloatOptionItem.Create(RoleInfo, 11, OptionName.TeleporterWaitingTime,
             new(0f, 10f, 1f), 3f, false).SetValueFormat(OptionFormat.Seconds);
     }
 
-    public float CalculateKillCooldown() => KillCooldown;
+    public float CalculateKillCooldown() => Main.AllPlayerKillCooldown.GetValueOrDefault(Player.PlayerId, Main.NormalOptions.KillCooldown);
     public bool CanUseSabotageButton() => true;
     public bool CanUseImpostorVentButton() => true;
 
@@ -232,7 +228,7 @@ public sealed class Teleporter : RoleBase, IImpostor, IUsePhantomButton
         var dest = PlayerCatch.GetPlayerById(destPlayerId);
         string destName = dest != null ? UtilsName.GetPlayerColor(dest, true) : "???";
         int sec = Mathf.CeilToInt(pendingTimer);
-        return $"\n<color=#ff4500>{destName} の元に {sec}秒後テレポートします！</color>";
+        return $"\\n<color=#ff4500>{destName} の元に {sec}秒後テレポートします！</color>";
     }
 
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null,

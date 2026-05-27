@@ -295,7 +295,6 @@ namespace TownOfHost
                         {
                             string message = string.Join(" ", args.Skip(1));
                             GlobalChatManager.SendMessage($"{PlayerControl.LocalPlayer.Data.PlayerName}: {message}");
-                            SendMessage($"[Global] {PlayerControl.LocalPlayer.Data.PlayerName}: {message}", PlayerControl.LocalPlayer.PlayerId);
                         }
                         break;
                     case "/kickprev":
@@ -1689,13 +1688,12 @@ namespace TownOfHost
                     canceled = true;
                     if (args.Length < 2)
                     {
-                        SendMessage("使い方: /cmd gr <メッセージ>", PlayerControl.LocalPlayer.PlayerId);
+                        SendMessage("使い方: /cmd gr <メッセージ>", player.PlayerId);
                     }
                     else
                     {
                         string message = string.Join(" ", args.Skip(1));
-                        GlobalChatManager.SendMessage($"{PlayerControl.LocalPlayer.Data.PlayerName}: {message}");
-                        SendMessage($"[Global] {PlayerControl.LocalPlayer.Data.PlayerName}: {message}", PlayerControl.LocalPlayer.PlayerId);
+                        GlobalChatManager.SendMessage($"{player.Data.PlayerName}: {message}", player);
                     }
                     break;
                 case "/l":

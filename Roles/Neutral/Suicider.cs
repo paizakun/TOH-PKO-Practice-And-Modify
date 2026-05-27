@@ -1,6 +1,7 @@
 using AmongUs.GameOptions;
-using TownOfHost.Roles.Core;
 using UnityEngine;
+
+using TownOfHost.Roles.Core;
 
 namespace TownOfHost.Roles.Neutral;
 
@@ -32,6 +33,7 @@ public sealed class Suicider : RoleBase
         HasWon = false;
         timer = InitialTimer;
         hasExploded = false;
+        LastCooltime = -1;
     }
 
     static OptionItem OptionInitialTimer; static float InitialTimer;
@@ -61,25 +63,30 @@ public sealed class Suicider : RoleBase
     float timer;
     bool hasExploded;
     bool HasWon;
+    int LastCooltime;
 
     public override void Add()
     {
         timer = InitialTimer;
         hasExploded = false;
         HasWon = false;
-        AURoleOptions.EngineerCooldown = InitialTimer;
-        AURoleOptions.EngineerInVentMaxTime = 0f;
+        LastCooltime = -1;
     }
 
     public override void ApplyGameOptions(IGameOptions opt)
     {
-        // ★ ベントCDをタイマー残量として表示
-        AURoleOptions.EngineerCooldown = Mathf.Max(timer, 0f);
+        AURoleOptions.EngineerCooldown = Mathf.Max(timer, 0.1f);
         AURoleOptions.EngineerInVentMaxTime = 0f;
     }
 
     public override bool CanClickUseVentButton => false;
     public override bool OnEnterVent(PlayerPhysics physics, int ventId) => false;
+
+    public override void OnSpawn(bool initialState = false)
+    {
+        AURoleOptions.EngineerCooldown = Mathf.Max(timer, 0.1f);
+        Player.RpcResetAbilityCooldown(Sync: true);
+    }
 
     public override bool OnCompleteTask(uint taskid)
     {
@@ -88,12 +95,10 @@ public sealed class Suicider : RoleBase
         timer += TaskTimeBonus;
         if (timer > InitialTimer) timer = InitialTimer;
 
-        Player.MarkDirtySettings();
-
         if (MyTaskState.IsTaskFinished && !HasWon)
-        {
             HasWon = true;
-        }
+
+        SyncCooldown();
         return true;
     }
 
@@ -105,20 +110,34 @@ public sealed class Suicider : RoleBase
         if (MyTaskState.IsTaskFinished) return;
 
         timer -= Time.fixedDeltaTime;
-        if (Mathf.Abs(timer % 0.5f) < Time.fixedDeltaTime)
-            Player.MarkDirtySettings();
+        if (timer < 0f) timer = 0f;
+
+        var now = Mathf.FloorToInt(timer);
+        if (now != LastCooltime)
+        {
+            LastCooltime = now;
+            SyncCooldown();
+        }
 
         if (timer <= 0f)
-        {
-            timer = 0f;
             Explode();
-        }
+    }
+
+    void SyncCooldown()
+    {
+        Player.MarkDirtySettings();
+        _ = new LateTask(() =>
+        {
+            if (Player.IsAlive())
+                Player.RpcResetAbilityCooldown(Sync: true);
+        }, 0.1f, "Suicider.SyncCD", true);
     }
 
     void Explode()
     {
         if (hasExploded) return;
         hasExploded = true;
+
         bool isFall = IRandom.Instance.Next(0, 100) < (int)(FallChance * 100);
         PlayerState.GetByPlayerId(Player.PlayerId).DeathReason =
             isFall ? CustomDeathReason.Fall : CustomDeathReason.Suicide;
@@ -129,13 +148,18 @@ public sealed class Suicider : RoleBase
             $"{UtilsName.GetPlayerColor(Player)}が自爆した ({(isFall ? "転落死" : "自殺")})");
     }
 
+    public override void OnStartMeeting()
+    {
+        LastCooltime = -1;
+    }
+
     public override void AfterMeetingTasks()
     {
         if (!AmongUsClient.Instance.AmHost) return;
         if (!Player.IsAlive()) return;
 
-        AURoleOptions.EngineerCooldown = Mathf.Max(timer, 0.1f);
-        Player.RpcResetAbilityCooldown();
+        LastCooltime = -1;
+        SyncCooldown();
     }
 
     public override void CheckWinner(GameOverReason reason)
@@ -159,6 +183,9 @@ public sealed class Suicider : RoleBase
         if (!Player.IsAlive()) return "";
         if (MyTaskState.IsTaskFinished)
             return $"<color={RoleInfo.RoleColorCode}>(完了)</color>";
-        return "";
+
+        int sec = Mathf.CeilToInt(timer);
+        string color = timer > InitialTimer * 0.5f ? RoleInfo.RoleColorCode : "#ff4444";
+        return $"<color={color}>({sec}s)</color>";
     }
 }

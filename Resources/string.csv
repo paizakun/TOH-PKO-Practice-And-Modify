@@ -2766,6 +2766,8 @@
 "Command.pko","You can chat with Pikeo AI.","ぴけおAIとチャットができます"
 "Command.8ball","8ball","8ball"
 "Command.rule","You can view the rules.","ルールを見れます"
+"Command.global","Global","グローバルチャットを送信"
+"Command.globalchat","globalchat","グローバルチャットを表示・非表示"
 "Command.fe",haison","廃村"
 "Command.Msay","Moderator is Say","モデレーター用のSay"
 "Command.Mkf","ALL KillFlash","全員にキルフラッシュを見せます。"
