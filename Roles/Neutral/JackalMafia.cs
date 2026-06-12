@@ -4,6 +4,7 @@ using UnityEngine;
 using TownOfHost.Modules;
 using TownOfHost.Roles.Core;
 using TownOfHost.Roles.Core.Interfaces;
+using TownOfHost.Roles.Crewmate;
 using Hazel;
 using System.Linq;
 
@@ -141,6 +142,7 @@ namespace TownOfHost.Roles.Neutral
                 ResetCooldown = false;
                 return;
             }
+            if (Walkure.TryRejectRoleChange(Player, target, Walkure.RoleChangeSource.Jackal)) return;
             if (SuddenDeathMode.NowSuddenDeathTemeMode)
             {
                 target.SideKickChangeTeam(Player);

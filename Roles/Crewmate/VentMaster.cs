@@ -52,7 +52,7 @@ public sealed class VentMaster : RoleBase
                 {
                     if (seer.IsAlive() && GameStates.IsInTask)
                         seer.KillFlash();
-                    if (seer.GetRoleClass() is VentMaster ventMaster) ventMaster.callcount++;
+                    if (MagicalGirl.TryGetEffectiveRole<VentMaster>(seer, out var ventMaster)) ventMaster.callcount++;
                 }
             }
         }

@@ -8,6 +8,7 @@ using TownOfHost.Patches.ISystemType;
 using TownOfHost.Roles.AddOns.Common;
 using TownOfHost.Roles.Core;
 using TownOfHost.Roles.Core.Interfaces;
+using TownOfHost.Roles.Crewmate;
 using TownOfHost.Roles.Ghost;
 using TownOfHost.Roles.Impostor;
 using UnityEngine;
@@ -70,6 +71,15 @@ namespace TownOfHost
                     PlayerControl targetm = min.Key;
                     if (!targetm.Is(CustomRoles.King) && !targetm.Is(CustomRoles.Merlin))
                     {
+                        var source = shapeshifter.Is(CustomRoles.Egoist) || targetRole is CustomRoles.Jackaldoll
+                            ? Walkure.RoleChangeSource.Jackal
+                            : Walkure.RoleChangeSource.Impostor;
+                        if (Walkure.TryRejectRoleChange(shapeshifter, targetm, source))
+                        {
+                            shapeshifter.RpcRejectShapeshift();
+                            return false;
+                        }
+
                         if (SuddenDeathMode.NowSuddenDeathTemeMode)
                         {
                             targetm.SideKickChangeTeam(shapeshifter);

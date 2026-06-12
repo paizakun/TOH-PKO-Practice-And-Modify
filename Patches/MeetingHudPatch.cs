@@ -97,7 +97,7 @@ public static class MeetingHudPatch
                         return false;
                     }
             }
-            if (voter.GetRoleClass() is ISelfVoter selfVoter && Amnesia.CheckAbility(voter))
+            if (MagicalGirl.TryGetEffectiveRole<ISelfVoter>(voter, out var selfVoter) && Amnesia.CheckAbility(voter))
             {
                 if (selfVoter.CanUseVoted())
                 {
@@ -242,7 +242,7 @@ public static class MeetingHudPatch
                 {
                     MeetingInfo.enabled = true;
                     MeetingInfo.text = $"<#ffffff><line-height=95%>" + $"Day.{UtilsGameLog.day}".Color(Palette.Orange) + Bakery.BakeryMark() + $"\n{UtilsNotifyRoles.ExtendedMeetingText}";
-                    if (CustomRolesHelper.CheckGuesser() || PlayerCatch.AllPlayerControls.Any(pc => pc.Is(CustomRoles.Guesser)))
+                    if (CustomRolesHelper.CheckGuesser() || PlayerCatch.AllPlayerControls.Any(HasGuesserAbility))
                     {
                         MeetingInfo.text = $"<size=50%>\n </size>{MeetingInfo.text}\n<size=50%><#999900>{GetString("GuessInfo")}</color></size>";
                     }
@@ -680,7 +680,7 @@ public static class MeetingHudPatch
         if (deathReason != CustomDeathReason.Vote) return null;
 
         if (Amnesia.CheckAbility(exiledplayer))
-            if (exiledplayer.GetRoleClass() is INekomata nekomata)
+            if (MagicalGirl.TryGetEffectiveRole<INekomata>(exiledplayer, out var nekomata))
             {
                 // 道連れしない状態ならnull
                 if (!nekomata.DoRevenge(deathReason))
@@ -695,7 +695,7 @@ public static class MeetingHudPatch
                 var isMadmate =
                     role.IsMadmate() ||
                     // マッド属性化時に削除
-                    (exiledplayer.GetRoleClass() is SchrodingerCat schrodingerCat && schrodingerCat.AmMadmate);
+                    (MagicalGirl.TryGetEffectiveRole<SchrodingerCat>(exiledplayer, out var schrodingerCat) && schrodingerCat.AmMadmate);
                 foreach (var candidate in PlayerCatch.AllAlivePlayerControls)
                 {
                     if (candidate == exiledplayer || Main.AfterMeetingDeathPlayers.ContainsKey(candidate.PlayerId)) continue;
@@ -754,6 +754,12 @@ public static class MeetingHudPatch
         var rand = IRandom.Instance;
         var target = TargetList[rand.Next(TargetList.Count)];
         return target;
+    }
+
+    private static bool HasGuesserAbility(PlayerControl pc)
+    {
+        return pc.Is(CustomRoles.Guesser)
+            || (RoleAddAddons.GetRoleAddon(pc.GetCustomRole(), out var data, pc, subrole: CustomRoles.Guesser) && data.GiveGuesser.GetBool());
     }
 }
 

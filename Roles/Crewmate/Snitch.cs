@@ -121,7 +121,7 @@ public class Snitch : RoleBase
             }
             return Utils.ColorString(RoleInfo.RoleColor, mark);
         }
-        else if (seen.GetRoleClass() is Snitch snitch && snitch.IsExposed)
+        else if (MagicalGirl.TryGetEffectiveRole<Snitch>(seen, out var snitch) && snitch.IsExposed)
         {
             //seenがタスク終わりそうなスニッチの時
             return Utils.ColorString(RoleInfo.RoleColor, "★");

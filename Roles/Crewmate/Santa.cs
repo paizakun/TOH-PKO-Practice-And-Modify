@@ -324,6 +324,8 @@ public sealed class Santa : RoleBase, IKiller
         var role = RollGiftRole(giftRoles);
         var beforeRole = target.GetCustomRole();
 
+        if (Walkure.TryRejectRoleChange(Player, target, Walkure.RoleChangeSource.Crewmate)) return;
+
         if (role == CustomRoles.UltraStar && beforeRole != CustomRoles.UltraStar)
             RememberedColorByPlayerId[target.PlayerId] = target.Data.DefaultOutfit.ColorId;
 

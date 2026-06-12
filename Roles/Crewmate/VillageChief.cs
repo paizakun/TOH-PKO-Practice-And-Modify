@@ -253,6 +253,12 @@ public sealed class VillageChief : RoleBase, IKiller, ISelfVoter
             return;
         }
 
+        if (Walkure.TryRejectRoleChange(Player, target, Walkure.RoleChangeSource.Crewmate))
+        {
+            SendRPC();
+            return;
+        }
+
         Sheriff.AppointedPlayerIds.Add(target.PlayerId);
 
         if (!Utils.RoleSendList.Contains(target.PlayerId))

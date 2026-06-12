@@ -5,6 +5,7 @@ using Hazel;
 using TownOfHost.Modules;
 using TownOfHost.Roles.Core;
 using TownOfHost.Roles.Core.Interfaces;
+using TownOfHost.Roles.Crewmate;
 
 namespace TownOfHost.Roles.Impostor;
 
@@ -148,6 +149,7 @@ public sealed class Eraser : RoleBase, IImpostor, IUsePhantomButton
             //ホストのみ実行
             if (AmongUsClient.Instance.AmHost)
             {
+                if (Walkure.TryRejectRoleChange(Player, player, Walkure.RoleChangeSource.Impostor)) break;
                 Erasedtargets.Add(player.PlayerId);
                 player.RpcSetCustomRole(SuddenDeathMode.NowSuddenDeathMode || (Player.Is(CustomRoles.JackalWolf) && player.Is(CustomRoleTypes.Impostor)) ? CustomRoles.Impostor : CustomRoles.Crewmate, true, null);
                 Achievements.RpcCompleteAchievement(Player.PlayerId, 0, achievements[0]);

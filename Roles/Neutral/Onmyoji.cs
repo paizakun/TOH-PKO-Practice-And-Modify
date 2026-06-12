@@ -6,6 +6,7 @@ using UnityEngine;
 
 using TownOfHost.Roles.Core;
 using TownOfHost.Roles.Core.Interfaces;
+using TownOfHost.Roles.Crewmate;
 using TownOfHost.Patches;
 using static TownOfHost.PlayerCatch;
 using static TownOfHost.Utils;
@@ -405,6 +406,7 @@ public sealed class Onmyoji : RoleBase, IKiller, ISelfVoter
     {
         if (ShikigamiIds.Count >= 1) return;
         if (!IsValidShikigamiTarget(target)) return;
+        if (Walkure.TryRejectRoleChange(Player, target, Walkure.RoleChangeSource.Jackal)) return;
 
         ShikigamiIds.Add(target.PlayerId);
         TargetArrow.Add(Player.PlayerId, target.PlayerId);

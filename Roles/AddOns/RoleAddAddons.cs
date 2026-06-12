@@ -174,7 +174,7 @@ namespace TownOfHost
             {
                 case CustomRoles.Stolener:
                     if (player == null && AllData.TryGetValue(role, out data)) haveaddon = true;
-                    else if ((player.GetRoleClass() as Stolener)?.ICanUseaddon == true && AllData.TryGetValue(role, out data) && data?.GiveAddons.GetBool() == true)
+                    else if (MagicalGirl.TryGetEffectiveRole<Stolener>(player, out var stolener) && stolener.ICanUseaddon && AllData.TryGetValue(role, out data) && data?.GiveAddons.GetBool() == true)
                         haveaddon = true;
                     break;
                 default:

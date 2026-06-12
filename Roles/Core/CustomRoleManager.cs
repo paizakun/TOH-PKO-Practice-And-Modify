@@ -1051,6 +1051,8 @@ public enum CustomRoles
     Braid,
     Vega,
     Altair,
+    MagicalGirl,
+    Walkure,
     // Sub-roll after 500
     NotAssigned = 500,
     LastImpostor,

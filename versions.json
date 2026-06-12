@@ -207,5 +207,10 @@
         "Unavailable": false,
         "NotAvailableOnline": false,
         "AnnounceText": "Test Text"
+    },
+    "4.32.17.73": {
+        "Unavailable": false,
+        "NotAvailableOnline": false,
+        "AnnounceText": "～debug版～"
     }
 }

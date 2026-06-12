@@ -375,9 +375,9 @@ namespace TownOfHost
             if (Main.DebugVersion)
             {
                 if (Main.UseingJapanese)
-                    Utils.SendMessage($"<size=120%>☆これはデバッグ版です☆</size>\n<line-height=80%><size=70%>\n・正式リリース版ではありません。\n・バグが発生する場合があります。\nバグが発生した場合はTOH-KのDiscordで報告すること!", Sendto, "<#ff1919>【=====　これはデバッグ版です　=====】</color>");
+                    Utils.SendMessage($"<size=120%>☆これはデバッグ版です☆</size>\n<line-height=80%><size=70%>\n・正式リリース版ではありません。\n・バグが発生する場合があります。\nバグが発生した場合はTOH-PkoのDiscordで報告すること!", Sendto, "<#ff1919>【=====　これはデバッグ版です　=====】</color>");
                 else
-                    Utils.SendMessage($"<size=120%>☆This is a debug version☆</size=120%>\n<line-height=80%><size=70%>This is not an official release version. \n If you encounter a bug, report it on TOH-K Discord!", Sendto, "<#ff1919>【==　This is Debug version　==】</color>");
+                    Utils.SendMessage($"<size=120%>☆This is a debug version☆</size=120%>\n<line-height=80%><size=70%>This is not an official release version. \n If you encounter a bug, report it on TOH-Pko Discord!", Sendto, "<#ff1919>【==　This is Debug version　==】</color>");
             }
         }
     }
