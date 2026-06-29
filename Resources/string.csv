@@ -2534,6 +2534,8 @@
 "GameModeInfo_MurderMystery","<MurderMystery>\n<size=60%>This is a mode where players are divided into Killers and Crewmates.\nKillers win by eliminating all Crewmates, while Crewmates win by eliminating all Killers.\nWhen Crewmates complete their tasks,\nthey become Sheriffs and gain a long-range kill ability.","＜マーダーミステリー＞\n<size=60%>殺人鬼とクルーで分かれて遊ぶモードです。\n殺人鬼はクルー全滅、クルーは殺人鬼全滅で勝利です。\nクルーはタスクを完了させると\n保安官となり遠距離キル能力を所持します。"
 "GM_Info","A role that is assigned only to the host. It starts in a dead state and does not participate in the game.","ホストのみに配役される役職。最初から死亡状態で、ゲームに関与しません。"
 
+"UpdateDetailsButtonInfo","Click to view update details.","クリックしてアップデートの詳細を表示します"
+
 "## その他"
 "DefaultSystemMessageTitle","【===== System Message =====】","【===== システムメッセージ ======】","【===== 系统信息 ======】","【===== 系統訊息 ======】","【=== Системное сообщение ===】","【===== Mensagem do Sistema ======】",""
 "MessageFromTheHost","【Message From The Host】","【ホストからの伝言】","【房主消息】","【房主訊息】","【Сообщение от Хоста】","【Mensagem do Anfitrião】",""

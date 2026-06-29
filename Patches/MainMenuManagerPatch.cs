@@ -187,7 +187,8 @@ namespace TownOfHost
                     },
                     "▽",
                     new(0.5f, 0.5f),
-                    isActive: false);
+                    isActive: false,
+                    toolTip: "UpdateDetailsButtonInfo");
             }
             //同じバージョンの 安定ver,デバッグバージョンの切り替えの奴
             if (SimpleButton.IsNullOrDestroyed(betaversionchange))
@@ -290,12 +291,22 @@ namespace TownOfHost
             string label,
             Vector2? scale = null,
             bool isActive = true,
-            Transform transform = null)
+            Transform transform = null,
+            string toolTip = null)
         {
             var button = new SimpleButton(transform == null ? CredentialsPatch.TohkLogo.transform : transform, name, localPosition, normalColor, hoverColor, action, label, isActive);
             if (scale.HasValue)
             {
                 button.Scale = scale.Value;
+            }
+            if (toolTip != null)
+            {
+                button.Button.OnMouseOver.AddListener((Action)(() =>
+                {
+                    var pos = ToolTip.GetMoucePos(new(-1.8f, -0.2f, -30)); //ejectボタンに隠れないように
+                    ToolTip.Show(button.Button, Translator.GetString(toolTip), pos);
+                }));
+                button.Button.OnMouseOut.AddListener((Action)ToolTip.Hide);
             }
             return button;
         }
@@ -405,7 +416,7 @@ namespace TownOfHost
             CreateStreameMenu.CloseMenu();
             _ = new LateTask(() =>
             {
-                __instance.ejectMenu?.ejectButton?.gameObject.SetActive(true);
+                __instance.ejectMenu?.ejectButton?.gameObject?.SetActive(true);
             }, 0.5f, "ShowButton", true);
         }
         public static void DestroyButton()
