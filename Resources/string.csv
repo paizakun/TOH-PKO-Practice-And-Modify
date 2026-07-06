@@ -1355,6 +1355,7 @@
 "MagicianMagicUseKillCount","magic use kill count","マジック発動に必要なキル数"
 "MagicianResetKillCount","after meeting reset kill count","会議後、キルカウントをリセットする"
 "MagicianResetMagicTarget","after meeting magic target","会議後、マジック対象をリセットする"
+"MagicianMeetingMark","Mark magic targets during meetings","会議中全員からマジック対象が見える"
 "MagicianRadius","magic distance","マジックの範囲"
 "StealthExcludeImpostors","Exclude Impostors From Blindness","暗転効果の対象からインポスターを除外する","","","Исключить Предателей из слепоты","Excluir Impostores da Cegueira",""
 "StealthDarkenDuration","Blindness Duration","暗転の持続時間","","","Длительность слепоты","Duração da Cegueira",""
