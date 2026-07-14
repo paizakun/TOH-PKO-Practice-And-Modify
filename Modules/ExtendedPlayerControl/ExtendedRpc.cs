@@ -173,6 +173,12 @@ namespace TownOfHost
                 {
                     player.RpcSetRole(role.GetRoleTypes(), Main.SetRoleOverride);
                     player.GetPlayerState().NowRoleType = role.GetRoleTypes();
+                    // ホスト自身が対象の場合、RpcSetRoleだけではホスト自身のData.Role.Roleが実際には切り替わらないことがあるため、
+                    // 初期配役やBottonHudの再設定処理と同じRoleManager.Instance.SetRoleでも明示的に適用する。
+                    if (player.PlayerId == PlayerControl.LocalPlayer.PlayerId)
+                    {
+                        RoleManager.Instance.SetRole(PlayerControl.LocalPlayer, role.GetRoleTypes());
+                    }
                 }
                 if ((roleInfo?.IsCantSeeTeammates == true || player.Is(CustomRoles.OneWolf)) && role.IsImpostor() && !SuddenDeathMode.NowSuddenDeathMode)
                 {

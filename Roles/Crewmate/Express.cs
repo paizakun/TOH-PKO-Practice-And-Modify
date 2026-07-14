@@ -47,12 +47,12 @@ public sealed class Express : RoleBase
     {
         Main.AllPlayerSpeed[Player.PlayerId] += speed;
     }
-    public override void ChengeRoleAdd()
+    public override void OnDestroy()
     {
         // Express が外れた瞬間に速度を戻す
         Main.AllPlayerSpeed[Player.PlayerId] -= speed;
 
-        base.ChengeRoleAdd();
+        base.OnDestroy();
     }
 
 }
