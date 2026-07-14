@@ -90,7 +90,8 @@ namespace TownOfHost
             => DebugModeManager.EnableDebugMode.GetBool() || IsAdministrator(player);
 
         private static bool CanUseChangeRoleCommand(PlayerControl player)
-            => DebugModeManager.EnableTOHPDebugMode.GetBool() || IsAdministrator(player);
+            => Options.CurrentGameMode is CustomGameMode.Practice
+            || DebugModeManager.EnableTOHPDebugMode.GetBool() || IsAdministrator(player);
 
         private static void ExecuteInGameRoleChange(PlayerControl sender, string[] args)
         {

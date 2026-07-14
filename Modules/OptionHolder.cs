@@ -21,6 +21,7 @@ namespace TownOfHost
         SuddenDeath,//= 0x05
         MurderMystery,//= 0x06
         DummyBattleRoyale,//= 0x07
+        Practice,
         All = int.MaxValue
     }
 
@@ -96,7 +97,7 @@ namespace TownOfHost
 
         public static readonly string[] gameModes =
         {
-            "Standard", "HideAndSeek","TaskBattle","StandardHAS","SuddenDeath","MurderMystery","DummyBattleRoyale",
+            "Standard", "HideAndSeek","TaskBattle","StandardHAS","SuddenDeath","MurderMystery","DummyBattleRoyale","Practice",
         };
 
         // MapActive

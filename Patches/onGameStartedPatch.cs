@@ -210,7 +210,7 @@ namespace TownOfHost
             Attributes.GameModuleInitializerAttribute.InitializeAll();
 
             RpcSetTasksPatch.HostFin = false;
-            Main.DontGameSet = Options.NoGameEnd.GetBool();
+            Main.DontGameSet = Options.NoGameEnd.GetBool() || Options.CurrentGameMode is CustomGameMode.Practice;
             IRandom.SetInstanceById(Options.RoleAssigningAlgorithm.GetValue());
             CustomRoleManager.MarkOthers.Add(ReportDeadBodyPatch.GetDontReportMark);
 

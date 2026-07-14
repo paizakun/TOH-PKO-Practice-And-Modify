@@ -55,6 +55,10 @@ class GameModeManager
                 result.Add(CustomOptionTags.GameOption);
                 result.Add(CustomOptionTags.OtherOption);
                 break;
+            case CustomGameMode.Practice:
+                result.Add(CustomOptionTags.GameOption);
+                result.Add(CustomOptionTags.OtherOption);
+                break;
         }
 
         return result.ToArray();

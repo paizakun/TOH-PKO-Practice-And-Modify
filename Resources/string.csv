@@ -1455,6 +1455,7 @@
 "### サドンデスモード"
 "SuddenDeathMode","SuddenDeathMode","サドンデスモード"
 "SuddenDeath","SuddenDeath","サドンデス"
+"Practice","Practice","練習"
 "SuddenDeathIntro","Get rid of them all as fast and as quick as you can.","素早く手っ取り早く全員始末しろ"
 "SuddenDeathModeInfo","Survive to the end by any means necessary.","どんな手を使ってでも最後まで生き残れ"
 "SuddenSharingRoles","Allplayer Role","全員の役職を共通にする"
@@ -3259,6 +3260,7 @@
 "GameModeInfo_StandardHAS","<StandardHAS>\n<size=60%>This is a Hide and Seek mode that includes roles assigned in the standard setup.\nPlayer body colors do not change.","＜役職入りかくれんぼ＞\n<size=60%>スタンダードで配役される役職が入ったかくれんぼです。\n体の色は変わりません。"
 "GameModeInfo_SuddenDeath","<SuddenDeath>\n<size=60%>In this mode, all players fight using roles assigned in the standard setup, and the last surviving player wins.\nThere are also team-based battles.","＜サドンデス＞\n<size=60%>スタンダードで配役される役職を使って全員が戦い、最後まで生き残った1人が勝利です。\nチーム戦もあります。"
 "GameModeInfo_MurderMystery","<MurderMystery>\n<size=60%>This is a mode where players are divided into Killers and Crewmates.\nKillers win by eliminating all Crewmates, while Crewmates win by eliminating all Killers.\nWhen Crewmates complete their tasks,\nthey become Sheriffs and gain a long-range kill ability.","＜マーダーミステリー＞\n<size=60%>殺人鬼とクルーで分かれて遊ぶモードです。\n殺人鬼はクルー全滅、クルーは殺人鬼全滅で勝利です。\nクルーはタスクを完了させると\n保安官となり遠距離キル能力を所持します。"
+"GameModeInfo_Practice","<Practice>\n<size=60%>The game will not end automatically even after a winner is determined.\nUse /cmd cr <role name> to freely change your own role.\nEnd the game manually with the abort command.","＜練習＞\n<size=60%>勝敗が決まってもゲームは自動終了しません。\n/cmd cr <役職名> で自分の役職を自由に変更できます。\n終了は廃村コマンドで行ってください。"
 "GM_Info","A role that is assigned only to the host. It starts in a dead state and does not participate in the game.","ホストのみに配役される役職。最初から死亡状態で、ゲームに関与しません。"
 
 "UpdateDetailsButtonInfo","Click to view update details.","クリックしてアップデートの詳細を表示します"
