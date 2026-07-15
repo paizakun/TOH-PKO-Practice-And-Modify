@@ -27,6 +27,9 @@ public sealed class EvilMoving : RoleBase, IImpostor, IUsePhantomButton
     public EvilMoving(PlayerControl player) : base(RoleInfo, player)
     {
         TeleportCooldown = OptionTeleportCooldown.GetFloat();
+        // Main.NormalOptions.KillCooldownは同期処理のたびに書き換わる共有値のため、
+        // 生成時点の値をキャッシュしてそれを使う(他のIUsePhantomButton役職と同じ方式)。
+        KillCooldown = Main.NormalOptions.KillCooldown;
         markedPos = null;
         hasMarked = false;
         cooldownLeft = 0f;
@@ -34,6 +37,7 @@ public sealed class EvilMoving : RoleBase, IImpostor, IUsePhantomButton
 
     static OptionItem OptionTeleportCooldown;
     static float TeleportCooldown;
+    static float KillCooldown;
 
     enum OptionName { EvilMovingTeleportCooldown }
 
@@ -47,7 +51,7 @@ public sealed class EvilMoving : RoleBase, IImpostor, IUsePhantomButton
             new(2.5f, 120f, 2.5f), 30f, false).SetValueFormat(OptionFormat.Seconds);
     }
 
-    public float CalculateKillCooldown() => Main.NormalOptions.KillCooldown;
+    public float CalculateKillCooldown() => KillCooldown;
     public bool CanUseSabotageButton() => true;
     public bool CanUseImpostorVentButton() => true;
 
