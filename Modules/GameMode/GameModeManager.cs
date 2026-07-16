@@ -56,6 +56,10 @@ class GameModeManager
                 result.Add(CustomOptionTags.OtherOption);
                 break;
             case CustomGameMode.Practice:
+                // Standardモードと同じ扱いにする(役職の途中変更などのRPC同期がStandard専用に
+                // 作られており、Practice単独扱いのままだとマルチプレイでは機能しないため)
+                result.Add(CustomOptionTags.Standard);
+                result.Add(CustomOptionTags.Role);
                 result.Add(CustomOptionTags.GameOption);
                 result.Add(CustomOptionTags.OtherOption);
                 break;
@@ -65,5 +69,5 @@ class GameModeManager
     }
 
     public static bool IsStandardClass()
-        => Options.CurrentGameMode is CustomGameMode.Standard or CustomGameMode.StandardHAS or CustomGameMode.SuddenDeath or CustomGameMode.MurderMystery;
+        => Options.CurrentGameMode is CustomGameMode.Standard or CustomGameMode.StandardHAS or CustomGameMode.SuddenDeath or CustomGameMode.MurderMystery or CustomGameMode.Practice;
 }

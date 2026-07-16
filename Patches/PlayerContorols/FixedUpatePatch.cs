@@ -114,6 +114,7 @@ namespace TownOfHost
                     VentManager.UpdateDesyncVentCleaning(player, roleclass);
                     DoubleTrigger.OnFixedUpdate(player);
                     (roleclass as IUsePhantomButton)?.FixedUpdate(player);
+                    TickManager.RunAll(player);
 
                     ChatManager.IntaskCheckSendMessage(player);
                 }

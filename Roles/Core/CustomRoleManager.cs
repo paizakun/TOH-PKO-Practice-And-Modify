@@ -1101,6 +1101,8 @@ public enum CustomRoles
     Amateras,
     Abuser,
     Victim,
+    //Test
+    SpeedAdderTest,
     // Sub-roll after 500
     NotAssigned = 500,
     LastImpostor,

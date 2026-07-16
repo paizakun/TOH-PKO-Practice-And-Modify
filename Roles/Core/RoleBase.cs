@@ -64,6 +64,7 @@ public abstract class RoleBase : IDisposable
     public void Dispose()
     {
         OnDestroy();
+        Modules.OperatePlayerSpeedModifier.RemoveBySource(this);
         CustomRoleManager.AllActiveRoles.Remove(Player.PlayerId);
         Player = null;
     }
