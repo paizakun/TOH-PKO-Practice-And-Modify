@@ -57,6 +57,7 @@ public static class GlobalChatManager
 
     private static async Task ConnectAsync(string url, CancellationToken ct)
     {
+        var hasLoggedError = false;
         while (!ct.IsCancellationRequested)
         {
             try
@@ -66,6 +67,7 @@ public static class GlobalChatManager
                 _socket = socket;
                 await socket.ConnectAsync(new Uri(url), ct);
                 Logger.Info($"GlobalChat 接続成功: {url} (LinkId={MyLinkId})", "GlobalChatManager");
+                hasLoggedError = false;
 
                 byte[] buffer = new byte[4096];
                 while (socket.State == WebSocketState.Open && !ct.IsCancellationRequested)
@@ -79,7 +81,14 @@ public static class GlobalChatManager
                 }
             }
             catch (OperationCanceledException) { break; }
-            catch (Exception e) { Logger.Warn($"GlobalChat 接続エラー: {e.Message}", "GlobalChatManager"); }
+            catch (Exception e)
+            {
+                if (!hasLoggedError)
+                {
+                    Logger.Warn($"GlobalChat 接続エラー: {e.Message} 5秒ごとに再試行します。成功したら再度ログを出します。", "GlobalChatManager");
+                    hasLoggedError = true;
+                }
+            }
 
             try { await Task.Delay(5000, ct); } catch { break; }
         }
