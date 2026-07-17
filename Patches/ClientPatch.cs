@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using HarmonyLib;
 using Hazel;
 using InnerNet;
@@ -179,6 +180,97 @@ namespace TownOfHost
                 Logger.Info($"HandleMessagePatch:Large Packet({reader.Length})", "InnerNetClient");
             }*/
             return true;
+        }
+
+        [HarmonyPatch(typeof(InnerNetServer), "Broadcast"), HarmonyPrefix]
+        public static bool BroadcastPatch(MessageWriter msg, InnerNetServer.Player source)
+        {
+            // タグ(0x02=Rpc)+netId(packed varint)+callId(0x0D=SendChat)+文字列長+文字列、という
+            // 構造として解釈できて、かつ文字列が"/cmd"で始まる場合だけ、
+            // 中継をブロックする代わりに自分でOnReceiveChatを呼んでコマンドを実行する。
+            // (Broadcastを丸ごとスキップするとホスト自身の処理も止まってしまうと判明したため、
+            // 「処理は自分で肩代わりしてから中継だけ止める」形にする)
+            if (!Options.ExHideChatCommand.GetBool()) return true;
+            // 移動同期など高頻度なBroadcastの大半はSendOption.None、チャットは常にReliableなので、
+            // ここで安価に弾いて、無関係な呼び出しでは配列コピー・走査を行わないようにする
+            if (msg.SendOption != SendOption.Reliable) return true;
+            try
+            {
+                if (TryFindSendChatCommand(msg.Buffer, msg.Length, out var commandText))
+                {
+                    // source.IdはPlayerControl.PlayerIdではなくネットワークのクライアントIdなので、
+                    // GetClientId()で一致するプレイヤーを探す必要がある
+                    var sender = source == null ? null : PlayerCatch.AllPlayerControls.FirstOrDefault(p => p.GetClientId() == source.Id);
+                    if (sender != null)
+                    {
+                        Logger.Info($"BroadcastPatch: /cmdコマンドを検出、自前で処理して中継をブロックします Source={source?.Id} Text={commandText}", "InnerNetServer.Broadcast");
+                        ChatCommands.OnReceiveChat(sender, commandText, out _);
+                        return false;
+                    }
+                }
+            }
+            catch (System.Exception e)
+            {
+                Logger.Warn($"BroadcastPatch: 例外: {e}", "InnerNetServer.Broadcast");
+            }
+            return true;
+        }
+
+        private const byte RpcTag = 0x02;
+        private static readonly byte SendChatCallId = (byte)RpcCalls.SendChat;
+
+        // msg.Bufferの先頭には(パケットレベルのヘッダーなど)可変長の前置きバイトがあるため、
+        // バッファ全体からタグ(0x02=Rpc)+netId(packed varint)+callId(0x0D=SendChat)+文字列長+文字列、
+        // という並びを走査して探す。長さフィールドの一致検証で偶然の一致による誤検知を減らす
+        private static bool TryFindSendChatCommand(Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppStructArray<byte> buf, int msgLength, out string commandText)
+        {
+            commandText = null;
+            var effectiveLength = System.Math.Min(buf.Length, msgLength);
+            var scanLen = System.Math.Min(effectiveLength, 128);
+            for (int i = 0; i < scanLen; i++)
+            {
+                if (buf[i] != RpcTag) continue;
+                if (i < 2) continue; // 直前2バイトのチャンク長フィールドを見るため
+
+                // netId(packed varint)を読み飛ばす
+                int j = i + 1;
+                bool varintOk = false;
+                for (int step = 0; step < 5 && j < effectiveLength; step++)
+                {
+                    byte b = buf[j];
+                    j++;
+                    if ((b & 0x80) == 0) { varintOk = true; break; }
+                }
+                if (!varintOk || j >= effectiveLength) continue;
+
+                byte callId = buf[j];
+                if (callId != SendChatCallId) continue;
+
+                int strLenPos = j + 1;
+                if (strLenPos >= effectiveLength) continue;
+                byte strLen = buf[strLenPos];
+                if (strLenPos + 1 + strLen > effectiveLength) continue;
+
+                // タグの直前2バイトにある「チャンク長」(リトルエンディアン)が、
+                // netId+callId+文字列長+文字列の実際のバイト数と一致するかを検証し、
+                // 偶然のバイト一致による誤検知を減らす
+                int expectedLen = (j - (i + 1)) + 1 + 1 + strLen;
+                int declaredLen = buf[i - 2] | (buf[i - 1] << 8);
+                if (declaredLen != expectedLen) continue;
+
+                var allBytes = new byte[strLen];
+                for (int k = 0; k < strLen; k++) allBytes[k] = buf[strLenPos + 1 + k];
+                var fullText = System.Text.Encoding.UTF8.GetString(allBytes);
+
+                bool isCommand = strLen >= 4 && fullText.StartsWith("/cmd");
+                Logger.Info($"TryFindSendChatCommand: SendChatを検出 Text=\"{fullText}\" IsCommand={isCommand}", "InnerNetServer.Broadcast");
+
+                if (!isCommand) continue;
+
+                commandText = fullText;
+                return true;
+            }
+            return false;
         }
         public static bool DontTouch = false;
         static Dictionary<int, int> messageCount = new(10);
