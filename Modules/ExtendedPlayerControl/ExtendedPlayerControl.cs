@@ -137,6 +137,17 @@ namespace TownOfHost
             }
         }
 
+        /// <summary>
+        /// キルクールダウンを指定した秒数へ設定し、即座にクライアントへ同期する。
+        /// <see cref="SetKillCooldown"/>と違い、補正ロジックやキルの実行は行わない単純な代入+同期のみ。
+        /// </summary>
+        public static void SyncKillCooldown(this PlayerControl player, float duration)
+        {
+            if (player == null) return;
+            Main.AllPlayerKillCooldown[player.PlayerId] = duration;
+            player.SyncSettings();
+        }
+
         public static void MarkDirtySettings(this PlayerControl player)
         {
             if (player.isDummy) return;

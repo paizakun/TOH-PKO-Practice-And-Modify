@@ -1103,6 +1103,7 @@ public enum CustomRoles
     Victim,
     //Test
     SpeedAdderTest,
+    KillCoolSyncTest,
     // Sub-roll after 500
     NotAssigned = 500,
     LastImpostor,
