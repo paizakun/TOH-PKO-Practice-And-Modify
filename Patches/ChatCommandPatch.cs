@@ -416,6 +416,134 @@ namespace TownOfHost
                             );
                         }
                         break;
+                    case "/setconfig":
+                    {
+                        canceled = true;
+                        if (Options.CurrentGameMode is not CustomGameMode.Practice)
+                        {
+                            SendMessage("/cmd setconfig は練習モードでのみ使用できます", PlayerControl.LocalPlayer.PlayerId);
+                            break;
+                        }
+                        if (args.Length < 2)
+                        {
+                            SendMessage("使い方: /cmd setconfig <役職名|myrole> [n番目] [値]", PlayerControl.LocalPlayer.PlayerId);
+                            break;
+                        }
+                        var roleArg = args[1];
+                        CustomRoles role;
+                        if (roleArg.Equals("myrole", StringComparison.OrdinalIgnoreCase))
+                            role = PlayerControl.LocalPlayer.GetCustomRole();
+                        else if (!GetRoleByInputName(roleArg, out role, true))
+                        {
+                            SendMessage($"役職が見つかりません: {roleArg}", PlayerControl.LocalPlayer.PlayerId);
+                            break;
+                        }
+                        if (!Options.CustomRoleSpawnChances.TryGetValue(role, out var roleOption) || roleOption == null)
+                        {
+                            SendMessage($"{role} には設定がありません", PlayerControl.LocalPlayer.PlayerId);
+                            break;
+                        }
+                        var children = roleOption.Children;
+                        if (args.Length < 3)
+                        {
+                            if (children.Count == 0)
+                            {
+                                SendMessage($"{role} には設定がありません", PlayerControl.LocalPlayer.PlayerId);
+                                break;
+                            }
+                            var list = string.Join("\n", children.Select((c, i) => $"{i}: {c.GetName(disableColor: true)} = {c.GetString()}"));
+                            SendMessage(list, PlayerControl.LocalPlayer.PlayerId, $"{role} の設定一覧");
+                            break;
+                        }
+                        if (!int.TryParse(args[2], out var index))
+                        {
+                            SendMessage("n番目は数値で指定してください", PlayerControl.LocalPlayer.PlayerId);
+                            break;
+                        }
+                        if (index < 0 || index >= children.Count)
+                        {
+                            SendMessage($"{role} の設定は0〜{children.Count - 1}番目です", PlayerControl.LocalPlayer.PlayerId);
+                            break;
+                        }
+                        var target = children[index];
+                        var label = target.GetName(disableColor: true);
+                        if (args.Length < 4)
+                        {
+                            string valuesText = target switch
+                            {
+                                FloatOptionItem f => $"{f.Rule.MinValue}〜{f.Rule.MaxValue} (刻み{f.Rule.Step}) / 現在値: {f.GetString()}",
+                                IntegerOptionItem iOpt => $"{iOpt.Rule.MinValue}〜{iOpt.Rule.MaxValue} (刻み{iOpt.Rule.Step}) / 現在値: {iOpt.GetString()}",
+                                BooleanOptionItem b => $"true / false / 現在値: {b.GetString()}",
+                                _ => $"このオプション型({target.GetType().Name})の値表示には未対応です / 現在値: {target.GetString()}",
+                            };
+                            SendMessage(valuesText, PlayerControl.LocalPlayer.PlayerId, label);
+                            break;
+                        }
+                        string valueArg = args[3];
+                        bool valueChanged = false;
+                        switch (target)
+                        {
+                            case FloatOptionItem f:
+                                if (!float.TryParse(valueArg, out var floatValue))
+                                {
+                                    SendMessage("数値で指定してください", PlayerControl.LocalPlayer.PlayerId);
+                                    break;
+                                }
+                                f.SetValue(f.Rule.GetNearestIndex(floatValue));
+                                valueChanged = true;
+                                SendMessage($"{label} を {target.GetString()} に設定しました", PlayerControl.LocalPlayer.PlayerId);
+                                break;
+                            case IntegerOptionItem iOpt:
+                                if (!int.TryParse(valueArg, out var intValue))
+                                {
+                                    SendMessage("整数で指定してください", PlayerControl.LocalPlayer.PlayerId);
+                                    break;
+                                }
+                                iOpt.SetValue(iOpt.Rule.GetNearestIndex(intValue));
+                                valueChanged = true;
+                                SendMessage($"{label} を {target.GetString()} に設定しました", PlayerControl.LocalPlayer.PlayerId);
+                                break;
+                            case BooleanOptionItem b:
+                                bool? boolValue = valueArg.ToLower() switch
+                                {
+                                    "true" or "on" or "1" => true,
+                                    "false" or "off" or "0" => false,
+                                    _ => null
+                                };
+                                if (boolValue is null)
+                                {
+                                    SendMessage("true/false で指定してください", PlayerControl.LocalPlayer.PlayerId);
+                                    break;
+                                }
+                                b.SetValue(boolValue.Value ? 1 : 0);
+                                valueChanged = true;
+                                SendMessage($"{label} を {target.GetString()} に設定しました", PlayerControl.LocalPlayer.PlayerId);
+                                break;
+                            default:
+                                SendMessage($"このオプション型({target.GetType().Name})の設定には未対応です", PlayerControl.LocalPlayer.PlayerId);
+                                break;
+                        }
+                        // 設定はコンストラクタでキャッシュされる場合があるため、既に役職を持っているプレイヤーへ
+                        // 役職を再度付与し直してインスタンスを作り直すことで新しい値を反映させる
+                        if (valueChanged)
+                        {
+                            var affected = AllPlayerControls.Where(pc => pc.Is(role)).ToArray();
+                            foreach (var pc in affected)
+                            {
+                                NameColorManager.RemoveAll(pc.PlayerId);
+                                // RpcSetCustomRoleは同じ役職を指定すると即returnして何もしないため、
+                                // 一旦別の役職(Crewmate)を経由してインスタンスを作り直させる
+                                pc.RpcSetCustomRole(CustomRoles.Crewmate, true, null);
+                                pc.RpcSetCustomRole(role, true, true);
+                            }
+                            if (affected.Length > 0)
+                            {
+                                RPC.RpcSyncAllNetworkedPlayer();
+                                SendMessage($"{role} を{affected.Length}人に再付与しました", PlayerControl.LocalPlayer.PlayerId);
+                            }
+                        }
+                        break;
+                    }
                     /*case "/grc":
                         canceled = true;
                         byte myId = PlayerControl.LocalPlayer.PlayerId;
