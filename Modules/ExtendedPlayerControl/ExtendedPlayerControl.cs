@@ -146,6 +146,13 @@ namespace TownOfHost
             if (player == null) return;
             Main.AllPlayerKillCooldown[player.PlayerId] = duration;
             player.SyncSettings();
+
+            // killTimer自体はネットワーク同期されないため、ホストがplayer.killTimerへ直接書き込んでも
+            // 対象が他プレイヤーの場合は本人のクライアントには一切反映されない。
+            // RpcProtectedMurderPlayer(自分自身への「守られたキル」)はRPCとして対象のクライアントに
+            // 届き、本人のSetCooldown()相当を本人の手元で走らせる。これにより既に同期済みの
+            // KillCooldown値で、対象が誰であっても正しくタイマーがリセットされる
+            player.RpcProtectedMurderPlayer(player);
         }
 
         public static void MarkDirtySettings(this PlayerControl player)
