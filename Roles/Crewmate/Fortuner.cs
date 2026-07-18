@@ -125,7 +125,7 @@ public sealed class Fortuner : RoleBase, IKiller
     {
         opt.SetVision(false);
     }
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
         => MyTaskState.IsTaskFinished ? $"<{(UseCount > 0 ? RoleInfo.RoleColorCode : "#cccccc")}> ({UseCount})</color>" : "";
     public override CustomRoles Misidentify() => Awakened ? CustomRoles.NotAssigned : CustomRoles.Crewmate;
     public override bool OnCompleteTask(uint taskid)

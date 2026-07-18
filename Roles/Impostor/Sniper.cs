@@ -383,7 +383,7 @@ public sealed class Sniper : RoleBase, IImpostor
         foreach (var pc in PlayerCatch.AllPlayerControls)
             GetArrow.Remove(pc.PlayerId, SnipeBasePosition);
     }
-    public override string GetProgressText(bool comms = false, bool gamelog = false)
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false)
     {
         return Utils.ColorString(Color.yellow, $"({BulletCount})");
     }

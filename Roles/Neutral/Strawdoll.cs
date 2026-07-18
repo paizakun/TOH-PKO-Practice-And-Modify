@@ -115,7 +115,7 @@ public sealed class Strawdoll : RoleBase, IKiller, IUsePhantomButton
 
         return "";
     }
-    public override string GetProgressText(bool comms = false, bool GameLog = false) => GameLog ? Utils.ColorString(RoleInfo.RoleColor.ShadeColor(0.2f), $"({killedcount}/{WinKilledCount})") : "";
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false) => GameLog ? Utils.ColorString(RoleInfo.RoleColor.ShadeColor(0.2f), $"({killedcount}/{WinKilledCount})") : "";
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)
     {
         seen ??= seer;

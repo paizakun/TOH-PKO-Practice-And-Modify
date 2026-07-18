@@ -419,7 +419,7 @@ public sealed class Walkure : RoleBase, ISelfVoter, IKiller
         addon = false;
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         var required = OptionNeedRevealToWin.GetBool() ? OptionNeedRevealCount.GetInt() : 0;
         var color = required == 0 || RevealCount >= required ? RoleInfo.RoleColor : Color.gray;

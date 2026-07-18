@@ -162,7 +162,7 @@ public sealed class EvilSatellite : RoleBase, IImpostor
             Utils.SendMessage(sendtext, Player.PlayerId, string.Format($"<color=#ff1919>{GetString("EvilSateliteSkillInfoTitle")}</color>", UtilsName.GetPlayerColor(playerid)));
         }
     }
-    public override string GetProgressText(bool comms = false, bool GameLog = false) => $"<color=#ff1919>({usecount})</color>";
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false) => $"<color=#ff1919>({usecount})</color>";
 
     public void SendRPC()
     {

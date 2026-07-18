@@ -132,7 +132,7 @@ public sealed class PlagueDoctor : RoleBase, IKiller
         return true;
     }
     public bool CanUseSabotageButton() => false;
-    public override string GetProgressText(bool comms = false, bool gamelog = false)
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false)
     {
         return Utils.ColorString(RoleInfo.RoleColor.ShadeColor(0.25f), $"({InfectCount})");
     }

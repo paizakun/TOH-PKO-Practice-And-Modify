@@ -215,7 +215,7 @@ public sealed class Madonna : RoleBase, ISelfVoter
                 Logger.Info($"{Player.GetNameWithRole().RemoveHtmlTags()}は指定ターン経過したため自殺。", "Madonna");
             }
     }
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         if (!Player.IsAlive() || !IsNonLover || Player.Is(CustomRoles.MadonnaLovers)) return "";
 

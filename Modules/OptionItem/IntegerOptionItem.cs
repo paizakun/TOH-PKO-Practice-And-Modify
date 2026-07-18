@@ -49,6 +49,23 @@ namespace TownOfHost
             opt.SetParentRole(roleInfo.RoleName);
             return opt;
         }
+        /// <summary>
+        /// 複数の役職で使い回す共通のenum名(例: AbilityMaxUse)はそのままに、
+        /// 実際のCSV/翻訳キーだけ"{役職名}{enum名}"という役職ごとに一意な文字列にする版。
+        /// (通常のCreate(roleInfo, idOffset, enum, ...)はenum名をそのままキーにするため、
+        /// 複数役職でenum名を共有すると翻訳キーも共有されてしまう。役職ごとに文言を分けたい時はこちらを使う。)
+        /// </summary>
+        public static IntegerOptionItem CreateWithRolePrefixedKey(
+            SimpleRoleInfo roleInfo, int idOffset, Enum name, IntegerValueRule rule, int defaultValue, bool isSingleValue, OptionItem parent = null
+        )
+        {
+            var opt = new IntegerOptionItem(
+                roleInfo.ConfigId + idOffset, $"{roleInfo.RoleName}{name}", defaultValue, roleInfo.Tab, isSingleValue, rule
+            );
+            opt.SetParent(parent ?? roleInfo.RoleOption);
+            opt.SetParentRole(roleInfo.RoleName);
+            return opt;
+        }
 
         // Getter
         public override int GetInt() => Rule.GetValueByIndex(CurrentValue);

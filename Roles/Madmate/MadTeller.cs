@@ -95,7 +95,7 @@ public sealed class MadTeller : RoleBase, IKillFlashSeeable, IDeathReasonSeeable
     }
     bool Check() => MyTaskState.HasCompletedEnoughCountOfTasks(OptionTaskTrigger.GetInt());
     public override void OnStartMeeting() => MeetingUsedcount = 0;
-    public override string GetProgressText(bool comms = false, bool gamelog = false) => Utils.ColorString(!Check() ? Color.gray : Max <= count ? Color.gray : Color.cyan, $"({Max - count})");
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false) => Utils.ColorString(!Check() ? Color.gray : Max <= count ? Color.gray : Color.cyan, $"({Max - count})");
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)
     {
         seen ??= seer;

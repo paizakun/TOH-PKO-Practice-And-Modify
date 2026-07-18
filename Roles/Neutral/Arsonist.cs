@@ -104,7 +104,7 @@ public sealed class Arsonist : RoleBase, IKiller, IUsePhantomButton
     public bool CanUseImpostorVentButton() => IsDouseDone(Player) || OptionCanUseVent.GetBool();
     public float CalculateKillCooldown() => DouseCooldown;
     public bool CanUseSabotageButton() => false;
-    public override string GetProgressText(bool comms = false, bool gamelog = false)
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false)
     {
         var doused = GetDousedPlayerCount();
         var Denominator = "?";

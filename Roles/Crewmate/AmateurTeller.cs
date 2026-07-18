@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using AmongUs.GameOptions;
 using UnityEngine;
 using TownOfHost.Roles.Core;
+using TownOfHost.Modules;
 using static TownOfHost.Modules.SelfVoteManager;
 using Hazel;
 using TownOfHost.Roles.Core.Interfaces;
@@ -30,18 +31,24 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
         player
     )
     {
-        Targets.Clear();
-        count = 0;
-        Awakened = !OptAwakening.GetBool() || OptionCanTaskcount.GetInt() < 1;
-        UseTarget = byte.MaxValue;
-        Votemode = (AbilityVoteMode)OptionVoteMode.GetValue();
+        AssignOptions();
+
+        divination = new DivinationManager(this, GetDivinationResult);
+        UsedAbilityCount = 0;
         CustomRoleManager.MarkOthers.Add(OtherArrow);
-        maximum = OptionMaximum.GetInt();
-        cantaskcount = OptionCanTaskcount.GetInt();
-        targetcanseearrow = TargetCanseeArrow.GetBool();
-        targetcanseeplayer = TargetCanseePlayer.GetBool();
-        canseerole = OptionRole.GetBool();
-        canusebutton = AbilityUseTurnCanButton.GetBool();
+        RegisterAbilityMethod(nameof(UseTellAbility));
+    }
+    /// <summary>オプション値をフィールドへ反映する。役職本体の初期化とは分離している。</summary>
+    private void AssignOptions()
+    {
+        Awakened = !OptAwakening.GetBool() || OptionCanTaskcount.GetInt() < 1;
+        Votemode = (AbilityVoteMode)OptionVoteMode.GetValue();
+        AbilityMaxUse = OptionMaximum.GetInt();
+        requiredTaskCount = OptionCanTaskcount.GetInt();
+        canSeeArrowAsTarget = TargetCanseeArrow.GetBool();
+        canSeePlayerAsTarget = TargetCanseePlayer.GetBool();
+        canSeeRole = OptionRole.GetBool();
+        canUseEmergencyButton = AbilityUseTurnCanButton.GetBool();
     }
 
     static OptionItem OptionMaximum;
@@ -53,21 +60,20 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
     static OptionItem TargetCanseePlayer;
     static OptionItem AbilityUseTurnCanButton;
     public AbilityVoteMode Votemode;
-    static bool canusebutton;
-    static bool canseerole;
-    static int maximum;
-    static int cantaskcount;
-    static bool targetcanseearrow;
-    static bool targetcanseeplayer;
-    int count;
+    static bool canUseEmergencyButton;
+    static bool canSeeRole;
+    static int AbilityMaxUse;
+    static int requiredTaskCount;
+    static bool canSeeArrowAsTarget;
+    static bool canSeePlayerAsTarget;
+    int UsedAbilityCount;
     bool Awakened;
-    byte UseTarget;
-    List<byte> Targets = new();
+    readonly DivinationManager divination;
     static HashSet<AmateurTeller> tellers = new();
 
     enum Option
     {
-        TellMaximum,
+        AbilityMaxUse,
         AbilityVotemode,
         TellRole,
         AmateurTellerTargetCanseeArrow,
@@ -85,39 +91,45 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
     }
     private static void SetupOptionItem()
     {
-        OptionMaximum = IntegerOptionItem.Create(RoleInfo, 10, Option.TellMaximum, new(1, 99, 1), 1, false)
+        OptionMaximum = IntegerOptionItem.CreateWithRolePrefixedKey(RoleInfo, 10, Option.AbilityMaxUse, new(1, 99, 1), 1, false)
             .SetValueFormat(OptionFormat.Times);
         OptionVoteMode = StringOptionItem.Create(RoleInfo, 11, Option.AbilityVotemode, EnumHelper.GetAllNames<AbilityVoteMode>(), 1, false);
         OptionRole = BooleanOptionItem.Create(RoleInfo, 12, Option.TellRole, true, false);
         TargetCanseePlayer = BooleanOptionItem.Create(RoleInfo, 13, Option.AmateurTellerTargetCanseePlayer, true, false);
         TargetCanseeArrow = BooleanOptionItem.Create(RoleInfo, 14, Option.AmateurTellerTargetCanseeArrow, true, false, TargetCanseePlayer);
         AbilityUseTurnCanButton = BooleanOptionItem.Create(RoleInfo, 15, Option.AmateurTellerCanUseAbilityTurnButton, true, false);
-        OptionCanTaskcount = IntegerOptionItem.Create(RoleInfo, 16, GeneralOption.cantaskcount, new(0, 99, 1), 5, false);
+        OptionCanTaskcount = IntegerOptionItem.Create(RoleInfo, 16, GeneralOption.requiredTaskCount, new(0, 99, 1), 5, false);
         OptAwakening = BooleanOptionItem.Create(RoleInfo, 17, GeneralOption.AbilityAwakening, false, false);
     }
     public override bool NotifyRolesCheckOtherName => true;
-    public override string GetProgressText(bool comms = false, bool gamelog = false) => Utils.ColorString(!MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount) ? Color.gray : maximum <= count ? Color.gray : Color.cyan, $"({maximum - count})");
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false)
+    {
+        var hasEnoughTasks = MyTaskState.HasCompletedEnoughCountOfTasks(requiredTaskCount);
+        var hasUsesLeft = AbilityMaxUse > UsedAbilityCount;
+        var textColor = hasEnoughTasks && hasUsesLeft ? Color.cyan : Color.gray;
+        return Utils.ColorString(textColor, $"({AbilityMaxUse - UsedAbilityCount})");
+    }
     public override void OnReportDeadBody(PlayerControl reporter, NetworkedPlayerInfo target)
     {
-        TargetArrow.Remove(UseTarget, Player.PlayerId);
-        Targets.Add(UseTarget);
-        UseTarget = byte.MaxValue;
+        divination.CompleteDivination();
         SendRPC();
     }
     public override bool CancelReportDeadBody(PlayerControl reporter, NetworkedPlayerInfo target, ref DontReportreson reportreson)
     {
-        if (UseTarget != byte.MaxValue && reporter.PlayerId == Player.PlayerId && target == null && !canusebutton)
+        if (divination.IsPending && reporter.PlayerId == Player.PlayerId && target == null && !canUseEmergencyButton)
         {
             reportreson = DontReportreson.CantUseButton;
             return true;
         }
         return false;
     }
-    bool ISelfVoter.CanUseVoted() => Canuseability() && maximum > count && MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount) && UseTarget == byte.MaxValue;
+    /// <summary>占いの残り回数・必要タスク数・占い中でないか、を全て満たしているか</summary>
+    bool CanUseTellAbility => AbilityMaxUse > UsedAbilityCount && MyTaskState.HasCompletedEnoughCountOfTasks(requiredTaskCount) && !divination.IsPending;
+    bool ISelfVoter.CanUseVoted() => Canuseability() && CanUseTellAbility;
     public override bool CheckVoteAsVoter(byte votedForId, PlayerControl voter)
     {
         if (!Canuseability()) return true;
-        if (maximum > count && Is(voter) && MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount) && UseTarget == byte.MaxValue)
+        if (CanUseTellAbility && Is(voter))
             return HandleAbilityVote(Player, votedForId, Votemode, "Mode.Divied", "Vote.Divied", UseTellAbility);
         return true;
     }
@@ -125,16 +137,17 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
     {
         var target = PlayerCatch.GetPlayerById(votedForId);
         if (!target.IsAlive()) return;
-        count++;
-        UseTarget = target.PlayerId;
-        TargetArrow.Add(target.PlayerId, Player.PlayerId);
+        UsedAbilityCount++;
+        divination.StartDivination(target);
         SendRPC();
         Utils.SendMessage(UtilsName.GetPlayerColor(target.PlayerId) + GetString("AmatruertellerTellMeg"), Player.PlayerId);
     }
+    /// <summary>占いの結果として見せる役職を決定する。AmateurTellerは素直に対象の役職を返す。</summary>
+    CustomRoles GetDivinationResult(PlayerControl target) => target.GetTellResults(Player);
     public override CustomRoles Misidentify() => Awakened ? CustomRoles.NotAssigned : CustomRoles.Crewmate;
     public override bool OnCompleteTask(uint taskid)
     {
-        if (MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount))
+        if (MyTaskState.HasCompletedEnoughCountOfTasks(requiredTaskCount))
         {
             if (Awakened == false)
                 if (!Utils.RoleSendList.Contains(Player.PlayerId))
@@ -147,20 +160,20 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
     {
         seen ??= seer;
         if (isForMeeting) return "";
-        if (!targetcanseeplayer) return "";
+        if (!canSeePlayerAsTarget) return "";
 
         foreach (var tell in tellers)
         {
-            if (seer.PlayerId == tell.UseTarget && seer == seen)
+            if (seer.PlayerId == tell.divination.PendingTarget && seer == seen)
             {
                 var ar = "";
                 if (seer.GetCustomRole().GetCustomRoleTypes() is not CustomRoleTypes.Crewmate)
                 {
-                    if (targetcanseearrow) ar = $"\n{TargetArrow.GetArrows(seer, tell.Player.PlayerId)}";
+                    if (canSeeArrowAsTarget) ar = $"\n{TargetArrow.GetArrows(seer, tell.Player.PlayerId)}";
                     return $"<color=#6b3ec3>★{ar}</color>";
                 }
             }
-            else if (seer.PlayerId == tell.UseTarget && seen == tell.Player)
+            else if (seer.PlayerId == tell.divination.PendingTarget && seen == tell.Player)
                 return "<color=#6b3ec3>★</color>";
         }
         return "";
@@ -168,7 +181,7 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)
     {
         seen ??= seer;
-        if (isForMeeting && Player.IsAlive() && Awakened && seer.PlayerId == seen.PlayerId && Canuseability() && maximum > count && MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount))
+        if (isForMeeting && Player.IsAlive() && Awakened && seer.PlayerId == seen.PlayerId && Canuseability() && AbilityMaxUse > UsedAbilityCount && MyTaskState.HasCompletedEnoughCountOfTasks(requiredTaskCount))
         {
             var mes = $"<color={RoleInfo.RoleColorCode}>{(Votemode == AbilityVoteMode.SelfVote ? GetString("SelfVoteRoleInfoMeg") : GetString("NomalVoteRoleInfoMeg"))}</color>";
             return isForHud ? mes : $"<size=40%>{mes}</size>";
@@ -178,30 +191,15 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
     public override void OverrideDisplayRoleNameAsSeer(PlayerControl seen, ref bool enabled, ref Color roleColor, ref string roleText, ref bool addon)
     {
         if (!Player.IsAlive()) return;
-        if (UseTarget == seen.PlayerId) return;
-        if (Targets.Contains(seen.PlayerId))
+        if (divination.PendingTarget == seen.PlayerId) return;
+        if (divination.TryGetRevealedRole(seen.PlayerId, out var revealedRole))
         {
             addon = false;
-            if (seen.GetCustomRole().IsCrewmate() is false) Achievements.RpcCompleteAchievement(Player.PlayerId, 0, achievements[0]);
-            if (!canseerole)
+            if (revealedRole.IsCrewmate() is false) Achievements.RpcCompleteAchievement(Player.PlayerId, 0, achievements[0]);
+            if (!canSeeRole)
             {
                 enabled = true;
-                switch (seen.GetCustomRole().GetCustomRoleTypes())
-                {
-                    case CustomRoleTypes.Crewmate:
-                    case CustomRoleTypes.Madmate:
-                        roleColor = Palette.CrewmateBlue;
-                        roleText = GetString("Crewmate");
-                        break;
-                    case CustomRoleTypes.Impostor:
-                        roleColor = ModColors.ImpostorRed;
-                        roleText = GetString("Impostor");
-                        break;
-                    case CustomRoleTypes.Neutral:
-                        roleColor = ModColors.NeutralGray;
-                        roleText = GetString("Neutral");
-                        break;
-                }
+                (roleColor, roleText) = UtilsRoleText.GetTeamDisplay(revealedRole);
             }
             else
             {
@@ -213,32 +211,29 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
     public void SendRPC()
     {
         using var sender = CreateSender();
-        sender.Writer.Write(count);
-        sender.Writer.Write(UseTarget);
+        sender.Writer.Write(UsedAbilityCount);
+        sender.Writer.Write(divination.PendingTarget);
     }
 
     public override void ReceiveRPC(MessageReader reader)
     {
-        count = reader.ReadInt32();
+        UsedAbilityCount = reader.ReadInt32();
         var target = reader.ReadByte();
 
         //new Target
-        if (UseTarget == byte.MaxValue && target != byte.MaxValue)
+        if (!divination.IsPending && target != byte.MaxValue)
         {
-            TargetArrow.Add(UseTarget, Player.PlayerId);
+            divination.StartDivination(PlayerCatch.GetPlayerById(target));
         }
         //reset Target
-        if (UseTarget != byte.MaxValue && target == byte.MaxValue)
+        if (divination.IsPending && target == byte.MaxValue)
         {
-            TargetArrow.Remove(UseTarget, Player.PlayerId);
-            Targets.Add(UseTarget);
+            divination.CompleteDivination();
         }
-
-        UseTarget = target;
     }
     public override void OnMurderPlayerAsTarget(MurderInfo info)
     {
-        if (info.AppearanceTarget.PlayerId == Player.PlayerId && info.AppearanceKiller.PlayerId == UseTarget)
+        if (info.AppearanceTarget.PlayerId == Player.PlayerId && info.AppearanceKiller.PlayerId == divination.PendingTarget)
             Achievements.RpcCompleteAchievement(Player.PlayerId, 0, achievements[1]);
     }
     public static Dictionary<int, Achievement> achievements = new();

@@ -153,7 +153,7 @@ public sealed class EvilTeller : RoleBase, IImpostor, IUsePhantomButton
             roleColor = UtilsRoleText.GetRoleColor(role);
         }
     }
-    public override string GetProgressText(bool comms = false, bool GameLog = false) => maxtellcount <= seentarget.Count ? $"<color=#cccccc>({maxtellcount - seentarget.Count})</color>" : $"<color=#ff1919>({maxtellcount - seentarget.Count})</color>";
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false) => maxtellcount <= seentarget.Count ? $"<color=#cccccc>({maxtellcount - seentarget.Count})</color>" : $"<color=#ff1919>({maxtellcount - seentarget.Count})</color>";
     public override void OnFixedUpdate(PlayerControl player)
     {
         if (!AmongUsClient.Instance.AmHost) return;

@@ -75,7 +75,7 @@ public sealed class Satellite : RoleBase, ISelfVoter
         Option1MeetingMaximum = IntegerOptionItem.Create(RoleInfo, 11, GeneralOption.MeetingMaxTime, new(0, 99, 1), 1, false)
             .SetValueFormat(OptionFormat.Times)
             .SetZeroNotation(OptionZeroNotation.Infinity);
-        OptiontaskCount = IntegerOptionItem.Create(RoleInfo, 12, GeneralOption.cantaskcount, new(0, 99, 1), 5, false);
+        OptiontaskCount = IntegerOptionItem.Create(RoleInfo, 12, GeneralOption.requiredTaskCount, new(0, 99, 1), 5, false);
         OptionAwakening = BooleanOptionItem.Create(RoleInfo, 13, GeneralOption.AbilityAwakening, false, false);
     }
 
@@ -185,7 +185,7 @@ public sealed class Satellite : RoleBase, ISelfVoter
         Utils.SendMessage(string.Format(GetString("SatelliteModeInfo"), UtilsName.GetPlayerColor(votedForId), GetString($"{systemTypes}")) + string.Format(GetString("EvilSateliteSkillInfo3"), maximum - UsedSkillCount), Player.PlayerId, $"<{RoleInfo.RoleColorCode}>{string.Format(GetString("SatelliteTitle"), UtilsName.GetPlayerColor(votedForId))}");
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false) => $" <{RoleInfo.RoleColorCode}>({maximum - UsedSkillCount})</color>";
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false) => $" <{RoleInfo.RoleColorCode}>({maximum - UsedSkillCount})</color>";
     public override void AfterMeetingTasks()
     {
         SentPlayers.Clear();

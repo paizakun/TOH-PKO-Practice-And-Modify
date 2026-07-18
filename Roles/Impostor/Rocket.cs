@@ -429,7 +429,7 @@ public sealed class Rocket : RoleBase, IImpostor, IUsePhantomButton
         return $"{size}<color={color}>掴み中: {count}人 | ファントムボタン → 打ち上げ！</color>";
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         if (!Player.IsAlive()) return "";
         int count = GrabbedPlayers.Count;

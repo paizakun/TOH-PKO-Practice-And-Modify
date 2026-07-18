@@ -109,5 +109,5 @@ public sealed class Observer : RoleBase
         RemainingMonitoring = reader.ReadInt32();
     }
     public override CustomRoles Misidentify() => Awakened ? CustomRoles.NotAssigned : CustomRoles.Crewmate;
-    public override string GetProgressText(bool comms = false, bool GameLog = false) => $"<{RoleInfo.RoleColorCode}>({RemainingMonitoring})</color>";
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false) => $"<{RoleInfo.RoleColorCode}>({RemainingMonitoring})</color>";
 }

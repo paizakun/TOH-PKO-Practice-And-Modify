@@ -218,7 +218,7 @@ public sealed class NiceEraser : RoleBase, ISelfVoter
         Utils.SendMessage(msg, Player.PlayerId);
     }
 
-    public override string GetProgressText(bool comms = false, bool gamelog = false)
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false)
     {
         if (OptionAwakening.GetBool() && !awakened) return "";
         return Utils.ColorString(usedCount >= maxUseCount ? Color.gray : Color.cyan, $"({maxUseCount - usedCount})");

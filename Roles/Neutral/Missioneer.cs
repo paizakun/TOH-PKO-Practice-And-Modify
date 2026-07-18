@@ -436,7 +436,7 @@ public sealed class Missioneer : RoleBase, IKiller, ISelfVoter, IAdditionalWinne
         UtilsNotifyRoles.NotifyRoles(OnlyMeName: true, SpecifySeer: [Player]);
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
         => $"<{RoleInfo.RoleColorCode}>({NowPoint}/{(AddWinAssignmentpoint is not 0 && !AddWin ? AddWinAssignmentpoint : WinAssignmentpoint)})";
     public override string GetMark(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false)
     {

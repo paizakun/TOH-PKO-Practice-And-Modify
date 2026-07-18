@@ -95,7 +95,7 @@ public sealed class Banker : RoleBase, IKiller, IAdditionalWinner
         ac_coins.addcoin += TaskAddCoin.GetInt();
         return true;
     }
-    public override string GetProgressText(bool comms = false, bool gamelog = false)
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false)
     => Player.IsAlive() || DieCanWin.GetBool() ? (gamelog ? "" : (TaskMode ? "[Task]" : "[Kill]") + Utils.ColorString(UtilsRoleText.GetRoleColor(CustomRoles.Banker), $"({HaveCoin})")) : "";
     public override string GetMark(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false)
     {

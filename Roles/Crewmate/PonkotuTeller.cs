@@ -104,7 +104,7 @@ public sealed class PonkotuTeller : RoleBase, ISelfVoter
         OptionVoteMode = StringOptionItem.Create(RoleInfo, 12, Option.AbilityVotemode, EnumHelper.GetAllNames<AbilityVoteMode>(), 1, false, OptionNonAlignFortuneTeller);
         Optionrolename = BooleanOptionItem.Create(RoleInfo, 19, Option.TellerCanSeeRolename, true, false, OptionNonAlignFortuneTeller);
         OptionRole = BooleanOptionItem.Create(RoleInfo, 13, Option.TellRole, true, false, OptionNonAlignFortuneTeller);
-        Optioncantaskcount = IntegerOptionItem.Create(RoleInfo, 14, GeneralOption.cantaskcount, new(0, 99, 1), 5, false, OptionNonAlignFortuneTeller);
+        Optioncantaskcount = IntegerOptionItem.Create(RoleInfo, 14, GeneralOption.requiredTaskCount, new(0, 99, 1), 5, false, OptionNonAlignFortuneTeller);
         Option1MeetingMaximum = IntegerOptionItem.Create(RoleInfo, 15, GeneralOption.MeetingMaxTime, new(0, 99, 1), 0, false, OptionNonAlignFortuneTeller)
             .SetValueFormat(OptionFormat.Times).SetZeroNotation(OptionZeroNotation.Infinity);
         OptAwakening = BooleanOptionItem.Create(RoleInfo, 16, GeneralOption.AbilityAwakening, false, false, OptionNonAlignFortuneTeller);
@@ -124,7 +124,7 @@ public sealed class PonkotuTeller : RoleBase, ISelfVoter
         Divination[reader.ReadByte()] = (CustomRoles)reader.ReadPackedInt32();
     }
     public override void OnStartMeeting() => MeetingUsedcount = 0;
-    public override string GetProgressText(bool comms = false, bool gamelog = false) => Utils.ColorString(!MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount) ? Color.gray : Max <= count ? Color.gray : Color.cyan, $"({Max - count})");
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false) => Utils.ColorString(!MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount) ? Color.gray : Max <= count ? Color.gray : Color.cyan, $"({Max - count})");
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)
     {
         seen ??= seer;

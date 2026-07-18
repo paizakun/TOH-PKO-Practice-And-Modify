@@ -567,7 +567,7 @@ public sealed class AlienHijack : RoleBase, IMeetingTimeAlterable, IImpostor, IN
     }
     #endregion
     #region Name
-    public override string GetProgressText(bool comms = false, bool GameLog = false) => OptUetuketukeTrun.GetBool() ? $"<color=#ff1919>({UetukeNokori})</color>" : "";
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false) => OptUetuketukeTrun.GetBool() ? $"<color=#ff1919>({UetukeNokori})</color>" : "";
     public override string GetMark(PlayerControl seer, PlayerControl seen, bool _ = false)
     {
         seen ??= seer;

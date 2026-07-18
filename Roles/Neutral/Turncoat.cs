@@ -221,7 +221,7 @@ public sealed class Turncoat : RoleBase, IKiller
         }
         return $"{string.Format(GetString("TurncoatLowerText"), targetname)}";
     }
-    public override string GetProgressText(bool comms = false, bool GameLog = false) => $"<color={TargetColorcode}>★</color>";
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false) => $"<color={TargetColorcode}>★</color>";
 
     public void SendRPC()
     {

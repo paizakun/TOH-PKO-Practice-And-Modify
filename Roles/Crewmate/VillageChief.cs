@@ -354,7 +354,7 @@ public sealed class VillageChief : RoleBase, IKiller, ISelfVoter
         NextAppointCandidate = reader.ReadByte();
     }
 
-    public override string GetProgressText(bool comms = false, bool gamelog = false)
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false)
     {
         if (hasAppointed) return "<color=#f5a623>(任命済)</color>";
         if (!GameStates.CalledMeeting && !gamelog)

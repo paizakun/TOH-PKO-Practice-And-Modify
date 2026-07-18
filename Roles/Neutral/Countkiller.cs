@@ -150,7 +150,7 @@ public sealed class CountKiller : RoleBase, ILNKiller, ISchrodingerCatOwner, IAd
     }
     private int GetSecondStageVictoryCount() => System.Math.Max(VictoryCount + 1, SoloVictoryCount);
     private int GetFinalVictoryCount() => OptionAddWin.GetBool() && OptionAddWinToSoloWin.GetBool() ? GetSecondStageVictoryCount() : VictoryCount;
-    public override string GetProgressText(bool comms = false, bool gamelog = false)
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false)
     => Utils.ColorString(RoleInfo.RoleColor, $"({KillCount}/{GetFinalVictoryCount()})");
     public bool CheckWin(ref CustomRoles winnerRole) => OptionAddWin.GetBool() && WinFlag;
     public static System.Collections.Generic.Dictionary<int, Achievement> achievements = new();

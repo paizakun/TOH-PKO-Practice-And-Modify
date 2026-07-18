@@ -125,7 +125,7 @@ public sealed class Decrescendo : RoleBase, IImpostor
         if (Decrescending && !OptionDecCantVent.GetBool()) return false;
         else return true;
     }
-    public override string GetProgressText(bool comms = false, bool gamelog = false) => Decrescending ? Utils.ColorString(ModColors.NeutralGray, "(´・ω・｀)") : Utils.ColorString(Palette.ImpostorRed, $"({KillCount}/{OptionDecKillcount.GetInt()})");
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false) => Decrescending ? Utils.ColorString(ModColors.NeutralGray, "(´・ω・｀)") : Utils.ColorString(Palette.ImpostorRed, $"({KillCount}/{OptionDecKillcount.GetInt()})");
 
     public void SendRPC()
     {

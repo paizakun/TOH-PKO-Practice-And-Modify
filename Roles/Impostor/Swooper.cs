@@ -357,7 +357,7 @@ public sealed class Swooper : RoleBase, IImpostor, IUsePhantomButton
         return $"{size}<color={color}>ベントに入ると透明化！</color>";
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         if (!Player.IsAlive()) return "";
         if (isInvisible)

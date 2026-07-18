@@ -51,7 +51,7 @@ namespace TownOfHost.Roles.Crewmate
             var sec = IncreaseMeetingTime * MyTaskState.CompletedTasksCount;
             return sec;
         }
-        public override string GetProgressText(bool comms = false, bool gamelog = false)
+        public override string GetRoleStatusText(bool comms = false, bool gamelog = false)
         {
             var time = CalculateMeetingTimeDelta();
             return time > 0 ? Utils.ColorString(UtilsRoleText.GetRoleColor(CustomRoles.TimeManager).ShadeColor(0.5f), $"+{time}s") : "";

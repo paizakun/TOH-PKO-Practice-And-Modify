@@ -115,7 +115,7 @@ public sealed class MadBetrayer : RoleBase, IKiller, ISchrodingerCatOwner
     {
         if (IsBetray) roleText = GetString("Betrayer");
     }
-    public override string GetProgressText(bool comms = false, bool GameLog = false) => IsBetray ? $"<{RoleInfo.RoleColorCode}>★</color>" : "";
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false) => IsBetray ? $"<{RoleInfo.RoleColorCode}>★</color>" : "";
 
     public override RoleTypes? AfterMeetingRole => IsTaskFinished || IsBetray ? RoleTypes.Impostor : RoleTypes.Engineer;
     bool IKiller.CanUseImpostorVentButton() => CanVent && IsTaskFinished;

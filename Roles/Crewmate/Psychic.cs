@@ -60,7 +60,7 @@ public sealed class Psychic : RoleBase
         OptionCallRate = FloatOptionItem.Create(RoleInfo, 12, OptionName.PsychicCallRate, new(0, 100, 1), 50, false).SetValueFormat(OptionFormat.Percent);
         OptionTaskAddRate = BooleanOptionItem.Create(RoleInfo, 13, OptionName.PsychicTaskAddrate, false, false);
         OptAwakening = BooleanOptionItem.Create(RoleInfo, 10, GeneralOption.AbilityAwakening, false, false);
-        OptionCanTaskcount = IntegerOptionItem.Create(RoleInfo, 14, GeneralOption.cantaskcount, new(1, 255, 1), 5, false);
+        OptionCanTaskcount = IntegerOptionItem.Create(RoleInfo, 14, GeneralOption.requiredTaskCount, new(1, 255, 1), 5, false);
     }
     public override bool OnCompleteTask(uint taskid)
     {
@@ -111,7 +111,7 @@ public sealed class Psychic : RoleBase
         Achievements.RpcCompleteAchievement(Player.PlayerId, 1, achievements[0], Receivedcount);
         Achievements.RpcCompleteAchievement(Player.PlayerId, 1, achievements[1], Receivedcount);
     }
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         if (!GameLog && comms) return "<color=#cccccc> (??)</color>";
 

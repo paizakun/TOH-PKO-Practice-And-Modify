@@ -217,7 +217,7 @@ public sealed class Scratcher : RoleBase, IAdditionalWinner
     bool IAdditionalWinner.CheckWin(ref CustomRoles winnerRole)
         => AddWin && (CanWinAtDeath || Player.IsAlive());
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
         => $"<{RoleInfo.RoleColorCode}>({Hits}/{WinHitCount})♦{Scratches}</color>";
 
     public override string GetMark(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false)

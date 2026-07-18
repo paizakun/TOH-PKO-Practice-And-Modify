@@ -264,7 +264,7 @@ public sealed class Sage : RoleBase
         return $"{size}<color={color}>ペットなで → 聖なるバリア発動</color>";
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         if (!Player.IsAlive()) return "";
         if (isBarrierActive)

@@ -178,7 +178,7 @@ public sealed class JackalWolf : RoleBase, ILNKiller, IUsePhantomButton, IDouble
         AddRole?.OverrideDisplayRoleNameAsSeen(seen, ref enabled, ref roleColor, ref roleText, ref addon);
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false) => AddRole?.GetProgressText(comms, GameLog);
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false) => AddRole?.GetRoleStatusText(comms, GameLog);
     public override string GetMark(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false) => AddRole?.GetMark(seer, seen, isForMeeting);
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false) => AddRole?.GetLowerText(seer, seen, isForMeeting, isForHud);
     public override string GetSuffix(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false) => AddRole?.GetSuffix(seer, seen, isForMeeting);

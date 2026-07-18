@@ -6,6 +6,7 @@ using static TownOfHost.PlayerCatch;
 using static TownOfHost.Translator;
 
 namespace TownOfHost.Roles.Neutral;
+
 public sealed class PokerFace : RoleBase
 {
     public static readonly SimpleRoleInfo RoleInfo =
@@ -137,7 +138,7 @@ public sealed class PokerFace : RoleBase
         }
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         var allPF = AllPlayerControls.Where(pc => pc.Is(CustomRoles.PokerFace)).ToList();
         int alivePartners = allPF.Count(pc => pc.IsAlive() && pc.PlayerId != Player.PlayerId);

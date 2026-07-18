@@ -61,7 +61,7 @@ public sealed class WhiteHacker : RoleBase
 
     private static void SetupOptionItem()
     {
-        Optioncantaskcount = IntegerOptionItem.Create(RoleInfo, 10, GeneralOption.cantaskcount, new(0, 99, 1), 5, false);
+        Optioncantaskcount = IntegerOptionItem.Create(RoleInfo, 10, GeneralOption.requiredTaskCount, new(0, 99, 1), 5, false);
         CanUseTrackAbility = BooleanOptionItem.Create(RoleInfo, 13, Option.WhiteHackerCanUseTrackAbility, false, false);
         TrackerCooldown = FloatOptionItem.Create(RoleInfo, 14, "TrackerCooldown", new(0f, 180f, 0.5f), 15f, false, CanUseTrackAbility)
         .SetValueFormat(OptionFormat.Seconds);
@@ -141,7 +141,7 @@ public sealed class WhiteHacker : RoleBase
         }
         return "";
     }
-    public override string GetProgressText(bool comms = false, bool gamelog = false) => Utils.ColorString(!MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount) ? Color.gray : Maximum <= count ? Color.gray : Color.cyan, $"({Maximum - count})");
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false) => Utils.ColorString(!MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount) ? Color.gray : Maximum <= count ? Color.gray : Color.cyan, $"({Maximum - count})");
 
     public string GetLastRoom(PlayerControl seen)
     {

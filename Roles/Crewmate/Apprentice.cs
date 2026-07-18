@@ -190,7 +190,7 @@ public sealed class Apprentice : RoleBase
         isTaskComplete = reader.ReadBoolean();
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         if (!Player.IsAlive() || hasInherited) return "";
 

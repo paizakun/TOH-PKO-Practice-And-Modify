@@ -140,7 +140,7 @@ public sealed class Ogre : RoleBase, IKiller, IAdditionalWinner
         => Player.IsAlive()
         && PlayerCatch.AllAlivePlayerControls.Any(pc => pc.GetCustomRole().IsImpostor());
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
         => ColorString(RoleInfo.RoleColor, $"[{nowKillRate}%]");
 
     void SendRpc()

@@ -108,7 +108,7 @@ public sealed class EarnestWolf : RoleBase, IImpostor, IUsePhantomButton
         }
         return false;
     }
-    public override string GetProgressText(bool comms = false, bool gamelog = false)
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false)
     {
         var limit = OptionOverKillCanCount.GetInt() - count;
         return Utils.ColorString(limit > 0 ? Palette.ImpostorRed : Palette.DisabledGrey, $"({limit})");

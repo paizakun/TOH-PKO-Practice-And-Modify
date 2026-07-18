@@ -122,7 +122,7 @@ namespace TownOfHost.Roles.Impostor
         {
             enabled |= KnowAllyRole(seen);
         }
-        public override string GetProgressText(bool isComms = false, bool gamelog = false)
+        public override string GetRoleStatusText(bool isComms = false, bool gamelog = false)
         {
             if (!canSeeMadmates) return "";
 

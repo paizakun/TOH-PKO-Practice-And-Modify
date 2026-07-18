@@ -38,16 +38,18 @@ public abstract class RoleBase : IDisposable
     /// <summary>
     /// 現在、能力(Vent/変身/ファントムボタン等を含む広義のアビリティ)を使用できる状態か。
     /// Amnesiaなど、能力を封じる効果を持つ側からfalseに設定される。
+    /// <see cref="Modules.AbilityGate.Register"/>で登録したメソッドは、これがfalseの間呼び出されても実行されない。
     /// </summary>
     public bool AbilityEnabled = true;
     /// <summary>
-    /// AbilityEnabledがfalseのため能力系フックの呼び出しをスキップしたことをログに残す。
-    /// 「意図せずAbilityEnabledがfalseになっていて能力が発動しなかった」という状況を追跡できるようにするための共通ヘルパー。
-    /// 能力系フックを集約ディスパッチしている箇所(AfterMeetingTasksのforeachなど)から、呼び出しをスキップする前に使う。
+    /// 能力発動メソッドをAbilityEnabled審査の対象として登録する。コンストラクタなどで、
+    /// 自分自身の能力発動メソッド(private/protected/publicいずれも可)に対して呼ぶ。
+    /// 登録後は、呼び出し元は何も気にせず通常通りそのメソッドを呼ぶだけでよい。
+    /// (AbilityEnabledがfalseの間は、呼んでも中身が実行されない)
     /// </summary>
-    /// <param name="hookName">スキップしたフック名(nameof(AfterMeetingTasks)などを渡す)</param>
-    public void LogAbilityBlocked(string hookName)
-        => Logger.Info($"{Player?.Data?.GetLogPlayerName()}: AbilityEnabled=falseのため{hookName}をスキップしました", "AbilityGate");
+    /// <param name="methodName">nameof(UseAbility)のように、対象メソッドの名前を渡す</param>
+    protected void RegisterAbilityMethod(string methodName)
+        => Modules.AbilityGate.Register(GetType(), methodName);
     public RoleBase(
         SimpleRoleInfo roleInfo,
         PlayerControl player,
@@ -418,7 +420,7 @@ public abstract class RoleBase : IDisposable
     /// 役職名の横に出るテキスト
     /// </summary>
     /// <param name="comms">コミュサボ中扱いするかどうか</param>
-    public virtual string GetProgressText(bool comms = false, bool GameLog = false) => "";
+    public virtual string GetRoleStatusText(bool comms = false, bool GameLog = false) => "";
     /// <summary>
     /// seerが自分であるときのMark
     /// seer,seenともに自分以外であるときに表示したい場合は同じ引数でstaticとして実装し
@@ -582,7 +584,7 @@ public abstract class RoleBase : IDisposable
         CanUseSabotage,
         CanCreateSideKick,
         Duration,
-        cantaskcount,
+        requiredTaskCount,
         MeetingMaxTime,
         PlayShapeAnimate,
         TaskAwakening,

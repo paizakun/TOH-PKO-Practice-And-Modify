@@ -166,7 +166,7 @@ public sealed class Eraser : RoleBase, IImpostor, IUsePhantomButton
     {
         if (DeltimingAfterMeeting) ErasePlayer();
     }
-    public override string GetProgressText(bool comms = false, bool GameLog = false) => $"<color=#{(MaxUseCount <= UseCount ? "758593" : "ff1919")}>({UseCount}/{MaxUseCount})</color>";
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false) => $"<color=#{(MaxUseCount <= UseCount ? "758593" : "ff1919")}>({UseCount}/{MaxUseCount})</color>";
     public override string GetMark(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false)
     {
         seen ??= seer;

@@ -278,7 +278,7 @@ public sealed class TeleportKiller : RoleBase, IImpostor
         CheckVentD[physics.myPlayer.PlayerId] = id;
         return true;
     }
-    public override string GetProgressText(bool comms = false, bool gamelog = false) => Maximum == 0 ? "" : Utils.ColorString(Maximum >= usecount ? Color.red : Color.gray, $"({Maximum - usecount})");
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false) => Maximum == 0 ? "" : Utils.ColorString(Maximum >= usecount ? Color.red : Color.gray, $"({Maximum - usecount})");
 
     public float CalculateKillCooldown() => KillCooldown;
 

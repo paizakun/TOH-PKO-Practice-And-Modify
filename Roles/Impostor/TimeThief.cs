@@ -59,7 +59,7 @@ namespace TownOfHost.Roles.Impostor
             var sec = -(DecreaseMeetingTime * MyState.GetKillCount(true));
             return sec;
         }
-        public override string GetProgressText(bool comms = false, bool gamelog = false)
+        public override string GetRoleStatusText(bool comms = false, bool gamelog = false)
         {
             var time = CalculateMeetingTimeDelta();
             return time < 0 ? Utils.ColorString(Palette.ImpostorRed.ShadeColor(0.5f), $"{time}s") : "";

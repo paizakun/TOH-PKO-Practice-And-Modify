@@ -216,7 +216,7 @@ public sealed class TheFirstLittlePig : RoleBase, IAdditionalWinner
             enabled = true;
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         int total = MyTaskState?.AllTasksCount ?? 0;
         if (total <= 0) return "";
@@ -349,7 +349,7 @@ public sealed class TheSecondLittlePig : RoleBase, IAdditionalWinner
             enabled = true;
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         int total = MyTaskState?.AllTasksCount ?? 0;
         if (total <= 0) return "";
@@ -501,7 +501,7 @@ public sealed class TheThirdLittlePig : RoleBase, IAdditionalWinner
             enabled = true;
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         int total = MyTaskState?.AllTasksCount ?? 0;
         if (total <= 0) return "";

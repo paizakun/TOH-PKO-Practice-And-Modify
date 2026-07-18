@@ -79,7 +79,7 @@ public sealed class FortuneTeller : RoleBase, ISelfVoter
         OptionVoteMode = StringOptionItem.Create(RoleInfo, 11, Option.AbilityVotemode, EnumHelper.GetAllNames<AbilityVoteMode>(), 1, false);
         Optionrolename = BooleanOptionItem.Create(RoleInfo, 12, Option.TellerCanSeeRolename, true, false);
         OptionRole = BooleanOptionItem.Create(RoleInfo, 13, Option.TellRole, true, false);
-        OptionCanTaskcount = IntegerOptionItem.Create(RoleInfo, 14, GeneralOption.cantaskcount, new(0, 99, 1), 5, false);
+        OptionCanTaskcount = IntegerOptionItem.Create(RoleInfo, 14, GeneralOption.requiredTaskCount, new(0, 99, 1), 5, false);
         Option1MeetingMaximum = IntegerOptionItem.Create(RoleInfo, 15, GeneralOption.MeetingMaxTime, new(0, 99, 1), 0, false)
             .SetValueFormat(OptionFormat.Times).SetZeroNotation(OptionZeroNotation.Infinity);
         OptAwakening = BooleanOptionItem.Create(RoleInfo, 16, GeneralOption.AbilityAwakening, false, false);
@@ -107,7 +107,7 @@ public sealed class FortuneTeller : RoleBase, ISelfVoter
         }
         return "";
     }
-    public override string GetProgressText(bool comms = false, bool gamelog = false) => Utils.ColorString(!MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount) ? Color.gray : Max <= count ? Color.gray : Color.cyan, $"({Max - count})");
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false) => Utils.ColorString(!MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount) ? Color.gray : Max <= count ? Color.gray : Color.cyan, $"({Max - count})");
     public override void OnStartMeeting() => MeetingUsedcount = 0;
     bool ISelfVoter.CanUseVoted() => Canuseability() && Max > count && MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount) && (MeetingUsedcount < onemeetingmaximum || onemeetingmaximum == 0);
     public override bool CheckVoteAsVoter(byte votedForId, PlayerControl voter)

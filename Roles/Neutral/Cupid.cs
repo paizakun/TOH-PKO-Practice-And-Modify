@@ -394,7 +394,7 @@ public sealed class Cupid : RoleBase, IKiller, IAdditionalWinner
         Lovers.CuCupidLoversPlayers.Clear();
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         if (hasDesignated) return "";
         return target1 != byte.MaxValue

@@ -400,7 +400,7 @@ public sealed class Evolver : RoleBase, IImpostor, IUsePhantomButton
         return "";
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         var max = MaxEvolveCount > 0 ? MaxEvolveCount.ToString() : "∞";
         return $" <color={RoleInfo.RoleColorCode}>({EvolveCount}/{max}) {CurrentKillCooldown:0.0}s</color>";

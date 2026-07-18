@@ -365,7 +365,7 @@ public sealed class Santa : RoleBase, IKiller
         _ = new LateTask(() => UtilsNotifyRoles.NotifyRoles(ForceLoop: true), 0.2f, "Santa Gift");
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         if (!giftMode) return "";
         var limit = OptGiftLimit?.GetInt() ?? 3;

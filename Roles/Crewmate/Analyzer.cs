@@ -74,7 +74,7 @@ public sealed class Analyzer : RoleBase
         OptionMaximum = IntegerOptionItem.Create(RoleInfo, 10, GeneralOption.OptionCount, new(1, 99, 1), 2, false);
         OptionTurnMax = IntegerOptionItem.Create(RoleInfo, 11, OptionName.AnalyzerTurnMax, new(1, 3, 1), 1, false);
         OptionCooldown = FloatOptionItem.Create(RoleInfo, 12, GeneralOption.Cooldown, OptionBaseCoolTime, 30, false).SetValueFormat(OptionFormat.Seconds);
-        OptionCanTaskcount = IntegerOptionItem.Create(RoleInfo, 13, GeneralOption.cantaskcount, new(0, 99, 1), 5, false);
+        OptionCanTaskcount = IntegerOptionItem.Create(RoleInfo, 13, GeneralOption.requiredTaskCount, new(0, 99, 1), 5, false);
         OptionAwakening = BooleanOptionItem.Create(RoleInfo, 14, GeneralOption.AbilityAwakening, false, false);
         OptionUsetoImpostor = BooleanOptionItem.Create(RoleInfo, 15, OptionName.AnalyzerUseto, true, false);
         OptionUsetoCrewmate = BooleanOptionItem.Create(RoleInfo, 16, OptionName.AnalyzerUseto, true, false);
@@ -149,7 +149,7 @@ public sealed class Analyzer : RoleBase
         }
         return false;
     }
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
         => Maximum <= Usecount || turnmax <= turnusecount ? $"<#cccccc>({Maximum - Usecount})</color>" : $"<{RoleInfo.RoleColorCode}>({Maximum - Usecount})</color>";
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)
     {

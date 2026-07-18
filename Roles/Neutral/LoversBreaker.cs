@@ -116,7 +116,7 @@ public sealed class LoversBreaker : RoleBase, ILNKiller
         return false;
     }
 
-    public override string GetProgressText(bool comms = false, bool gamelog = false)
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false)
         => Utils.ColorString(RoleInfo.RoleColor, $"({loversKillCount}/{RequiredLoversKills})");
 
     bool CanSoloWinNow()

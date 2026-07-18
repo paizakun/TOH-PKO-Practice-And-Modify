@@ -113,7 +113,7 @@ public sealed class SuspiciousTeller : RoleBase, ISelfVoter
         optionVoteMode = StringOptionItem.Create(RoleInfo, 20, OptionName.AbilityVotemode, EnumHelper.GetAllNames<AbilityVoteMode>(), 1, false, optionNonAlignFortuneTeller);
         optionRoleName = BooleanOptionItem.Create(RoleInfo, 21, OptionName.TellerCanSeeRolename, true, false, optionNonAlignFortuneTeller);
         optionRole = BooleanOptionItem.Create(RoleInfo, 22, OptionName.TellRole, true, false, optionNonAlignFortuneTeller);
-        optionCanTaskCount = IntegerOptionItem.Create(RoleInfo, 23, GeneralOption.cantaskcount, new(0, 99, 1), 5, false, optionNonAlignFortuneTeller);
+        optionCanTaskCount = IntegerOptionItem.Create(RoleInfo, 23, GeneralOption.requiredTaskCount, new(0, 99, 1), 5, false, optionNonAlignFortuneTeller);
         optionOneMeetingMaximum = IntegerOptionItem.Create(RoleInfo, 24, GeneralOption.MeetingMaxTime, new(0, 99, 1), 0, false, optionNonAlignFortuneTeller)
             .SetValueFormat(OptionFormat.Times).SetZeroNotation(OptionZeroNotation.Infinity);
         optionAwakening = BooleanOptionItem.Create(RoleInfo, 25, GeneralOption.AbilityAwakening, true, false, optionNonAlignFortuneTeller);
@@ -354,7 +354,7 @@ public sealed class SuspiciousTeller : RoleBase, ISelfVoter
         Utils.SendMessage(message, Player.PlayerId);
     }
 
-    public override string GetProgressText(bool comms = false, bool gamelog = false)
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false)
     {
         var color = !awakened || !MyTaskState.HasCompletedEnoughCountOfTasks(taskCount) || usedCount >= maxUseCount
             ? Color.gray

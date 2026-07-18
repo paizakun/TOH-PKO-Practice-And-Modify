@@ -173,7 +173,7 @@ public sealed class ProBowler : RoleBase, IImpostor
         Bowl = null;
     }
     public float CalculateKillCooldown() => KillCooldown;
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
         => $"<color=#{(MaxUseCount <= NowUseCount ? "cccccc" : "ff1919")}>({MaxUseCount - NowUseCount})</color>";
 
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)

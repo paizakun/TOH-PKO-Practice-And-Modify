@@ -246,7 +246,7 @@ public sealed class MadAvenger : RoleBase, IKillFlashSeeable, IDeathReasonSeeabl
         else return true;
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false) => !GameLog && OptionCanseeimpostorCount.GetBool() ? $"({PlayerCatch.AliveImpostorCount})" : "";
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false) => !GameLog && OptionCanseeimpostorCount.GetBool() ? $"({PlayerCatch.AliveImpostorCount})" : "";
 
     public static Dictionary<int, Achievement> achievements = new();
     [Attributes.PluginModuleInitializer]

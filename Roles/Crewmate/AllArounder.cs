@@ -158,7 +158,7 @@ public sealed class AllArounder : RoleBase, ISystemTypeUpdateHook, IKillFlashSee
         return "";
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         var text = UtilsRoleText.GetRoleColorAndtext((CustomRoles)NowRole);
 
@@ -714,4 +714,4 @@ public sealed class AllArounder : RoleBase, ISystemTypeUpdateHook, IKillFlashSee
         achievements.Add(1, l1);
         achievements.Add(2, l2);
     }
-} 
+}

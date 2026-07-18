@@ -200,7 +200,7 @@ public sealed class Amateras : RoleBase, ISelfVoter, IAdditionalWinner
         return MeetingStates.FirstMeeting ? GetString("AmaterasMeetingFirst") : GetString("AmaterasMeetingAlive");
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         var need = Math.Max(0, requiredWishCount);
         var color = CanWinNow() ? RoleInfo.RoleColor : Color.gray;

@@ -562,7 +562,7 @@ public sealed class Onmyoji : RoleBase, IKiller, ISelfVoter
         return $"{size}<color=#9b59b6>ペット→指名モード / 会議自投票→近接指名</color>";
     }
 
-    public override string GetProgressText(bool comms = false, bool gameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool gameLog = false)
     {
         var ready = CanWinNow() ? "#9b59b6" : "#5e5e5e";
 

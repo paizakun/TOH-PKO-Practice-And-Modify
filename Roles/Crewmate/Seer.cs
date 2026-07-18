@@ -80,7 +80,7 @@ public sealed class Seer : RoleBase, IKillFlashSeeable
     {
         OptionActiveComms = BooleanOptionItem.Create(RoleInfo, 10, GeneralOption.CanUseActiveComms, true, false);
         OptAwakening = BooleanOptionItem.Create(RoleInfo, 16, GeneralOption.AbilityAwakening, false, false);
-        OptionCanTaskcount = IntegerOptionItem.Create(RoleInfo, 17, GeneralOption.cantaskcount, new(0, 255, 1), 0, false);
+        OptionCanTaskcount = IntegerOptionItem.Create(RoleInfo, 17, GeneralOption.requiredTaskCount, new(0, 255, 1), 0, false);
         OptionDelay = BooleanOptionItem.Create(RoleInfo, 11, OptionName.SeerDelayMode, false, false);
         OptionFirstMindelay = FloatOptionItem.Create(RoleInfo, 12, OptionName.SeerFirstMindelay, new(0, 60, 0.5f), 5f, false, OptionDelay).SetValueFormat(OptionFormat.Seconds);
         OptionFirstMaxdelay = FloatOptionItem.Create(RoleInfo, 13, OptionName.SeerFirstMaxdelay, new(0, 60, 0.5f), 7f, false, OptionDelay).SetValueFormat(OptionFormat.Seconds);
@@ -389,7 +389,7 @@ public sealed class Seer : RoleBase, IKillFlashSeeable
     {
         OptionActiveComms = BooleanOptionItem.Create(RoleInfo, 10, GeneralOption.CanUseActiveComms, true, false);
         OptAwakening = BooleanOptionItem.Create(RoleInfo, 16, GeneralOption.AbilityAwakening, false, false);
-        OptionCanTaskcount = IntegerOptionItem.Create(RoleInfo, 17, GeneralOption.cantaskcount, new(0, 255, 1), 0, false);
+        OptionCanTaskcount = IntegerOptionItem.Create(RoleInfo, 17, GeneralOption.requiredTaskCount, new(0, 255, 1), 0, false);
         OptionDelay = BooleanOptionItem.Create(RoleInfo, 11, OptionName.SeerDelayMode, false, false);
         OptionFirstMindelay = FloatOptionItem.Create(RoleInfo, 12, OptionName.SeerFirstMindelay, new(0, 60, 0.5f), 5f, false, OptionDelay).SetValueFormat(OptionFormat.Seconds);
         OptionFirstMaxdelay = FloatOptionItem.Create(RoleInfo, 13, OptionName.SeerFirstMaxdelay, new(0, 60, 0.5f), 7f, false, OptionDelay).SetValueFormat(OptionFormat.Seconds);
@@ -461,7 +461,7 @@ public sealed class Seer : RoleBase, IKillFlashSeeable
 
         return true;
     }
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         if (Player.IsAlive() is false) return "";
 

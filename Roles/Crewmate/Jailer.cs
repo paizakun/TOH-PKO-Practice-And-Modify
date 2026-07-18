@@ -411,7 +411,7 @@ public sealed class Jailer : RoleBase, IUsePhantomButton, IKiller
         _ = new LateTask(() => ApplyModeDesync(mode), 0.5f, "Jailer.AfterMeetDesync", true);
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         if (!Player.IsAlive()) return "";
 

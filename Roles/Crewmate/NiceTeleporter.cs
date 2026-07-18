@@ -288,7 +288,7 @@ public sealed class NiceTeleporter : RoleBase
         return $"{size}<color={color}>ペットを撫でる → ランダムな人の元へ全員テレポート</color>";
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         if (!Player.IsAlive()) return "";
         if (pendingTimer >= 0f)

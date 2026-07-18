@@ -219,7 +219,7 @@ public sealed class Magician : RoleBase, IImpostor, IUsePhantomButton
         return true;
     }
 
-    public override string GetProgressText(bool comms = false, bool gamelog = false)
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false)
     {
         if (Maximum == 0 && MagicUseKillCount == 0) return "";
         var text = "(";

@@ -201,7 +201,7 @@ public sealed class Lawyer : RoleBase
         return "";
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         var target = Target;
         if (target == null) return "";
@@ -291,7 +291,7 @@ public sealed class Pursuer : RoleBase, IAdditionalWinner
 
     bool IAdditionalWinner.CheckWin(ref CustomRoles winnerRole) => Player.IsAlive();
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
         => ColorString(guardCount > 0 ? Color.yellow : Color.gray, $"〔{guardCount}〕");
 
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null,

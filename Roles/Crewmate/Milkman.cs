@@ -359,7 +359,7 @@ public sealed class Milkman : RoleBase, IKiller
         nowcool = reader.ReadSingle();
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         if (!Player.IsAlive()) return "";
 

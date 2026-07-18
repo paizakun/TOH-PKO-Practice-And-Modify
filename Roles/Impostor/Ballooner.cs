@@ -111,7 +111,7 @@ public sealed class Ballooner : RoleBase, IImpostor, IUsePhantomButton
     }
     public float CalculateKillCooldown() => OptionKillCoolDown.GetFloat();
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
         => Utils.ColorString(NowBoomDis <= 0 ? ModColors.Gray : (MaxBoomDis <= NowBoomDis ? ModColors.Red : ModColors.Orange), $" ({NowBoomDis})");
 
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)

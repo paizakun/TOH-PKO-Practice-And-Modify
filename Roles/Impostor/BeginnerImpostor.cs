@@ -281,7 +281,7 @@ public sealed class BeginnerImpostor : RoleBase, IImpostor, IUsePhantomButton
 
     public override string GetAbilityButtonText() => GetString("BeginnerImpostorTrainButton");
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         string text = OptionRequireDummyKills.GetBool()
             ? $"({dummyKillCount}/{OptionRequiredDummyKills.GetInt()})"

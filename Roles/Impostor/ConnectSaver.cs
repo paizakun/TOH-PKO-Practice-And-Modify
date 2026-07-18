@@ -95,7 +95,7 @@ public sealed class ConnectSaver : RoleBase, IImpostor, ISelfVoter
 
         Player.SyncSettings();
     }
-    public override string GetProgressText(bool comms = false, bool gamelog = false) => Utils.ColorString(Max <= usedcount ? Color.gray : Palette.ImpostorRed, $"({Max - usedcount})");
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false) => Utils.ColorString(Max <= usedcount ? Color.gray : Palette.ImpostorRed, $"({Max - usedcount})");
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)
     {
         seen ??= seer;

@@ -430,7 +430,7 @@ public sealed class Monika : RoleBase, ILNKiller
         for (int i = 0; i < count; i++) MonikaTrashLayer.Add(reader.ReadByte());
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         if (!Player.IsAlive()) return "";
         int trashed = MonikaTrashLayer.Count;

@@ -178,7 +178,7 @@ public sealed class Suicider : RoleBase
             CustomWinnerHolder.WinnerIds.Add(Player.PlayerId);
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         if (!Player.IsAlive()) return "";
         if (MyTaskState.IsTaskFinished)

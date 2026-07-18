@@ -136,7 +136,7 @@ public sealed class VentHunter : RoleBase
         count = reader.ReadInt32();
     }
     public override bool CanVentMoving(PlayerPhysics physics, int ventId) => false;
-    public override string GetProgressText(bool comms = false, bool GameLog = false) => Isinfinity ? "" : Utils.ColorString(CanUseAbility ? RoleInfo.RoleColor : IsTaskCompleted ? Color.red : Color.gray, $"({count})");
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false) => Isinfinity ? "" : Utils.ColorString(CanUseAbility ? RoleInfo.RoleColor : IsTaskCompleted ? Color.red : Color.gray, $"({count})");
     public bool CanUseAbility => (Isinfinity || count > 0) && IsTaskCompleted;
     public bool IsTaskCompleted => MyTaskState.HasCompletedEnoughCountOfTasks(task);
     public override bool CanClickUseVentButton => CanUseAbility;

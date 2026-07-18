@@ -90,7 +90,7 @@ public sealed class AntiReporter : RoleBase, IImpostor, IUsePhantomButton
         Brokens.Add(target.PlayerId);
         UtilsNotifyRoles.NotifyRoles(SpecifySeer: Player);
     }
-    public override string GetProgressText(bool comms = false, bool gamelog = false) => Utils.ColorString(Use > 0 ? Color.red : Color.gray, $"({Use})");
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false) => Utils.ColorString(Use > 0 ? Color.red : Color.gray, $"({Use})");
     public override bool CancelReportDeadBody(PlayerControl reporter, NetworkedPlayerInfo target, ref DontReportreson reportreson)
     {
         if (ReportCrashTimers.ContainsKey(reporter.PlayerId))

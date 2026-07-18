@@ -93,7 +93,7 @@ namespace TownOfHost.Roles.Impostor
             UtilsNotifyRoles.NotifyRoles(SpecifySeer: Player);
         }
         bool IUsePhantomButton.IsPhantomRole => BomberExplosion > 0;
-        public override string GetProgressText(bool comms = false, bool gamelog = false) => Utils.ColorString(0 < BomberExplosion ? Color.red : Color.gray, $"({BomberExplosion})");
+        public override string GetRoleStatusText(bool comms = false, bool gamelog = false) => Utils.ColorString(0 < BomberExplosion ? Color.red : Color.gray, $"({BomberExplosion})");
         public override void OnFixedUpdate(PlayerControl _)
         {
             if (!AmongUsClient.Instance.AmHost || !GameStates.IsInTask || !Player.IsAlive()) return;

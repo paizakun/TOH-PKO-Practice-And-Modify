@@ -299,7 +299,7 @@ public sealed class PavlovOwner : RoleBase, IKiller, IAdditionalWinner, ISchrodi
         return true;
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
         => $"<color=#b8860b>({RemainingImprintCount})</color>";
 
     public override void OverrideDisplayRoleNameAsSeer(PlayerControl seen, ref bool enabled, ref Color roleColor, ref string roleText, ref bool addon)
@@ -561,7 +561,7 @@ public abstract class PavlovDogBase : RoleBase, IKiller, IAdditionalWinner, ISch
         return true;
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         if (!IsRampage) return "";
         return "<color=#ff6633>(!!)</color>";

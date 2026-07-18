@@ -66,7 +66,7 @@ public sealed class UnFortuner : RoleBase, IImpostor, IUsePhantomButton
     {
         AURoleOptions.PhantomCooldown = cooldown;
     }
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
         => $"<{(UseCount > 0 ? RoleInfo.RoleColorCode : "#cccccc")}> ({UseCount})</color>";
     bool IUsePhantomButton.UseOneclickButton => 0 < UseCount;
     bool IUsePhantomButton.IsPhantomRole => 0 < UseCount;

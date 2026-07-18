@@ -99,7 +99,7 @@ public sealed class GuardMaster : RoleBase
             Guard += AddGuardCount;
         return true;
     }
-    public override string GetProgressText(bool comms = false, bool gamelog = false) => CanSeeProtect ? Utils.ColorString(Guard == 0 ? UnityEngine.Color.gray : RoleInfo.RoleColor, $"({Guard})") : "";
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false) => CanSeeProtect ? Utils.ColorString(Guard == 0 ? UnityEngine.Color.gray : RoleInfo.RoleColor, $"({Guard})") : "";
     public override CustomRoles Misidentify() => Awakened ? CustomRoles.NotAssigned : CustomRoles.Crewmate;
     public override void OnFixedUpdate(PlayerControl player) => timer += Time.fixedDeltaTime;
 

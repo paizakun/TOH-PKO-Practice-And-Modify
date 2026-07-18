@@ -243,7 +243,7 @@ public sealed class Abuser : RoleBase, IImpostor, IUsePhantomButton
         addon = false;
     }
 
-    public override string GetProgressText(bool comms = false, bool gamelog = false)
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false)
         => Utils.ColorString(remainingUses > 0 ? RoleInfo.RoleColor : Palette.DisabledGrey, $"({remainingUses})");
 
     public override string GetAbilityButtonText() => GetString("AbuserForceKillButtonText");

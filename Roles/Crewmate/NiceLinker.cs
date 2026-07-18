@@ -308,7 +308,7 @@ public sealed class NiceLinker : RoleBase
         pendingDummy = null;
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         if (!Player.IsAlive()) return "";
         string pend = pendingDummy != null ? " <color=#ffff00>1/2</color>" : "";

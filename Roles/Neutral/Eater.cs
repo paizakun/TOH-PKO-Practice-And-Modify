@@ -707,7 +707,7 @@ public sealed class Eater : RoleBase, IKiller, IUsePhantomButton, IKillFlashSeea
         return arrows == "" ? "" : $"<color={RoleInfo.RoleColorCode}>{arrows}</color>";
     }
 
-    public override string GetProgressText(bool comms = false, bool gameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool gameLog = false)
         => $" <color={RoleInfo.RoleColorCode}>({eatOrSwallowCount}/{OptionWinCount.GetInt()})</color>";
 
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)

@@ -112,7 +112,7 @@ public sealed class Chef : RoleBase, IKiller, IAdditionalWinner
                 return Utils.ColorString(RoleInfo.RoleColor, "▲");
             else return "";
     }
-    public override string GetProgressText(bool comms = false, bool gamelog = false)
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false)
     {
         var chefdata = GetCheftargetCount();
         var Denominator = "?";

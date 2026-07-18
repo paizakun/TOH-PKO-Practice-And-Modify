@@ -529,7 +529,7 @@ public sealed class SheriffHadouHo : RoleBase, IUsePhantomButton
         return "";
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         if (!Player.IsAlive()) return "";
         if (!IsBeamUnlocked)

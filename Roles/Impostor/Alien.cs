@@ -574,7 +574,7 @@ public sealed class Alien : RoleBase, IMeetingTimeAlterable, IImpostor, INekomat
     }
     #endregion
     #region Name
-    public override string GetProgressText(bool comms = false, bool gamelog = false)
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false)
     {
         if (!Player.IsAlive() && !gamelog) return "";
         if (AlienHideAbility || GameStates.CalledMeeting || gamelog) return Mode(gamelog);

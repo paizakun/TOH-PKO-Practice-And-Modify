@@ -46,7 +46,7 @@ public sealed class BorderKiller : RoleBase, IImpostor
         OptionMissionKillcount = IntegerOptionItem.Create(RoleInfo, 11, OptionName.BorderKillerMissionKillcount, new(1, 14, 1), 3, false).SetValueFormat(OptionFormat.Players);
     }
     public float CalculateKillCooldown() => OptionKillCoolDown.GetFloat();
-    public override string GetProgressText(bool comms = false, bool GameLog = false) => $"({MyState.GetKillCount(false)}/{OptionMissionKillcount.GetInt()})";
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false) => $"({MyState.GetKillCount(false)}/{OptionMissionKillcount.GetInt()})";
 
     public override void CheckWinner(GameOverReason reason)
     {

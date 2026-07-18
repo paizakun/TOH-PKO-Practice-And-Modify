@@ -318,7 +318,7 @@ public sealed class Sheriff : RoleBase, IKiller, ISchrodingerCatOwner
         _ = new LateTask(() => nowcool = CurrentKillCooldown, Main.LagTime, "Reset-Sheriff");
     }
 
-    public override string GetProgressText(bool comms = false, bool gamelog = false)
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false)
     {
         var progress = Utils.ColorString(CanUseSheriffMode() ? Color.yellow : Color.gray, $"({ShotLimit})");
         if (!GameStates.CalledMeeting && !gamelog)

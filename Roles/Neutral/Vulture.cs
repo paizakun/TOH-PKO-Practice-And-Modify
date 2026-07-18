@@ -190,7 +190,7 @@ public sealed class Vulture : RoleBase, IKillFlashSeeable, IAdditionalWinner
         return OptKillflashTaskcount <= MyTaskState.CompletedTasksCount;
     }
     //現在の食事状況を
-    public override string GetProgressText(bool comms = false, bool GameLog = false) => $" <color={RoleInfo.RoleColorCode}>({EatCount}/{OptWinEatcount})</color>";
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false) => $" <color={RoleInfo.RoleColorCode}>({EatCount}/{OptWinEatcount})</color>";
     //死体位置の矢印表示
     public override string GetMark(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false)
     {

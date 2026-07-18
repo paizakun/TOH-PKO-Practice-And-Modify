@@ -918,7 +918,7 @@ public sealed class JackalHadouHo : RoleBase, ILNKiller, IUsePhantomButton, ISel
         return "";
     }
 
-    public override string GetProgressText(bool comms = false, bool gamelog = false)
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false)
     {
         if (!CanSideKick && !skMode) return "";
         return skMode
@@ -1026,7 +1026,7 @@ public sealed class Tama : RoleBase, IKiller
         Utils.SendMessage(GetString("TamaLoaded"), Player.PlayerId);
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         if (!JackalHadouHo.GetTamaCanLoad()) return "<color=#5e5e5e>【装填不可】</color>";
         if (hasLoaded) return $"<color=#00b4eb>【装填済】</color>";

@@ -136,7 +136,7 @@ public sealed class Inspector : RoleBase, ISelfVoter
         }
         return true;
     }
-    public override string GetProgressText(bool comms = false, bool gamelog = false) => Utils.ColorString(Max <= count ? Color.gray : Color.cyan, $"({Max - count})");
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false) => Utils.ColorString(Max <= count ? Color.gray : Color.cyan, $"({Max - count})");
     public override void OnStartMeeting()
     {
         if (Balancer.Id != byte.MaxValue)

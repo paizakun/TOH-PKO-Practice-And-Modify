@@ -272,7 +272,7 @@ public sealed class MMArcher : RoleBase, IKiller, IUsePhantomButton
         Arrowtime = time is -1 ? null : time;
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false) => Arrowtime is null ? "" : $"<#{(Arrowtime is 0 ? "ff1919" : "cccccc")}> ({Arrowtime.Value})";
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false) => Arrowtime is null ? "" : $"<#{(Arrowtime is 0 ? "ff1919" : "cccccc")}> ({Arrowtime.Value})";
 
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)
     {

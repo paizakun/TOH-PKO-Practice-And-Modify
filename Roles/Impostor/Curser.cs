@@ -127,7 +127,7 @@ public sealed class Curser : RoleBase, IImpostor
         seen ??= seer;
         return TargetId == seen.PlayerId ? Utils.ColorString(Palette.ImpostorRed, "θ") : "";
     }
-    public override string GetProgressText(bool comms = false, bool gamelog = false) => Utils.ColorString(RoleInfo.RoleColor, $"({CurseCount})");
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false) => Utils.ColorString(RoleInfo.RoleColor, $"({CurseCount})");
     public override void ApplyGameOptions(IGameOptions opt) => AURoleOptions.ShapeshifterCooldown = Cooldown;
     public float CalculateKillCooldown() => KillCooldown;
     public override string GetAbilityButtonText() => GetString("MadChanger_Targetset");

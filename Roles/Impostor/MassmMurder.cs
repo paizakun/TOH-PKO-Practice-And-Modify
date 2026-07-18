@@ -81,7 +81,7 @@ public sealed class MassmMurder : RoleBase, IKiller, IUsePhantomButton
     public override void ApplyGameOptions(IGameOptions opt)
     {
         AURoleOptions.PhantomCooldown = KillCooldown_;
-        AURoleOptions.PhantomDuration = 0f; 
+        AURoleOptions.PhantomDuration = 0f;
     }
 
     public void OnClick(ref bool AdjustKillCooldown, ref bool? ResetCooldown)
@@ -146,7 +146,7 @@ public sealed class MassmMurder : RoleBase, IKiller, IUsePhantomButton
         Player.RpcResetAbilityCooldown();
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         if (!Player.IsAlive()) return "";
         string countStr = $"({remainingSetCount})";

@@ -78,7 +78,7 @@ public sealed class Medium : RoleBase
             .SetValueFormat(OptionFormat.Times);
         OptionShowDeathReason = BooleanOptionItem.Create(RoleInfo, 11, OptionName.MediumShowDeathReason, false, false);
         OptionRole = BooleanOptionItem.Create(RoleInfo, 12, OptionName.TellRole, true, false);
-        OptionCanTaskcount = IntegerOptionItem.Create(RoleInfo, 13, GeneralOption.cantaskcount, new(0, 99, 1), 0, false);
+        OptionCanTaskcount = IntegerOptionItem.Create(RoleInfo, 13, GeneralOption.requiredTaskCount, new(0, 99, 1), 0, false);
         Option1MeetingMaximum = IntegerOptionItem.Create(RoleInfo, 14, GeneralOption.MeetingMaxTime, new(0, 99, 1), 0, false)
             .SetValueFormat(OptionFormat.Times).SetZeroNotation(OptionZeroNotation.Infinity);
         OptAwakening = BooleanOptionItem.Create(RoleInfo, 15, GeneralOption.AbilityAwakening, false, false);
@@ -121,7 +121,7 @@ public sealed class Medium : RoleBase
         return true;
     }
 
-    public override string GetProgressText(bool comms = false, bool gamelog = false)
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false)
     {
         var canUse = Player.IsAlive() && RemainingCount > 0 && awakened;
         return Utils.ColorString(canUse ? Color.cyan : Color.gray, $"({RemainingCount})");

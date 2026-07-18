@@ -25,6 +25,22 @@ namespace TownOfHost
     {
 
         /// <summary>
+        /// 実際の役職名を明かさず、陣営(Crewmate/Impostor/Neutral)だけを色とテキストに変換する。
+        /// 占い系役職などで「役職までは見せず陣営だけ見せる」設定の時に使う。
+        /// </summary>
+        /// <param name="role">変換したい対象の役職</param>
+        /// <returns>陣営を表す色とテキスト</returns>
+        public static (Color color, string text) GetTeamDisplay(CustomRoles role)
+        {
+            return role.GetCustomRoleTypes() switch
+            {
+                CustomRoleTypes.Crewmate or CustomRoleTypes.Madmate => (Palette.CrewmateBlue, GetString("Crewmate")),
+                CustomRoleTypes.Impostor => (ModColors.ImpostorRed, GetString("Impostor")),
+                CustomRoleTypes.Neutral => (ModColors.NeutralGray, GetString("Neutral")),
+                _ => (Color.white, ""),
+            };
+        }
+        /// <summary>
         /// seerが自分であるときのseenのRoleName + ProgressText
         /// </summary>
         /// <param name="seer">見る側</param>
@@ -360,7 +376,7 @@ namespace TownOfHost
             ProgressText.Append(GetTaskProgressText(playerId, comms, ShowManegementText, hide));
             if (!hide && roleClass != null && !player.Is(CustomRoles.Amnesia) && (!player.GetMisidentify(out var missrole) || missrole is CustomRoles.FortuneTeller))
             {
-                ProgressText.Append(roleClass.GetProgressText(comms, gamelog));
+                ProgressText.Append(roleClass.GetRoleStatusText(comms, gamelog));
             }
             if (player.CanMakeMadmate()) ProgressText.Append(ColorString(Palette.ImpostorRed.ShadeColor(0.5f), $"[{Options.CanMakeMadmateCount.GetInt() - PlayerCatch.SKMadmateNowCount}]"));
             if (player.GetCustomRole() is CustomRoles.Jackal or CustomRoles.JackalAlien or CustomRoles.JackalMafia or CustomRoles.JackalWolf && JackalDoll.GetSideKickCount() > 0)

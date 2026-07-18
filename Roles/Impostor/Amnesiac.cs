@@ -196,7 +196,7 @@ public sealed class Amnesiac : RoleBase, IImpostor
         return true;
     }
 
-    public override string GetProgressText(bool comms = false, bool gamelog = false) => MatchSettingstoSheriff && !Realized ? Utils.ColorString(ShShotLimit - KillCount > 0 ? Color.yellow : Color.gray, $"({ShShotLimit - KillCount})") : "";
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false) => MatchSettingstoSheriff && !Realized ? Utils.ColorString(ShShotLimit - KillCount > 0 ? Color.yellow : Color.gray, $"({ShShotLimit - KillCount})") : "";
 
     public void SendRPC()
     {

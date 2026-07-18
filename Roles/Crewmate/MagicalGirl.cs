@@ -895,7 +895,7 @@ public sealed class MagicalGirl : RoleBase, ISelfVoter, IKiller, IUsePhantomButt
         => addRole?.OverrideDisplayRoleNameAsSeer(seen, ref enabled, ref roleColor, ref roleText, ref addon);
     public override void OverrideDisplayRoleNameAsSeen(PlayerControl seer, ref bool enabled, ref Color roleColor, ref string roleText, ref bool addon)
         => addRole?.OverrideDisplayRoleNameAsSeen(seer, ref enabled, ref roleColor, ref roleText, ref addon);
-    public override string GetProgressText(bool comms = false, bool GameLog = false) => addRole?.GetProgressText(comms, GameLog) ?? "";
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false) => addRole?.GetRoleStatusText(comms, GameLog) ?? "";
     public override string GetSuffix(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false) => addRole?.GetSuffix(seer, seen, isForMeeting) ?? "";
     public override string GetAbilityButtonText() => addRole?.GetAbilityButtonText() ?? base.GetAbilityButtonText();
     public override bool OverrideAbilityButton(out string text)

@@ -275,7 +275,7 @@ public sealed class TimeSleeper : RoleBase, IImpostor, IUsePhantomButton
         return $"{(isForHud ? "" : "<size=60%>")}<color=#a0c4ff>ファントムボタン → タイムスリープ</color>";
     }
 
-    public override string GetProgressText(bool comms = false, bool GameLog = false)
+    public override string GetRoleStatusText(bool comms = false, bool GameLog = false)
     {
         if (isRecording) return $"<color=#a0c4ff>●REC</color>";
         if (isRewinding) return $"<color=#a0c4ff>◀◀</color>";
