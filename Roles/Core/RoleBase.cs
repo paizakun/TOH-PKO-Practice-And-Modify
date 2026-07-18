@@ -35,6 +35,19 @@ public abstract class RoleBase : IDisposable
     /// アビリティボタンで発動する能力を持っているか
     /// </summary>
     public bool HasAbility;
+    /// <summary>
+    /// 現在、能力(Vent/変身/ファントムボタン等を含む広義のアビリティ)を使用できる状態か。
+    /// Amnesiaなど、能力を封じる効果を持つ側からfalseに設定される。
+    /// </summary>
+    public bool AbilityEnabled = true;
+    /// <summary>
+    /// AbilityEnabledがfalseのため能力系フックの呼び出しをスキップしたことをログに残す。
+    /// 「意図せずAbilityEnabledがfalseになっていて能力が発動しなかった」という状況を追跡できるようにするための共通ヘルパー。
+    /// 能力系フックを集約ディスパッチしている箇所(AfterMeetingTasksのforeachなど)から、呼び出しをスキップする前に使う。
+    /// </summary>
+    /// <param name="hookName">スキップしたフック名(nameof(AfterMeetingTasks)などを渡す)</param>
+    public void LogAbilityBlocked(string hookName)
+        => Logger.Info($"{Player?.Data?.GetLogPlayerName()}: AbilityEnabled=falseのため{hookName}をスキップしました", "AbilityGate");
     public RoleBase(
         SimpleRoleInfo roleInfo,
         PlayerControl player,

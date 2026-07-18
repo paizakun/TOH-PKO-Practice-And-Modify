@@ -45,12 +45,19 @@ namespace TownOfHost.Roles.AddOns.Common
         public static void Add(byte playerId)
         {
             playerIdList.Add(playerId);
+            if (dontcanUseability)
+            {
+                var roleClass = PlayerCatch.GetPlayerById(playerId)?.GetRoleClass();
+                if (roleClass != null) roleClass.AbilityEnabled = false;
+            }
         }
         public static void RemoveAmnesia(byte playerId, bool sync = false)
         {
             playerIdList.Remove(playerId);
             PlayerState.GetByPlayerId(playerId).RemoveSubRole(CustomRoles.Amnesia);
             UtilsGameLog.AddGameLog("Amnesia", string.Format(Translator.GetString("Am.log"), UtilsName.GetPlayerColor(playerId)));
+            var roleClass = PlayerCatch.GetPlayerById(playerId)?.GetRoleClass();
+            if (roleClass != null) roleClass.AbilityEnabled = true;
             if (sync) { using var sender = new SubRoleRPCSender(CustomRoles.Amnesia, playerId); }
         }
         public static void ReceiveRPC(Hazel.MessageReader reader, byte playerId)

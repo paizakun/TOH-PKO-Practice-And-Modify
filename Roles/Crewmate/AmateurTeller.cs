@@ -31,9 +31,7 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
     )
     {
         Targets.Clear();
-        Divination.Clear();
         count = 0;
-        Use = false;
         Awakened = !OptAwakening.GetBool() || OptionCanTaskcount.GetInt() < 1;
         UseTarget = byte.MaxValue;
         Votemode = (AbilityVoteMode)OptionVoteMode.GetValue();
@@ -63,10 +61,8 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
     static bool targetcanseeplayer;
     int count;
     bool Awakened;
-    bool Use;
     byte UseTarget;
     List<byte> Targets = new();
-    Dictionary<byte, CustomRoles> Divination = new();
     static HashSet<AmateurTeller> tellers = new();
 
     enum Option
@@ -103,7 +99,6 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
     public override string GetProgressText(bool comms = false, bool gamelog = false) => Utils.ColorString(!MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount) ? Color.gray : maximum <= count ? Color.gray : Color.cyan, $"({maximum - count})");
     public override void OnReportDeadBody(PlayerControl reporter, NetworkedPlayerInfo target)
     {
-        Use = false;
         TargetArrow.Remove(UseTarget, Player.PlayerId);
         Targets.Add(UseTarget);
         UseTarget = byte.MaxValue;
@@ -118,34 +113,12 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
         }
         return false;
     }
-    bool ISelfVoter.CanUseVoted() => Canuseability() && maximum > count && MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount) && (!Use);
+    bool ISelfVoter.CanUseVoted() => Canuseability() && maximum > count && MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount) && UseTarget == byte.MaxValue;
     public override bool CheckVoteAsVoter(byte votedForId, PlayerControl voter)
     {
         if (!Canuseability()) return true;
-        if (maximum > count && Is(voter) && MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount) && (!Use))
-        {
-            var target = PlayerCatch.GetPlayerById(votedForId);
-            if (Votemode == AbilityVoteMode.NomalVote)
-            {
-                if (Player.PlayerId == votedForId || votedForId == SkipId) return true;
-                UseTellAbility(votedForId);
-                return false;
-            }
-            else
-            {
-                if (CheckSelfVoteMode(Player, votedForId, out var status))
-                {
-                    if (status is VoteStatus.Self)
-                        Utils.SendMessage(string.Format(GetString("SkillMode"), GetString("Mode.Divied"), GetString("Vote.Divied")) + GetString("VoteSkillMode"), Player.PlayerId);
-                    if (status is VoteStatus.Skip)
-                        Utils.SendMessage(GetString("VoteSkillFin"), Player.PlayerId);
-                    if (status is VoteStatus.Vote)
-                        UseTellAbility(votedForId);
-                    SetMode(Player, status is VoteStatus.Self);
-                    return false;
-                }
-            }
-        }
+        if (maximum > count && Is(voter) && MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount) && UseTarget == byte.MaxValue)
+            return HandleAbilityVote(Player, votedForId, Votemode, "Mode.Divied", "Vote.Divied", UseTellAbility);
         return true;
     }
     public void UseTellAbility(byte votedForId)
@@ -153,7 +126,6 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
         var target = PlayerCatch.GetPlayerById(votedForId);
         if (!target.IsAlive()) return;
         count++;
-        Use = true;
         UseTarget = target.PlayerId;
         TargetArrow.Add(target.PlayerId, Player.PlayerId);
         SendRPC();
