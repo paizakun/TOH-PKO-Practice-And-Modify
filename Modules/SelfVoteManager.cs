@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using TownOfHost.Roles.Impostor;
 using TownOfHost.Roles.Madmate;
 using static TownOfHost.Modules.MeetingVoteManager;
+using static TownOfHost.Translator;
 
 namespace TownOfHost.Modules
 {
@@ -77,6 +79,37 @@ namespace TownOfHost.Modules
         {
             NomalVote,
             SelfVote,
+        }
+
+        /// <summary>
+        /// 「対象に投票することで能力を発動する」役職のCheckVoteAsVoter内で使う共通処理。
+        /// NomalVoteなら投票先へそのまま発動、SelfVoteなら自投票モードのON/OFF・スキップ判定を行う。
+        /// ゲージ(count/max等)や覚醒などの使用可否判定は呼び出し側で行ってから渡すこと。
+        /// </summary>
+        /// <param name="modeMessageKey">セルフ投票モードON時に表示する役職名相当のGetStringキー(例: "Mode.Divied")</param>
+        /// <param name="voteMessageKey">セルフ投票モードON時に表示する動作名相当のGetStringキー(例: "Vote.Divied")</param>
+        /// <param name="useAbility">投票確定時に呼ぶ、能力発動処理</param>
+        /// <returns>投票自体をキャンセルするか(false)、素通しするか(true)</returns>
+        public static bool HandleAbilityVote(PlayerControl player, byte votedForId, AbilityVoteMode voteMode, string modeMessageKey, string voteMessageKey, Action<byte> useAbility)
+        {
+            if (voteMode == AbilityVoteMode.NomalVote)
+            {
+                if (player.PlayerId == votedForId || votedForId == SkipId) return true;
+                useAbility(votedForId);
+                return false;
+            }
+            if (CheckSelfVoteMode(player, votedForId, out var status))
+            {
+                if (status is VoteStatus.Self)
+                    Utils.SendMessage(string.Format(GetString("SkillMode"), GetString(modeMessageKey), GetString(voteMessageKey)) + GetString("VoteSkillMode"), player.PlayerId);
+                if (status is VoteStatus.Skip)
+                    Utils.SendMessage(GetString("VoteSkillFin"), player.PlayerId);
+                if (status is VoteStatus.Vote)
+                    useAbility(votedForId);
+                SetMode(player, status is VoteStatus.Self);
+                return false;
+            }
+            return true;
         }
     }
 }
