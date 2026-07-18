@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using AmongUs.GameOptions;
+using Hazel;
 
 using TownOfHost.Modules;
 using TownOfHost.Roles.Core;
@@ -138,21 +139,36 @@ namespace TownOfHost
         }
 
         /// <summary>
-        /// キルクールダウンを指定した秒数へ設定し、即座にクライアントへ同期する。
-        /// <see cref="SetKillCooldown"/>と違い、補正ロジックやキルの実行は行わない単純な代入+同期のみ。
+        /// キルクールダウンの最大値(AURoleOptions.KillCooldownとして送信される値)を設定する。
+        /// 現在進行中のキルタイマーには影響しない。
         /// </summary>
-        public static void SyncKillCooldown(this PlayerControl player, float duration)
+        public static void SetMaxKillCooldown(this PlayerControl player, float maxCooldown)
         {
             if (player == null) return;
-            Main.AllPlayerKillCooldown[player.PlayerId] = duration;
+            Main.AllPlayerKillCooldown[player.PlayerId] = maxCooldown;
             player.SyncSettings();
+        }
 
-            // killTimer自体はネットワーク同期されないため、ホストがplayer.killTimerへ直接書き込んでも
-            // 対象が他プレイヤーの場合は本人のクライアントには一切反映されない。
-            // RpcProtectedMurderPlayer(自分自身への「守られたキル」)はRPCとして対象のクライアントに
-            // 届き、本人のSetCooldown()相当を本人の手元で走らせる。これにより既に同期済みの
-            // KillCooldown値で、対象が誰であっても正しくタイマーがリセットされる
-            player.RpcProtectedMurderPlayer(player);
+        /// <summary>
+        /// 現在進行中のキルタイマーを指定した秒数へ即座に設定する、一回限りの操作。
+        /// <see cref="SetMaxKillCooldown"/>で設定される値への復元は行わない。
+        /// 進行中に何らかのリセット(実際のキル成立による<see cref="ResetKillCooldown"/>や、
+        /// 次の<see cref="SetMaxKillCooldown"/>呼び出しなど)が入った場合は、そちらの値が
+        /// 優先されて上書きされるのが正しい仕様とする。
+        /// </summary>
+        public static void SetCurrentKillCooldown(this PlayerControl player, float currentCooldown)
+        {
+            if (player == null) return;
+
+            // killTimerは非同期なので、自分への「守られたキル」RPCでリセットを誘発する。
+            // このRPCはKillCooldown(格納値)の半分になるため*2で送り、届いた後currentに設定し直す
+            // (=maxをcurrentに置き換える。以後の復元はしない)。
+            // SyncSettingsと同じReliableで送ることで、順序保証をLagTime頼みにせず確定させる。
+            Main.AllPlayerKillCooldown[player.PlayerId] = currentCooldown * 2;
+            player.SyncSettings();
+            player.RpcProtectedMurderPlayer(player, SendOption.Reliable);
+            Main.AllPlayerKillCooldown[player.PlayerId] = currentCooldown;
+            player.SyncSettings();
         }
 
         public static void MarkDirtySettings(this PlayerControl player)

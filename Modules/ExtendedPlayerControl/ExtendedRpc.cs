@@ -519,6 +519,8 @@ namespace TownOfHost
             UtilsNotifyRoles.NotifyRoles();
         }
         public static void RpcProtectedMurderPlayer(this PlayerControl killer, PlayerControl target = null)
+            => killer.RpcProtectedMurderPlayer(target, SendOption.None);
+        public static void RpcProtectedMurderPlayer(this PlayerControl killer, PlayerControl target, SendOption sendOption)
         {
             //killerが死んでいる場合は実行しない
             if (!killer.IsAlive()) return;
@@ -532,7 +534,7 @@ namespace TownOfHost
             // Other Clients
             if (killer.PlayerId != 0)
             {
-                var writer = AmongUsClient.Instance.StartRpcImmediately(killer.NetId, (byte)RpcCalls.MurderPlayer, SendOption.None, killer.GetClientId());
+                var writer = AmongUsClient.Instance.StartRpcImmediately(killer.NetId, (byte)RpcCalls.MurderPlayer, sendOption, killer.GetClientId());
                 writer.WriteNetObject(target);
                 writer.Write((int)MurderResultFlags.FailedProtected);
                 AmongUsClient.Instance.FinishRpcImmediately(writer);
