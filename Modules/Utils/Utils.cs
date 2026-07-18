@@ -30,6 +30,25 @@ namespace TownOfHost
 {
     public static class Utils
     {
+        /// <summary>
+        /// OnReportDeadBody/CancelReportDeadBodyのtargetが、緊急ボタン(自己通報)によるものかどうか。
+        /// 死体通報の場合targetはnullではない。
+        /// </summary>
+        public static bool IsEmergencyButtonPress(this NetworkedPlayerInfo target) => target == null;
+        /// <summary>
+        /// OnReportDeadBody/CancelReportDeadBodyの通報者が自分自身で、かつ緊急ボタン(自己通報)によるものかどうか
+        /// </summary>
+        public static bool IsSelfEmergencyButtonPress(this RoleBase role, PlayerControl reporter, NetworkedPlayerInfo target)
+            => role.Is(reporter) && target.IsEmergencyButtonPress();
+        /// <summary>
+        /// 能力発動メソッドをAbilityEnabled審査の対象として登録する。コンストラクタなどで、
+        /// 自分自身の能力発動メソッド(private/protected/publicいずれも可)に対して呼ぶ。
+        /// 登録後は、呼び出し元は何も気にせず通常通りそのメソッドを呼ぶだけでよい。
+        /// (AbilityEnabledがfalseの間は、呼んでも中身が実行されない)
+        /// </summary>
+        /// <param name="methodName">nameof(UseAbility)のように、対象メソッドの名前を渡す</param>
+        public static void RegisterAbilityMethod(this RoleBase role, string methodName)
+            => Modules.AbilityGate.Register(role.GetType(), methodName);
         public static bool IsActive(SystemTypes type)
         {
             if (GameStates.IsFreePlay && CustomSpawnEditor.ActiveEditMode) return false;

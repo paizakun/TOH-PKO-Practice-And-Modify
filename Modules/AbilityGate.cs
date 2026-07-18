@@ -38,15 +38,15 @@ namespace TownOfHost.Modules
             harmony.Patch(method, prefix: prefix);
         }
 
-        // __instanceがRoleBaseで、AbilityEnabledがfalseなら本体の実行自体をスキップする(false=元メソッドを実行しない)
+        // __instanceがRoleBaseで、AbilityEnabledがfalseまたは全体的に能力使用不可(Canuseability)なら
+        // 本体の実行自体をスキップする(false=元メソッドを実行しない)
         private static bool Prefix(object __instance, MethodBase __originalMethod)
         {
-            if (__instance is RoleBase role && !role.AbilityEnabled)
-            {
-                Logger.Info($"{role.Player?.Data?.GetLogPlayerName()}: AbilityEnabled=falseのため{__originalMethod.Name}をブロックしました", "AbilityGate");
-                return false;
-            }
-            return true;
+            if (__instance is not RoleBase role) return true;
+            if (role.AbilityEnabled && SelfVoteManager.Canuseability()) return true;
+
+            Logger.Info($"{role.Player?.Data?.GetLogPlayerName()}: 能力使用不可のため{__originalMethod.Name}をブロックしました", "AbilityGate");
+            return false;
         }
     }
 }

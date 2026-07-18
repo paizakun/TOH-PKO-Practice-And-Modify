@@ -36,7 +36,7 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
         divination = new DivinationManager(this, GetDivinationResult);
         UsedAbilityCount = 0;
         CustomRoleManager.MarkOthers.Add(OtherArrow);
-        RegisterAbilityMethod(nameof(UseTellAbility));
+        this.RegisterAbilityMethod(nameof(UseTellAbility));
     }
     /// <summary>オプション値をフィールドへ反映する。役職本体の初期化とは分離している。</summary>
     private void AssignOptions()
@@ -116,7 +116,10 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
     }
     public override bool CancelReportDeadBody(PlayerControl reporter, NetworkedPlayerInfo target, ref DontReportreson reportreson)
     {
-        if (divination.IsPending && reporter.PlayerId == Player.PlayerId && target == null && !canUseEmergencyButton)
+        var isEmergencyButtonPressAsReporter = this.IsSelfEmergencyButtonPress(reporter, target);
+        var isDivining = divination.IsPending;
+        var cannotUseEmergencyButton = !canUseEmergencyButton;
+        if (isEmergencyButtonPressAsReporter && isDivining && cannotUseEmergencyButton)
         {
             reportreson = DontReportreson.CantUseButton;
             return true;
@@ -124,7 +127,10 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
         return false;
     }
     /// <summary>占いの残り回数・必要タスク数・占い中でないか、を全て満たしているか</summary>
-    bool CanUseTellAbility => AbilityMaxUse > UsedAbilityCount && MyTaskState.HasCompletedEnoughCountOfTasks(requiredTaskCount) && !divination.IsPending;
+    bool CanUseTellAbility =>
+        AbilityMaxUse > UsedAbilityCount
+        && MyTaskState.HasCompletedEnoughCountOfTasks(requiredTaskCount)
+        && !divination.IsPending;
     bool ISelfVoter.CanUseVoted() => Canuseability() && CanUseTellAbility;
     public override bool CheckVoteAsVoter(byte votedForId, PlayerControl voter)
     {
@@ -181,7 +187,13 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)
     {
         seen ??= seer;
-        if (isForMeeting && Player.IsAlive() && Awakened && seer.PlayerId == seen.PlayerId && Canuseability() && AbilityMaxUse > UsedAbilityCount && MyTaskState.HasCompletedEnoughCountOfTasks(requiredTaskCount))
+        if (isForMeeting
+            && Player.IsAlive()
+            && Awakened
+            && seer.PlayerId == seen.PlayerId
+            && Canuseability()
+            && AbilityMaxUse > UsedAbilityCount
+            && MyTaskState.HasCompletedEnoughCountOfTasks(requiredTaskCount))
         {
             var mes = $"<color={RoleInfo.RoleColorCode}>{(Votemode == AbilityVoteMode.SelfVote ? GetString("SelfVoteRoleInfoMeg") : GetString("NomalVoteRoleInfoMeg"))}</color>";
             return isForHud ? mes : $"<size=40%>{mes}</size>";

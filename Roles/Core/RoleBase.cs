@@ -41,15 +41,6 @@ public abstract class RoleBase : IDisposable
     /// <see cref="Modules.AbilityGate.Register"/>で登録したメソッドは、これがfalseの間呼び出されても実行されない。
     /// </summary>
     public bool AbilityEnabled = true;
-    /// <summary>
-    /// 能力発動メソッドをAbilityEnabled審査の対象として登録する。コンストラクタなどで、
-    /// 自分自身の能力発動メソッド(private/protected/publicいずれも可)に対して呼ぶ。
-    /// 登録後は、呼び出し元は何も気にせず通常通りそのメソッドを呼ぶだけでよい。
-    /// (AbilityEnabledがfalseの間は、呼んでも中身が実行されない)
-    /// </summary>
-    /// <param name="methodName">nameof(UseAbility)のように、対象メソッドの名前を渡す</param>
-    protected void RegisterAbilityMethod(string methodName)
-        => Modules.AbilityGate.Register(GetType(), methodName);
     public RoleBase(
         SimpleRoleInfo roleInfo,
         PlayerControl player,
