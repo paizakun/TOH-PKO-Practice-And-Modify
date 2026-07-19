@@ -36,8 +36,17 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
         divination = new DivinationManager(this, GetDivinationResult);
         UsedAbilityCount = 0;
         CustomRoleManager.MarkOthers.Add(OtherArrow);
-        this.RegisterAbilityMethod(nameof(UseTellAbility));
+        this.RegisterAbilityMethod(nameof(UseVoteAbility));
     }
+
+    static OptionItem OptionMaximum;
+    static OptionItem OptionVoteMode;
+    static OptionItem OptionRole;
+    static OptionItem OptionCanTaskcount;
+    static OptionItem OptAwakening;
+    static OptionItem TargetCanseeArrow;
+    static OptionItem TargetCanseePlayer;
+    static OptionItem AbilityUseTurnCanButton;
     /// <summary>オプション値をフィールドへ反映する。役職本体の初期化とは分離している。</summary>
     private void AssignOptions()
     {
@@ -49,45 +58,6 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
         canSeePlayerAsTarget = TargetCanseePlayer.GetBool();
         canSeeRole = OptionRole.GetBool();
         canUseEmergencyButton = AbilityUseTurnCanButton.GetBool();
-    }
-
-    static OptionItem OptionMaximum;
-    static OptionItem OptionVoteMode;
-    static OptionItem OptionRole;
-    static OptionItem OptionCanTaskcount;
-    static OptionItem OptAwakening;
-    static OptionItem TargetCanseeArrow;
-    static OptionItem TargetCanseePlayer;
-    static OptionItem AbilityUseTurnCanButton;
-    public AbilityVoteMode Votemode;
-    static bool canUseEmergencyButton;
-    static bool canSeeRole;
-    static int AbilityMaxUse;
-    static int requiredTaskCount;
-    static bool canSeeArrowAsTarget;
-    static bool canSeePlayerAsTarget;
-    int UsedAbilityCount;
-    bool Awakened;
-    readonly DivinationManager divination;
-    static HashSet<AmateurTeller> tellers = new();
-
-    enum Option
-    {
-        AbilityMaxUse,
-        AbilityVotemode,
-        TellRole,
-        AmateurTellerTargetCanseeArrow,
-        AmateurTellerCanUseAbilityTurnButton,
-        AmateurTellerTargetCanseePlayer
-    }
-
-    public override void Add()
-    {
-        tellers.Add(this);
-    }
-    public override void OnDestroy()
-    {
-        tellers.Clear();
     }
     private static void SetupOptionItem()
     {
@@ -101,14 +71,72 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
         OptionCanTaskcount = IntegerOptionItem.Create(RoleInfo, 16, GeneralOption.requiredTaskCount, new(0, 99, 1), 5, false);
         OptAwakening = BooleanOptionItem.Create(RoleInfo, 17, GeneralOption.AbilityAwakening, false, false);
     }
-    public override bool NotifyRolesCheckOtherName => true;
-    public override string GetRoleStatusText(bool comms = false, bool gamelog = false)
+    enum Option
     {
-        var hasEnoughTasks = MyTaskState.HasCompletedEnoughCountOfTasks(requiredTaskCount);
-        var hasUsesLeft = AbilityMaxUse > UsedAbilityCount;
-        var textColor = hasEnoughTasks && hasUsesLeft ? Color.cyan : Color.gray;
-        return Utils.ColorString(textColor, $"({AbilityMaxUse - UsedAbilityCount})");
+        AbilityMaxUse,
+        AbilityVotemode,
+        TellRole,
+        AmateurTellerTargetCanseeArrow,
+        AmateurTellerCanUseAbilityTurnButton,
+        AmateurTellerTargetCanseePlayer
     }
+
+    public AbilityVoteMode Votemode;
+    static bool canUseEmergencyButton;
+    static bool canSeeRole;
+    static int AbilityMaxUse;
+    static int requiredTaskCount;
+    static bool canSeeArrowAsTarget;
+    static bool canSeePlayerAsTarget;
+    int UsedAbilityCount;
+    bool Awakened;
+    readonly DivinationManager divination;
+    static HashSet<AmateurTeller> tellers = new();
+    public static Dictionary<int, Achievement> achievements = new();
+
+    public override void Add()
+    {
+        tellers.Add(this);
+    }
+    public override void OnDestroy()
+    {
+        tellers.Clear();
+    }
+
+    /// <summary>占いの残り回数・必要タスク数・占い中でないか、を全て満たしているか</summary>
+    bool CanUseVoteAbility =>
+        AbilityMaxUse > UsedAbilityCount
+        && MyTaskState.HasCompletedEnoughCountOfTasks(requiredTaskCount)
+        && !divination.IsPending;
+    bool ISelfVoter.CanUseVoted() => Canuseability() && CanUseVoteAbility;
+
+    public override bool CheckVoteAsVoter(byte votedForId, PlayerControl voter)
+    {
+        if (!Canuseability()) return true;
+        if (CanUseVoteAbility && Is(voter))
+        {
+            if (Votemode == AbilityVoteMode.NomalVote)
+            {
+                if (Player.PlayerId == votedForId || votedForId == SkipId) return true;
+                UseVoteAbility(votedForId);
+                return false;
+            }
+            return HandleAbilityVote(Player, votedForId, "Mode.Divied", "Vote.Divied", new VoteAbility(UseVoteAbility));
+        }
+        return true;
+    }
+    public void UseVoteAbility(byte votedForId)
+    {
+        var target = PlayerCatch.GetPlayerById(votedForId);
+        if (!target.IsAlive()) return;
+        UsedAbilityCount++;
+        divination.StartDivination(target);
+        SendRPC();
+        Utils.SendMessage(UtilsName.GetPlayerColor(target.PlayerId) + GetString("AmatruertellerTellMeg"), Player.PlayerId);
+    }
+    /// <summary>占いの結果として見せる役職を決定する。AmateurTellerは素直に対象の役職を返す。</summary>
+    CustomRoles GetDivinationResult(PlayerControl target) => target.GetTellResults(Player);
+
     public override void OnReportDeadBody(PlayerControl reporter, NetworkedPlayerInfo target)
     {
         divination.CompleteDivination();
@@ -126,30 +154,6 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
         }
         return false;
     }
-    /// <summary>占いの残り回数・必要タスク数・占い中でないか、を全て満たしているか</summary>
-    bool CanUseTellAbility =>
-        AbilityMaxUse > UsedAbilityCount
-        && MyTaskState.HasCompletedEnoughCountOfTasks(requiredTaskCount)
-        && !divination.IsPending;
-    bool ISelfVoter.CanUseVoted() => Canuseability() && CanUseTellAbility;
-    public override bool CheckVoteAsVoter(byte votedForId, PlayerControl voter)
-    {
-        if (!Canuseability()) return true;
-        if (CanUseTellAbility && Is(voter))
-            return HandleAbilityVote(Player, votedForId, Votemode, "Mode.Divied", "Vote.Divied", UseTellAbility);
-        return true;
-    }
-    public void UseTellAbility(byte votedForId)
-    {
-        var target = PlayerCatch.GetPlayerById(votedForId);
-        if (!target.IsAlive()) return;
-        UsedAbilityCount++;
-        divination.StartDivination(target);
-        SendRPC();
-        Utils.SendMessage(UtilsName.GetPlayerColor(target.PlayerId) + GetString("AmatruertellerTellMeg"), Player.PlayerId);
-    }
-    /// <summary>占いの結果として見せる役職を決定する。AmateurTellerは素直に対象の役職を返す。</summary>
-    CustomRoles GetDivinationResult(PlayerControl target) => target.GetTellResults(Player);
     public override CustomRoles Misidentify() => Awakened ? CustomRoles.NotAssigned : CustomRoles.Crewmate;
     public override bool OnCompleteTask(uint taskid)
     {
@@ -162,27 +166,19 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
         }
         return true;
     }
-    public static string OtherArrow(PlayerControl seer, PlayerControl seen, bool isForMeeting = false)
+    public override void OnMurderPlayerAsTarget(MurderInfo info)
     {
-        seen ??= seer;
-        if (isForMeeting) return "";
-        if (!canSeePlayerAsTarget) return "";
+        if (info.AppearanceTarget.PlayerId == Player.PlayerId && info.AppearanceKiller.PlayerId == divination.PendingTarget)
+            Achievements.RpcCompleteAchievement(Player.PlayerId, 0, achievements[1]);
+    }
 
-        foreach (var tell in tellers)
-        {
-            if (seer.PlayerId == tell.divination.PendingTarget && seer == seen)
-            {
-                var ar = "";
-                if (seer.GetCustomRole().GetCustomRoleTypes() is not CustomRoleTypes.Crewmate)
-                {
-                    if (canSeeArrowAsTarget) ar = $"\n{TargetArrow.GetArrows(seer, tell.Player.PlayerId)}";
-                    return $"<color=#6b3ec3>★{ar}</color>";
-                }
-            }
-            else if (seer.PlayerId == tell.divination.PendingTarget && seen == tell.Player)
-                return "<color=#6b3ec3>★</color>";
-        }
-        return "";
+    public override bool NotifyRolesCheckOtherName => true;
+    public override string GetRoleStatusText(bool comms = false, bool gamelog = false)
+    {
+        var hasEnoughTasks = MyTaskState.HasCompletedEnoughCountOfTasks(requiredTaskCount);
+        var hasUsesLeft = AbilityMaxUse > UsedAbilityCount;
+        var textColor = hasEnoughTasks && hasUsesLeft ? Color.cyan : Color.gray;
+        return Utils.ColorString(textColor, $"({AbilityMaxUse - UsedAbilityCount})");
     }
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)
     {
@@ -219,6 +215,28 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
             }
         }
     }
+    public static string OtherArrow(PlayerControl seer, PlayerControl seen, bool isForMeeting = false)
+    {
+        seen ??= seer;
+        if (isForMeeting) return "";
+        if (!canSeePlayerAsTarget) return "";
+
+        foreach (var tell in tellers)
+        {
+            if (seer.PlayerId == tell.divination.PendingTarget && seer == seen)
+            {
+                var ar = "";
+                if (seer.GetCustomRole().GetCustomRoleTypes() is not CustomRoleTypes.Crewmate)
+                {
+                    if (canSeeArrowAsTarget) ar = $"\n{TargetArrow.GetArrows(seer, tell.Player.PlayerId)}";
+                    return $"<color=#6b3ec3>★{ar}</color>";
+                }
+            }
+            else if (seer.PlayerId == tell.divination.PendingTarget && seen == tell.Player)
+                return "<color=#6b3ec3>★</color>";
+        }
+        return "";
+    }
 
     public void SendRPC()
     {
@@ -226,7 +244,6 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
         sender.Writer.Write(UsedAbilityCount);
         sender.Writer.Write(divination.PendingTarget);
     }
-
     public override void ReceiveRPC(MessageReader reader)
     {
         UsedAbilityCount = reader.ReadInt32();
@@ -243,12 +260,7 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
             divination.CompleteDivination();
         }
     }
-    public override void OnMurderPlayerAsTarget(MurderInfo info)
-    {
-        if (info.AppearanceTarget.PlayerId == Player.PlayerId && info.AppearanceKiller.PlayerId == divination.PendingTarget)
-            Achievements.RpcCompleteAchievement(Player.PlayerId, 0, achievements[1]);
-    }
-    public static Dictionary<int, Achievement> achievements = new();
+
     [Attributes.PluginModuleInitializer]
     public static void Load()
     {

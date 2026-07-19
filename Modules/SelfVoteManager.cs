@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using TownOfHost.Roles.Impostor;
 using TownOfHost.Roles.Madmate;
@@ -9,6 +8,11 @@ namespace TownOfHost.Modules
 {
     public static class SelfVoteManager
     {
+        /// <summary>
+        /// HandleAbilityVoteで発動する能力のシグネチャ。votedForIdを受けて能力を発動する。
+        /// </summary>
+        public delegate void VoteAbility(byte votedForId);
+
         ///<summary>
         ///MeetingVoteManagerのSkip
         ///</summary>
@@ -82,22 +86,16 @@ namespace TownOfHost.Modules
         }
 
         /// <summary>
-        /// 「対象に投票することで能力を発動する」役職のCheckVoteAsVoter内で使う共通処理。
-        /// NomalVoteなら投票先へそのまま発動、SelfVoteなら自投票モードのON/OFF・スキップ判定を行う。
+        /// 「自投票することで能力を発動する」役職のCheckVoteAsVoter内で使う共通処理。
+        /// 自投票モードのON/OFF・スキップ判定を行い、次の投票で能力を発動する。
         /// ゲージ(count/max等)や覚醒などの使用可否判定は呼び出し側で行ってから渡すこと。
         /// </summary>
         /// <param name="modeMessageKey">セルフ投票モードON時に表示する役職名相当のGetStringキー(例: "Mode.Divied")</param>
         /// <param name="voteMessageKey">セルフ投票モードON時に表示する動作名相当のGetStringキー(例: "Vote.Divied")</param>
         /// <param name="useAbility">投票確定時に呼ぶ、能力発動処理</param>
-        /// <returns>投票自体をキャンセルするか(false)、素通しするか(true)</returns>
-        public static bool HandleAbilityVote(PlayerControl player, byte votedForId, AbilityVoteMode voteMode, string modeMessageKey, string voteMessageKey, Action<byte> useAbility)
+        /// <returns>useAbilityが実行されたら投票キャンセル(false)、実行されなければ投票を反映する(true)</returns>
+        public static bool HandleAbilityVote(PlayerControl player, byte votedForId, string modeMessageKey, string voteMessageKey, VoteAbility useAbility)
         {
-            if (voteMode == AbilityVoteMode.NomalVote)
-            {
-                if (player.PlayerId == votedForId || votedForId == SkipId) return true;
-                useAbility(votedForId);
-                return false;
-            }
             if (CheckSelfVoteMode(player, votedForId, out var status))
             {
                 if (status is VoteStatus.Self)
