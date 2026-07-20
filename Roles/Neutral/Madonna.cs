@@ -89,17 +89,17 @@ public sealed class Madonna : RoleBase, ISelfVoter
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)
     {
         seen ??= seer;
-        if (isForMeeting && Player.IsAlive() && seer.PlayerId == seen.PlayerId && Canuseability() && IsNonLover)
+        if (isForMeeting && Player.IsAlive() && seer.PlayerId == seen.PlayerId && CanUseAbility() && IsNonLover)
         {
             var mes = $"<color={RoleInfo.RoleColorCode}>{GetString("SelfVoteRoleInfoMeg")}</color>";
             return isForHud ? mes : $"<size=40%>{mes}</size>";
         }
         return "";
     }
-    bool ISelfVoter.CanUseVoted() => Canuseability() && !Player.Is(CustomRoles.MadonnaLovers) && IsNonLover;
+    bool ISelfVoter.CanUseVoted() => CanUseAbility() && !Player.Is(CustomRoles.MadonnaLovers) && IsNonLover;
     public override bool CheckVoteAsVoter(byte votedForId, PlayerControl voter)
     {
-        if (!Canuseability()) return true;
+        if (!CanUseAbility()) return true;
         if (!Player.Is(CustomRoles.MadonnaLovers) && IsNonLover && Is(voter))
         {
             if (CheckSelfVoteMode(Player, votedForId, out var status))

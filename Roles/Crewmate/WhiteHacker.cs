@@ -95,7 +95,7 @@ public sealed class WhiteHacker : RoleBase
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)
     {
         seen ??= seer;
-        if (isForMeeting && Player.IsAlive() && Awakened && seer.PlayerId == seen.PlayerId && SelfVoteManager.Canuseability() && Maximum > count && MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount))
+        if (isForMeeting && Player.IsAlive() && Awakened && seer.PlayerId == seen.PlayerId && SelfVoteManager.CanUseAbility() && Maximum > count && MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount))
         {
             var mes = $"<color={RoleInfo.RoleColorCode}>{GetString("NomalVoteRoleInfoMeg")}</color>";
             return isForHud ? mes : $"<size=40%>{mes}</size>";

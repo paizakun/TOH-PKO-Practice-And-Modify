@@ -103,7 +103,7 @@ public sealed class EvilSatellite : RoleBase, IImpostor
     public float CalculateKillCooldown() => OptionKillCoolDown.GetFloat();
     public override bool CheckVoteAsVoter(byte votedForId, PlayerControl voter)
     {
-        if (!Canuseability()) return true;
+        if (!CanUseAbility()) return true;
         if (Is(voter))
         {
             if (CheckSelfVoteMode(Player, votedForId, out var status))
@@ -124,7 +124,7 @@ public sealed class EvilSatellite : RoleBase, IImpostor
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)
     {
         seen ??= seer;
-        if (isForMeeting && Player.IsAlive() && seer.PlayerId == seen.PlayerId && Canuseability())
+        if (isForMeeting && Player.IsAlive() && seer.PlayerId == seen.PlayerId && CanUseAbility())
         {
             var voteinfo = $"<color={RoleInfo.RoleColorCode}>{GetString("SelfVoteRoleInfoMeg")}</color>";
             return isForHud ? voteinfo : $"<size=40%>{voteinfo}</size>";

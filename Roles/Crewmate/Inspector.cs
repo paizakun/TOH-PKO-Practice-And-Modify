@@ -229,14 +229,14 @@ public sealed class Inspector : RoleBase, ISelfVoter
         Isdie = false;
         TargetPlayerId = byte.MaxValue;
     }
-    bool ISelfVoter.CanUseVoted() => Canuseability() && Max > count && TargetPlayerId is byte.MaxValue && Awakened;
+    bool ISelfVoter.CanUseVoted() => CanUseAbility() && Max > count && TargetPlayerId is byte.MaxValue && Awakened;
     public override bool CheckVoteAsVoter(byte votedForId, PlayerControl voter)
     {
-        if (!Canuseability()) return true;
+        if (!CanUseAbility()) return true;
         if (Max > count && Is(voter) && TargetPlayerId is byte.MaxValue && Awakened)
         {
             var target = PlayerCatch.GetPlayerById(votedForId);
-            if (Votemode == AbilityVoteMode.NomalVote)
+            if (Votemode == AbilityVoteMode.NormalVote)
             {
                 if (Player.PlayerId == votedForId || votedForId == SkipId) return true;
                 Inspect(votedForId);

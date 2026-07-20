@@ -100,17 +100,17 @@ public sealed class ConnectSaver : RoleBase, IImpostor, ISelfVoter
     {
         seen ??= seer;
         if (PlayerCatch.AllAlivePlayersCount < OptionMinimumPlayerCount.GetInt()) return "";
-        if (isForMeeting && Player.IsAlive() && seer.PlayerId == seen.PlayerId && Canuseability() && Max > usedcount)
+        if (isForMeeting && Player.IsAlive() && seer.PlayerId == seen.PlayerId && CanUseAbility() && Max > usedcount)
         {
             var mes = $"<color={RoleInfo.RoleColorCode}>{GetString("SelfVoteRoleInfoMeg")}</color>";
             return isForHud ? mes : $"<size=40%>{mes}</size>";
         }
         return "";
     }
-    bool ISelfVoter.CanUseVoted() => Canuseability() && !(PlayerCatch.AllAlivePlayersCount < OptionMinimumPlayerCount.GetInt()) && Max > usedcount && (target1 == byte.MaxValue || target2 == byte.MaxValue);
+    bool ISelfVoter.CanUseVoted() => CanUseAbility() && !(PlayerCatch.AllAlivePlayersCount < OptionMinimumPlayerCount.GetInt()) && Max > usedcount && (target1 == byte.MaxValue || target2 == byte.MaxValue);
     public override bool CheckVoteAsVoter(byte votedForId, PlayerControl voter)
     {
-        if (!Canuseability()) return true;
+        if (!CanUseAbility()) return true;
         if (Madmate.MadAvenger.Skill) return true;
         if (PlayerCatch.AllAlivePlayersCount < OptionMinimumPlayerCount.GetInt()) return true;
         if (Is(voter) && Max > usedcount && (target1 == byte.MaxValue || target2 == byte.MaxValue))

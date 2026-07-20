@@ -99,21 +99,21 @@ public sealed class MadTeller : RoleBase, IKillFlashSeeable, IDeathReasonSeeable
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)
     {
         seen ??= seer;
-        if (isForMeeting && Player.IsAlive() && seer.PlayerId == seen.PlayerId && Canuseability() && Max > count && Check())
+        if (isForMeeting && Player.IsAlive() && seer.PlayerId == seen.PlayerId && CanUseAbility() && Max > count && Check())
         {
             var mes = $"<color={RoleInfo.RoleColorCode}>{(Votemode == AbilityVoteMode.SelfVote ? GetString("SelfVoteRoleInfoMeg") : GetString("NomalVoteRoleInfoMeg"))}</color>";
             return isForHud ? mes : $"<size=40%>{mes}</size>";
         }
         return "";
     }
-    bool ISelfVoter.CanUseVoted() => Canuseability() && Max > count && Check() && (MeetingUsedcount < onemeetingmaximum || onemeetingmaximum == 0);
+    bool ISelfVoter.CanUseVoted() => CanUseAbility() && Max > count && Check() && (MeetingUsedcount < onemeetingmaximum || onemeetingmaximum == 0);
 
     public override bool CheckVoteAsVoter(byte votedForId, PlayerControl voter)
     {
-        if (!Canuseability()) return true;
+        if (!CanUseAbility()) return true;
         if (Max > count && Is(voter) && Check() && (MeetingUsedcount < onemeetingmaximum || onemeetingmaximum == 0))
         {
-            if (Votemode == AbilityVoteMode.NomalVote)
+            if (Votemode == AbilityVoteMode.NormalVote)
             {
                 if (Player.PlayerId == votedForId || votedForId == SkipId) return true;
                 UseTellAbility(votedForId);

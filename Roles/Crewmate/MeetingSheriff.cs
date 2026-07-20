@@ -99,18 +99,18 @@ public sealed class MeetingSheriff : RoleBase, ISelfVoter
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)
     {
         seen ??= seer;
-        if (isForMeeting && Player.IsAlive() && seer.PlayerId == seen.PlayerId && Canuseability() && Max > Usedcount && MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount))
+        if (isForMeeting && Player.IsAlive() && seer.PlayerId == seen.PlayerId && CanUseAbility() && Max > Usedcount && MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount))
         {
             var mes = $"<color={RoleInfo.RoleColorCode}>{GetString("SelfVoteRoleInfoMeg")}</color>";
             return isForHud ? mes : $"<size=40%>{mes}</size>";
         }
         return "";
     }
-    bool ISelfVoter.CanUseVoted() => Canuseability() && Max > Usedcount && MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount) && (MeetingUsedcount < OneMeetingMaximum || OneMeetingMaximum == 0);
+    bool ISelfVoter.CanUseVoted() => CanUseAbility() && Max > Usedcount && MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount) && (MeetingUsedcount < OneMeetingMaximum || OneMeetingMaximum == 0);
 
     public override bool CheckVoteAsVoter(byte votedForId, PlayerControl voter)
     {
-        if (!Canuseability()) return true;
+        if (!CanUseAbility()) return true;
         if (Max > Usedcount && Is(voter) && MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount) && (MeetingUsedcount < OneMeetingMaximum || OneMeetingMaximum == 0))
         {
             if (CheckSelfVoteMode(Player, votedForId, out var status))

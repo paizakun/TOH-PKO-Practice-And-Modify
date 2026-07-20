@@ -113,7 +113,7 @@ public sealed class BatGirl : RoleBase, ISelfVoter, IUsePhantomButton, IAddition
         AURoleOptions.PhantomCooldown = OptionSuicideCooldown.GetFloat();
     }
 
-    bool ISelfVoter.CanUseVoted() => Canuseability() && Player.IsAlive() && princeId == byte.MaxValue;
+    bool ISelfVoter.CanUseVoted() => CanUseAbility() && Player.IsAlive() && princeId == byte.MaxValue;
 
     public override bool CheckVoteAsVoter(byte votedForId, PlayerControl voter)
     {
@@ -478,7 +478,7 @@ public sealed class BatGirl : RoleBase, ISelfVoter, IUsePhantomButton, IAddition
         seen ??= seer;
         if (seer.PlayerId != Player.PlayerId || seen.PlayerId != Player.PlayerId || !Player.IsAlive()) return "";
 
-        if (isForMeeting && princeId == byte.MaxValue && Canuseability())
+        if (isForMeeting && princeId == byte.MaxValue && CanUseAbility())
         {
             var text = inLoveMode ? GetString("BatGirlVoteModeOn") : GetString("SelfVoteRoleInfoMeg");
             var msg = $"<color={RoleInfo.RoleColorCode}>{text}</color>";

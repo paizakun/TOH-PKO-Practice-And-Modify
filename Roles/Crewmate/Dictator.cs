@@ -44,7 +44,7 @@ public sealed class Dictator : RoleBase, ISelfVoter
     bool ISelfVoter.CanUseVoted() => false;
     public override bool CheckVoteAsVoter(byte votedForId, PlayerControl voter)
     {
-        if (!Canuseability()) return true;
+        if (!CanUseAbility()) return true;
 
         if (Is(voter))
         {
@@ -73,7 +73,7 @@ public sealed class Dictator : RoleBase, ISelfVoter
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)
     {
         seen ??= seer;
-        if (isForMeeting && Player.IsAlive() && seer.PlayerId == seen.PlayerId && Canuseability())
+        if (isForMeeting && Player.IsAlive() && seer.PlayerId == seen.PlayerId && CanUseAbility())
         {
             var mes = $"<color={RoleInfo.RoleColorCode}>{(OptionSelfVote.GetBool() ? GetString("SelfVoteRoleInfoMeg") : GetString("NomalVoteRoleInfoMeg"))}</color>";
             return isForHud ? mes : $"<size=40%>{mes}</size>";
@@ -84,7 +84,7 @@ public sealed class Dictator : RoleBase, ISelfVoter
     {
         var (votedForId, numVotes, doVote) = base.ModifyVote(voterId, sourceVotedForId, isIntentional);
         var baseVote = (votedForId, numVotes, doVote);
-        if (!isIntentional || !Canuseability() || OptionSelfVote.GetBool() || voterId != Player.PlayerId || sourceVotedForId == Player.PlayerId || sourceVotedForId >= 253 || !Player.IsAlive())
+        if (!isIntentional || !CanUseAbility() || OptionSelfVote.GetBool() || voterId != Player.PlayerId || sourceVotedForId == Player.PlayerId || sourceVotedForId >= 253 || !Player.IsAlive())
         {
             return baseVote;
         }

@@ -91,7 +91,7 @@ public static class GuessManager
                 Utils.SendMessage(GetString("GuessErrorMadAvenger"), pc.PlayerId, $"<#ff1919>{GetString("GuessErrorMadAvengerTitle")}</color>");
                 return true;
             }
-            if (!SelfVoteManager.Canuseability())
+            if (!SelfVoteManager.CanUseAbility())
             {
                 return true;
             }

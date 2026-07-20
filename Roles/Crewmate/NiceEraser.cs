@@ -144,7 +144,7 @@ public sealed class NiceEraser : RoleBase, ISelfVoter
 
     private bool CanUseAbilityNow()
     {
-        if (!Canuseability()) return false;
+        if (!CanUseAbility()) return false;
         if (!Player.IsAlive()) return false;
         if (!awakened) return false;
         if (!MyTaskState.HasCompletedEnoughCountOfTasks(taskCount)) return false;
@@ -160,7 +160,7 @@ public sealed class NiceEraser : RoleBase, ISelfVoter
         if (!Is(voter)) return true;
         if (!CanUseAbilityNow()) return true;
 
-        if (voteMode == AbilityVoteMode.NomalVote)
+        if (voteMode == AbilityVoteMode.NormalVote)
         {
             if (votedForId == Player.PlayerId || votedForId == SkipId || votedForId >= 253) return true;
             TryQueueReform(votedForId);

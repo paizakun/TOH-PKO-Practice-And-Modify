@@ -233,7 +233,7 @@ public sealed class MassMedia : RoleBase, IKiller, IKillFlashSeeable
     public bool? CheckKillFlash(MurderInfo info) => info.AppearanceTarget.PlayerId == Targetid && Canseekillflash;
     public override bool CheckVoteAsVoter(byte votedForId, PlayerControl voter)
     {
-        if (!SelfVoteManager.Canuseability()) return true;
+        if (!SelfVoteManager.CanUseAbility()) return true;
         if (Is(voter) && GuessMode && Player.Is(CustomRoles.MassMedia))
         {
             if (votedForId == 253)

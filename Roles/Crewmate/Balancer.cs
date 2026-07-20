@@ -94,10 +94,10 @@ public sealed class Balancer : RoleBase, ISelfVoter
             nickname = null;
         }
     }
-    bool ISelfVoter.CanUseVoted() => Canuseability() && !used && Id is not 255 && (CanUseAllAlive || GameStates.AlreadyDied);
+    bool ISelfVoter.CanUseVoted() => CanUseAbility() && !used && Id is not 255 && (CanUseAllAlive || GameStates.AlreadyDied);
     public override bool CheckVoteAsVoter(byte votedForId, PlayerControl voter)
     {
-        if (!Canuseability()) return true;
+        if (!CanUseAbility()) return true;
         //誰かが天秤を発動していて、自分ではないなら実行しない
         if (Id is not 255 && Id != Player.PlayerId) return true;
         //発動してるなら～
@@ -393,7 +393,7 @@ public sealed class Balancer : RoleBase, ISelfVoter
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)
     {
         seen ??= seer;
-        if (isForMeeting && Player.IsAlive() && (!GameStates.AlreadyDied || CanUseAllAlive) && seer.PlayerId == seen.PlayerId && Canuseability() && !used)
+        if (isForMeeting && Player.IsAlive() && (!GameStates.AlreadyDied || CanUseAllAlive) && seer.PlayerId == seen.PlayerId && CanUseAbility() && !used)
         {
             var mes = $"<color={RoleInfo.RoleColorCode}>{GetString("SelfVoteRoleInfoMeg")}</color>";
             return isForHud ? mes : $"<size=40%>{mes}</size>";

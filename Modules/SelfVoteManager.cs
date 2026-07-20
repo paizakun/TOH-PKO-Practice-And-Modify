@@ -70,7 +70,7 @@ namespace TownOfHost.Modules
         public static void SetMode(PlayerControl player, bool mode)
             => CheckVote[player.PlayerId] = mode;
 
-        public static bool Canuseability()
+        public static bool CanUseAbility()
         {
             if (MadAvenger.Skill) return false;
             if (Options.firstturnmeeting && Options.FirstTurnMeetingCantability.GetBool() && MeetingStates.FirstMeeting) return false;
@@ -81,7 +81,7 @@ namespace TownOfHost.Modules
 
         public enum AbilityVoteMode
         {
-            NomalVote,
+            NormalVote,
             SelfVote,
         }
 

@@ -170,7 +170,7 @@ public sealed class Walkure : RoleBase, ISelfVoter, IKiller
 
     private bool CanUseRevealAbility()
     {
-        if (!Canuseability()) return false;
+        if (!CanUseAbility()) return false;
         if (!Player.IsAlive()) return false;
         var limit = OptionMeetingRevealLimit.GetInt();
         return limit == 0 || meetingRevealCount < limit;

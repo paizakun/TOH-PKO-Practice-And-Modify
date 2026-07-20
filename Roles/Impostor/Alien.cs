@@ -779,10 +779,10 @@ public sealed class Alien : RoleBase, IMeetingTimeAlterable, IImpostor, INekomat
     #endregion
 
     #region 植え付け
-    bool ISelfVoter.CanUseVoted() => Canuseability() && OptUetukeCount.GetInt() > Uetukecount && !UetukeUsed && mode != AlienMode.None && mode != AlienMode.Normal;
+    bool ISelfVoter.CanUseVoted() => CanUseAbility() && OptUetukeCount.GetInt() > Uetukecount && !UetukeUsed && mode != AlienMode.None && mode != AlienMode.Normal;
     public override bool CheckVoteAsVoter(byte votedForId, PlayerControl voter)
     {
-        if (!Canuseability()) return true;
+        if (!CanUseAbility()) return true;
         if (OptUetukeCount.GetInt() > Uetukecount && Is(voter) && !UetukeUsed && mode != AlienMode.None && mode != AlienMode.Normal)
         {
             var target = PlayerCatch.GetPlayerById(votedForId);

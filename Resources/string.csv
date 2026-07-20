@@ -2749,7 +2749,7 @@
 "NiceLoggerTitle","===DoorLog===","ドアログ情報"
 "NiceLoggerAbility","\n<u>{0} has passed {1}'s sensor.","\n<u>{0}が{1}のセンサーを通過した。</u>"
 "NiceLoggerAbility2","\n<u>None of them passed the sensors on the {0}</u>","\n<u>誰も{0}のセンサーを通過しなかったようだ。</u>"
-"AmatruertellerTellMeg","Divine","を占おう..."
+"AmateurTellerTellMeg","Divine","を占おう..."
 "CurseMakerMeetingMeg","<#553d59>CurseMaker</color> was {0} players Cursed...","<#554d59>カースメーカー</color>が{0}人の船員を呪った..."
 
 "PhantomThiefTitle","<align="center"><size=150%>～～</size>","<align="center"><size=150%>～予告状～</size>"

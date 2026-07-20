@@ -35,7 +35,7 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
 
         divination = new DivinationManager(this, GetDivinationResult);
         UsedAbilityCount = 0;
-        CustomRoleManager.MarkOthers.Add(OtherArrow);
+        CustomRoleManager.MarkOthers.Add(OtherArrow); // OtherArrowを名前表示マーク計算関数として登録
         this.RegisterAbilityMethod(nameof(UseVoteAbility));
     }
 
@@ -108,14 +108,14 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
         AbilityMaxUse > UsedAbilityCount
         && MyTaskState.HasCompletedEnoughCountOfTasks(requiredTaskCount)
         && !divination.IsPending;
-    bool ISelfVoter.CanUseVoted() => Canuseability() && CanUseVoteAbility;
+    bool ISelfVoter.CanUseVoted() => CanUseAbility() && CanUseVoteAbility;
 
     public override bool CheckVoteAsVoter(byte votedForId, PlayerControl voter)
     {
-        if (!Canuseability()) return true;
+        if (!CanUseAbility()) return true;
         if (CanUseVoteAbility && Is(voter))
         {
-            if (Votemode == AbilityVoteMode.NomalVote)
+            if (Votemode == AbilityVoteMode.NormalVote)
             {
                 if (Player.PlayerId == votedForId || votedForId == SkipId) return true;
                 UseVoteAbility(votedForId);
@@ -132,7 +132,7 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
         UsedAbilityCount++;
         divination.StartDivination(target);
         SendRPC();
-        Utils.SendMessage(UtilsName.GetPlayerColor(target.PlayerId) + GetString("AmatruertellerTellMeg"), Player.PlayerId);
+        Utils.SendMessage(UtilsName.GetPlayerColor(target.PlayerId) + GetString("AmateurTellerTellMeg"), Player.PlayerId);
     }
     /// <summary>占いの結果として見せる役職を決定する。AmateurTellerは素直に対象の役職を返す。</summary>
     CustomRoles GetDivinationResult(PlayerControl target) => target.GetTellResults(Player);
@@ -142,14 +142,14 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
         divination.CompleteDivination();
         SendRPC();
     }
-    public override bool CancelReportDeadBody(PlayerControl reporter, NetworkedPlayerInfo target, ref DontReportreson reportreson)
+    public override bool CancelReportDeadBody(PlayerControl reporter, NetworkedPlayerInfo target, ref DontReportreson reportReason)
     {
         var isEmergencyButtonPressAsReporter = this.IsSelfEmergencyButtonPress(reporter, target);
         var isDivining = divination.IsPending;
         var cannotUseEmergencyButton = !canUseEmergencyButton;
         if (isEmergencyButtonPressAsReporter && isDivining && cannotUseEmergencyButton)
         {
-            reportreson = DontReportreson.CantUseButton;
+            reportReason = DontReportreson.CantUseButton;
             return true;
         }
         return false;
@@ -187,7 +187,7 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
             && Player.IsAlive()
             && Awakened
             && seer.PlayerId == seen.PlayerId
-            && Canuseability()
+            && CanUseAbility()
             && AbilityMaxUse > UsedAbilityCount
             && MyTaskState.HasCompletedEnoughCountOfTasks(requiredTaskCount))
         {
@@ -215,6 +215,11 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
             }
         }
     }
+    /// <summary>
+    /// CustomRoleManager.MarkOthersに登録される、名前表示マーク計算関数。
+    /// UtilsNotifyRoles内の全プレイヤー×全プレイヤーの組み合わせを走査するループから、
+    /// 全seer・全targetの組み合わせについて毎回呼ばれる。
+    /// </summary>
     public static string OtherArrow(PlayerControl seer, PlayerControl seen, bool isForMeeting = false)
     {
         seen ??= seer;
@@ -232,7 +237,9 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
                     return $"<color=#6b3ec3>★{ar}</color>";
                 }
             }
-            else if (seer.PlayerId == tell.divination.PendingTarget && seen == tell.Player)
+            else if (seer.PlayerId == tell.divination.PendingTarget
+                && seen == tell.Player
+                && seer.GetCustomRole().GetCustomRoleTypes() is not CustomRoleTypes.Crewmate)
                 return "<color=#6b3ec3>★</color>";
         }
         return "";

@@ -82,7 +82,7 @@ public sealed class Nue : RoleBase, ISelfVoter, IKiller
 
     public override bool CheckVoteAsVoter(byte votedForId, PlayerControl voter)
     {
-        if (!SelfVoteManager.Canuseability()) return true;
+        if (!SelfVoteManager.CanUseAbility()) return true;
         if (!GuessedFool && !Guessed && Is(voter) && MyTaskState.HasCompletedEnoughCountOfTasks(canusevotecount))
         {
             if (SelfVoteManager.CheckSelfVoteMode(Player, votedForId, out var status))

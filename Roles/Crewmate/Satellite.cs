@@ -130,7 +130,7 @@ public sealed class Satellite : RoleBase, ISelfVoter
             }
         }
     }
-    bool ISelfVoter.CanUseVoted() => Canuseability() && !IsAwaken && CanUseAbility && (MeetingUsedSkillCount <= meetingmaximum || meetingmaximum == 0);
+    bool ISelfVoter.CanUseVoted() => CanUseAbility() && !IsAwaken && CanUseAbility && (MeetingUsedSkillCount <= meetingmaximum || meetingmaximum == 0);
     public override bool CheckVoteAsVoter(byte votedForId, PlayerControl voter)
     {
         if (Is(voter) && !IsAwaken && CanUseAbility && (MeetingUsedSkillCount <= meetingmaximum || meetingmaximum == 0))

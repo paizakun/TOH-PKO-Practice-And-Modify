@@ -43,7 +43,7 @@ namespace TownOfHost.Modules
         private static bool Prefix(object __instance, MethodBase __originalMethod)
         {
             if (__instance is not RoleBase role) return true;
-            if (role.AbilityEnabled && SelfVoteManager.Canuseability()) return true;
+            if (role.AbilityEnabled && SelfVoteManager.CanUseAbility()) return true;
 
             Logger.Info($"{role.Player?.Data?.GetLogPlayerName()}: 能力使用不可のため{__originalMethod.Name}をブロックしました", "AbilityGate");
             return false;

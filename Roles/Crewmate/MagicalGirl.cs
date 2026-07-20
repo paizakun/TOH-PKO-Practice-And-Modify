@@ -169,7 +169,7 @@ public sealed class MagicalGirl : RoleBase, ISelfVoter, IKiller, IUsePhantomButt
     private bool CanUseTransformAbility()
     {
         if (!Player.IsAlive()) return false;
-        if (!SelfVoteManager.Canuseability()) return false;
+        if (!SelfVoteManager.CanUseAbility()) return false;
         if (IsTransformed) return false;
         if (!MyTaskState.HasCompletedEnoughCountOfTasks(requiredTasks)) return false;
         return HasAnyCandidateRole();

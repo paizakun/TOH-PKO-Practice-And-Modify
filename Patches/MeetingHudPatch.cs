@@ -288,7 +288,7 @@ public static class MeetingHudPatch
             {
                 Send += "<#640125>！" + GetString("Warning.OverrideExiledPlayer") + "</color>\n";
             }
-            if (!SelfVoteManager.Canuseability())
+            if (!SelfVoteManager.CanUseAbility())
             {
                 Send += "<#998317>◇" + GetString("Warning.CannotUseAbility") + "</color>\n";
             }

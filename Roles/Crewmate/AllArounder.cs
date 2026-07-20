@@ -121,7 +121,7 @@ public sealed class AllArounder : RoleBase, ISystemTypeUpdateHook, IKillFlashSee
     {
         var (votedForId, numVotes, doVote) = base.ModifyVote(voterId, sourceVotedForId, isIntentional);
         var baseVote = (votedForId, numVotes, doVote);
-        if (!isIntentional || !CanUseAbility() || !SelfVoteManager.Canuseability() || voterId != Player.PlayerId || sourceVotedForId == Player.PlayerId || sourceVotedForId >= 253 || !Player.IsAlive())
+        if (!isIntentional || !CanUseAbility() || !SelfVoteManager.CanUseAbility() || voterId != Player.PlayerId || sourceVotedForId == Player.PlayerId || sourceVotedForId >= 253 || !Player.IsAlive())
         {
             return baseVote;
         }
@@ -142,7 +142,7 @@ public sealed class AllArounder : RoleBase, ISystemTypeUpdateHook, IKillFlashSee
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)
     {
         seen ??= seer;
-        if (isForMeeting && Player.IsAlive() && seer.PlayerId == seen.PlayerId && CanUseAbility() && SelfVoteManager.Canuseability())
+        if (isForMeeting && Player.IsAlive() && seer.PlayerId == seen.PlayerId && CanUseAbility() && SelfVoteManager.CanUseAbility())
         {
             if (NowRole is NowMode.Dictator)
             {
@@ -221,11 +221,11 @@ public sealed class AllArounder : RoleBase, ISystemTypeUpdateHook, IKillFlashSee
     #endregion
     #region Sheriff
     bool ISelfVoter.CanUseVoted() => OptionSheriffShotLimit.GetInt() > NowCount && CanUseAbility() && NowRole is NowMode.MeetingSheriff && (MeetingCount < Option1MeetingMaximum.GetInt() || Option1MeetingMaximum.GetInt() == 0)
-    && Canuseability() && CanUseAbility();
+    && SelfVoteManager.CanUseAbility() && CanUseAbility();
 
     public override bool CheckVoteAsVoter(byte votedForId, PlayerControl voter)
     {
-        if (!Canuseability()) return true;
+        if (!SelfVoteManager.CanUseAbility()) return true;
         if (OptionSheriffShotLimit.GetInt() > NowCount && Is(voter) && CanUseAbility() && NowRole is NowMode.MeetingSheriff && (MeetingCount < Option1MeetingMaximum.GetInt() || Option1MeetingMaximum.GetInt() == 0))
         {
             if (CheckSelfVoteMode(Player, votedForId, out var status))

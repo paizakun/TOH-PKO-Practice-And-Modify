@@ -207,7 +207,7 @@ public sealed class SuspiciousTeller : RoleBase, ISelfVoter
 
     private bool CanUseTellAbility()
     {
-        if (!Canuseability()) return false;
+        if (!CanUseAbility()) return false;
         if (!Player.IsAlive()) return false;
         if (!awakened) return false;
         if (!MyTaskState.HasCompletedEnoughCountOfTasks(taskCount)) return false;
@@ -223,7 +223,7 @@ public sealed class SuspiciousTeller : RoleBase, ISelfVoter
         if (!Is(voter)) return true;
         if (!CanUseTellAbility()) return true;
 
-        if (voteMode == AbilityVoteMode.NomalVote)
+        if (voteMode == AbilityVoteMode.NormalVote)
         {
             if (votedForId == Player.PlayerId || votedForId == SkipId || votedForId >= 253) return true;
             UseTellAbility(votedForId);

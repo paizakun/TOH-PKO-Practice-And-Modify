@@ -135,7 +135,7 @@ public sealed class Amateras : RoleBase, ISelfVoter, IAdditionalWinner
         Instances.Remove(this);
     }
 
-    bool ISelfVoter.CanUseVoted() => Player.IsAlive() && Canuseability() && wishTargetId == byte.MaxValue;
+    bool ISelfVoter.CanUseVoted() => Player.IsAlive() && CanUseAbility() && wishTargetId == byte.MaxValue;
 
     public override bool CheckVoteAsVoter(byte votedForId, PlayerControl voter)
     {
