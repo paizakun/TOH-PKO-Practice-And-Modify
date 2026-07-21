@@ -620,6 +620,10 @@ public static class CustomRoleManager
         {
             sb.Append(marker(seer, seen, isForMeeting));
         }
+        foreach (var role in AllActiveRoles.Values)
+        {
+            sb.Append(role.GetBroadcastMark(seer, seen, isForMeeting));
+        }
         return sb.ToString();
     }
     /// <summary>
@@ -638,6 +642,10 @@ public static class CustomRoleManager
         {
             sb.Append(lower(seer, seen, isForMeeting, isForHud));
         }
+        foreach (var role in AllActiveRoles.Values)
+        {
+            sb.Append(role.GetBroadcastLowerText(seer, seen, isForMeeting, isForHud));
+        }
         return sb.ToString();
     }
     /// <summary>
@@ -654,6 +662,10 @@ public static class CustomRoleManager
         foreach (var suffix in SuffixOthers)
         {
             sb.Append(suffix(seer, seen, isForMeeting));
+        }
+        foreach (var role in AllActiveRoles.Values)
+        {
+            sb.Append(role.GetBroadcastSuffix(seer, seen, isForMeeting));
         }
         return sb.ToString();
     }

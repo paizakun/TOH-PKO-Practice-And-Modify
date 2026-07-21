@@ -414,8 +414,8 @@ public abstract class RoleBase : IDisposable
     public virtual string GetRoleStatusText(bool comms = false, bool GameLog = false) => "";
     /// <summary>
     /// seerが自分であるときのMark
-    /// seer,seenともに自分以外であるときに表示したい場合は同じ引数でstaticとして実装し
-    /// CustomRoleManager.MarkOthersに登録する
+    /// seer,seenともに自分以外であるときに表示したい場合はGetBroadcastMarkをoverrideする
+    /// (CustomRoleManager.AllActiveRolesを通じて全役職インスタンスにブロードキャストされる)
     /// </summary>
     /// <param name="seer">見る側</param>
     /// <param name="seen">見られる側</param>
@@ -424,8 +424,8 @@ public abstract class RoleBase : IDisposable
     public virtual string GetMark(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false) => "";
     /// <summary>
     /// seerが自分であるときのLowerTex
-    /// seer,seenともに自分以外であるときに表示したい場合は同じ引数でstaticとして実装し
-    /// CustomRoleManager.LowerOthersに登録する
+    /// seer,seenともに自分以外であるときに表示したい場合はGetBroadcastLowerTextをoverrideする
+    /// (CustomRoleManager.AllActiveRolesを通じて全役職インスタンスにブロードキャストされる)
     /// </summary>
     /// <param name="seer">見る側</param>
     /// <param name="seen">見られる側</param>
@@ -435,14 +435,46 @@ public abstract class RoleBase : IDisposable
     public virtual string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false) => "";
     /// <summary>
     /// seer自分であるときのSuffix
-    /// seer,seenともに自分以外であるときに表示したい場合は同じ引数でstaticとして実装し
-    /// CustomRoleManager.SuffixOthersに登録する
+    /// seer,seenともに自分以外であるときに表示したい場合はGetBroadcastSuffixをoverrideする
+    /// (CustomRoleManager.AllActiveRolesを通じて全役職インスタンスにブロードキャストされる)
     /// </summary>
     /// <param name="seer">見る側</param>
     /// <param name="seen">見られる側</param>
     /// <param name="isForMeeting">会議中フラグ</param>
     /// <returns>構築したMark</returns>
     public virtual string GetSuffix(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false) => "";
+    /// <summary>
+    /// seer,seenが役職であるかに関わらず発動するMark。
+    /// CustomRoleManager.AllActiveRolesを使って全役職インスタンスに対しブロードキャストされる
+    /// (CustomRoleManager.MarkOthersへの.Add登録は不要。OnDeadと同じブロードキャスト方式)。
+    /// 名前は既存の静的登録関数の慣習名(GetMarkOthers)と衝突するため、あえてGetBroadcastMarkにしている。
+    /// </summary>
+    /// <param name="seer">見る側</param>
+    /// <param name="seen">見られる側</param>
+    /// <param name="isForMeeting">会議中フラグ</param>
+    /// <returns>構築したMark</returns>
+    public virtual string GetBroadcastMark(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false) => "";
+    /// <summary>
+    /// seer,seenが役職であるかに関わらず発動するLowerText。
+    /// CustomRoleManager.AllActiveRolesを使って全役職インスタンスに対しブロードキャストされる
+    /// (CustomRoleManager.LowerOthersへの.Add登録は不要)。
+    /// </summary>
+    /// <param name="seer">見る側</param>
+    /// <param name="seen">見られる側</param>
+    /// <param name="isForMeeting">会議中フラグ</param>
+    /// <param name="isForHud">ModでHudとして表示する場合</param>
+    /// <returns>構築したLowerText</returns>
+    public virtual string GetBroadcastLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false) => "";
+    /// <summary>
+    /// seer,seenが役職であるかに関わらず発動するSuffix。
+    /// CustomRoleManager.AllActiveRolesを使って全役職インスタンスに対しブロードキャストされる
+    /// (CustomRoleManager.SuffixOthersへの.Add登録は不要)。
+    /// </summary>
+    /// <param name="seer">見る側</param>
+    /// <param name="seen">見られる側</param>
+    /// <param name="isForMeeting">会議中フラグ</param>
+    /// <returns>構築したSuffix</returns>
+    public virtual string GetBroadcastSuffix(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false) => "";
 
     public virtual bool AllEnabledColor => false;
     /// <summary>

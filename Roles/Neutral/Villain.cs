@@ -396,6 +396,12 @@ public sealed class Villain : RoleBase, ILNKiller, ISelfVoter
 
     public override string GetSuffix(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false)
         => !Realized ? (addRole?.GetSuffix(seer, seen, isForMeeting) ?? "") : "";
+    public override string GetBroadcastMark(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false)
+        => !Realized ? (addRole?.GetBroadcastMark(seer, seen, isForMeeting) ?? "") : "";
+    public override string GetBroadcastLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)
+        => !Realized ? (addRole?.GetBroadcastLowerText(seer, seen, isForMeeting, isForHud) ?? "") : "";
+    public override string GetBroadcastSuffix(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false)
+        => !Realized ? (addRole?.GetBroadcastSuffix(seer, seen, isForMeeting) ?? "") : "";
 
     void SendRPC()
     {

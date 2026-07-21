@@ -182,6 +182,9 @@ public sealed class JackalWolf : RoleBase, ILNKiller, IUsePhantomButton, IDouble
     public override string GetMark(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false) => AddRole?.GetMark(seer, seen, isForMeeting);
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false) => AddRole?.GetLowerText(seer, seen, isForMeeting, isForHud);
     public override string GetSuffix(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false) => AddRole?.GetSuffix(seer, seen, isForMeeting);
+    public override string GetBroadcastMark(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false) => AddRole?.GetBroadcastMark(seer, seen, isForMeeting) ?? "";
+    public override string GetBroadcastLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false) => AddRole?.GetBroadcastLowerText(seer, seen, isForMeeting, isForHud) ?? "";
+    public override string GetBroadcastSuffix(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false) => AddRole?.GetBroadcastSuffix(seer, seen, isForMeeting) ?? "";
     public override string GetAbilityButtonText() => AddRole?.GetAbilityButtonText();
     public override bool OverrideAbilityButton(out string text)
     {

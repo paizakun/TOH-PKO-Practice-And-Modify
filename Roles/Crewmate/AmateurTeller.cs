@@ -35,7 +35,6 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
 
         divination = new DivinationManager(this, GetDivinationResult);
         UsedAbilityCount = 0;
-        CustomRoleManager.MarkOthers.Add(OtherArrow); // OtherArrowを名前表示マーク計算関数として登録
         this.RegisterAbilityMethod(nameof(UseVoteAbility));
     }
 
@@ -91,16 +90,16 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
     int UsedAbilityCount;
     bool Awakened;
     readonly DivinationManager divination;
-    static HashSet<AmateurTeller> tellers = new();
+    static HashSet<AmateurTeller> amateurTellers = new();
     public static Dictionary<int, Achievement> achievements = new();
 
     public override void Add()
     {
-        tellers.Add(this);
+        amateurTellers.Add(this);
     }
     public override void OnDestroy()
     {
-        tellers.Clear();
+        amateurTellers.Remove(this);
     }
 
     /// <summary>占いの残り回数・必要タスク数・占い中でないか、を全て満たしているか</summary>
@@ -191,7 +190,7 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
             && AbilityMaxUse > UsedAbilityCount
             && MyTaskState.HasCompletedEnoughCountOfTasks(requiredTaskCount))
         {
-            var mes = $"<color={RoleInfo.RoleColorCode}>{(Votemode == AbilityVoteMode.SelfVote ? GetString("SelfVoteRoleInfoMeg") : GetString("NomalVoteRoleInfoMeg"))}</color>";
+            var mes = $"<color={RoleInfo.RoleColorCode}>{(Votemode == AbilityVoteMode.SelfVote ? GetString("SelfVoteRoleInfoMeg") : GetString("NormalVoteRoleInfoMeg"))}</color>";
             return isForHud ? mes : $"<size=40%>{mes}</size>";
         }
         return "";
@@ -216,34 +215,31 @@ public sealed class AmateurTeller : RoleBase, ISelfVoter
         }
     }
     /// <summary>
-    /// CustomRoleManager.MarkOthersに登録される、名前表示マーク計算関数。
-    /// UtilsNotifyRoles内の全プレイヤー×全プレイヤーの組み合わせを走査するループから、
-    /// 全seer・全targetの組み合わせについて毎回呼ばれる。
+    /// RoleBase.GetBroadcastMarkのoverride。CustomRoleManager.AllActiveRolesを通じて
+    /// 全役職インスタンスにブロードキャストされる(このインスタンス自身の占い対象判定のみ行えばよい)。
     /// </summary>
-    public static string OtherArrow(PlayerControl seer, PlayerControl seen, bool isForMeeting = false)
+    public override string GetBroadcastMark(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false)
     {
         seen ??= seer;
         if (isForMeeting) return "";
         if (!canSeePlayerAsTarget) return "";
+        if (seer.PlayerId != divination.PendingTarget) return "";
+        if (seer.GetCustomRole().GetCustomRoleTypes() is CustomRoleTypes.Crewmate) return "";
 
-        foreach (var tell in tellers)
-        {
-            if (seer.PlayerId == tell.divination.PendingTarget && seer == seen)
-            {
-                var ar = "";
-                if (seer.GetCustomRole().GetCustomRoleTypes() is not CustomRoleTypes.Crewmate)
-                {
-                    if (canSeeArrowAsTarget) ar = $"\n{TargetArrow.GetArrows(seer, tell.Player.PlayerId)}";
-                    return $"<color=#6b3ec3>★{ar}</color>";
-                }
-            }
-            else if (seer.PlayerId == tell.divination.PendingTarget
-                && seen == tell.Player
-                && seer.GetCustomRole().GetCustomRoleTypes() is not CustomRoleTypes.Crewmate)
-                return "<color=#6b3ec3>★</color>";
-        }
+        if (seer == seen) return BuildPendingTargetMark(GetArrowText(seer));
+        if (seen == Player) return BuildPendingTargetMark("");
         return "";
     }
+    /// <summary>
+    /// 占い対象であることを示す★マークを、矢印テキスト(あれば)と合わせて1つの色タグで組み立てる。
+    /// 矢印も★と同じ色にするため、あえて1つの色タグにまとめている。
+    /// </summary>
+    private static string BuildPendingTargetMark(string arrowText) => $"<color=#6b3ec3>★{arrowText}</color>";
+    /// <summary>
+    /// canSeeArrowAsTargetが有効なときだけ、占い対象への矢印テキストを組み立てる。
+    /// </summary>
+    private string GetArrowText(PlayerControl seer) =>
+        canSeeArrowAsTarget ? $"\n{TargetArrow.GetArrows(seer, Player.PlayerId)}" : "";
 
     public void SendRPC()
     {
