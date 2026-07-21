@@ -3043,8 +3043,7 @@ namespace TownOfHost
                                     pc.PlayerId == player.PlayerId) continue;
 
                                     player.Data.IsDead = false;
-                                    string playername = player.GetRealName(isMeeting: true);
-                                    playername = playername.ApplyNameColorData(pc, player, true);
+                                    string playername = NameColorManager.GetColoredRealName(pc, player, true);
 
                                     var sender = CustomRpcSender.Create("MessagesToSend", SendOption.Reliable);
                                     sender.StartMessage(pc.GetClientId());

@@ -101,12 +101,8 @@ namespace TownOfHost
                 var role = seer.GetCustomRole();
                 var seerRole = seer.GetRoleClass();
                 var seerRoleInfo = seer.GetCustomRole().GetRoleInfo();
-                var seerSubrole = seer.GetCustomSubRoles();
                 var seerisAlive = seer.IsAlive();
-                var Amnesiacheck = Amnesia.CheckAbility(seer);
                 var seerConnecting = seer.Is(CustomRoles.Connecting);
-                var IsMisidentify = seer.GetMisidentify(out var missrole);
-                RoleAddAddons.GetRoleAddon(role, out var data, seer, subrole: [CustomRoles.Guesser]);
                 // 会議じゃなくて，キノコカオス中で，seerが生きていてdesyncインポスターの場合に自身の名前を消す
                 if (isMushroomMixupActive && seerisAlive && !role.IsImpostor() && seerRoleInfo?.IsDesyncImpostor == true)
                 {
@@ -121,50 +117,14 @@ namespace TownOfHost
                 }
                 else
                 {
-                    //名前の後ろに付けるマーカー
-                    SelfMark.Clear();
-
                     //seerの名前を一時的に上書きするかのチェック
                     string name = ""; bool nomarker = false;
                     var TemporaryName = seerRole?.GetTemporaryName(ref name, ref nomarker, false, seer);
 
-                    //seer役職が対象のMark
-                    if (Amnesiacheck && !IsMisidentify)
-                        SelfMark.Append(seerRole?.GetMark(seer, isForMeeting: false) ?? "");
-
-                    //seerに関わらず発動するMark
-                    SelfMark.Append(CustomRoleManager.GetMarkOthers(seer, isForMeeting: false));
-
-                    //ハートマークを付ける(自分に)
-                    var lover = seer.GetLoverRole();
-                    if (lover is not CustomRoles.NotAssigned and not CustomRoles.OneLove) SelfMark.Append(ColorString(GetRoleColor(lover), "♥"));
-
-                    if ((seerConnecting && role is not CustomRoles.WolfBoy)
-                    || (seerConnecting && !seerisAlive)) SelfMark.Append(ColorString(GetRoleColor(CustomRoles.Connecting), "Ψ"));
-
-                    if (Options.CurrentGameMode == CustomGameMode.TaskBattle)
-                    {
-                        TaskBattle.GetMark(seer, null, ref SelfMark);
-                    }
-                    //Markとは違い、改行してから追記されます。
-                    SelfSuffix.Clear();
-
-                    //seer役職が対象のLowerText
-                    if (Amnesiacheck && !IsMisidentify)
-                        SelfSuffix.Append(seerRole?.GetLowerText(seer, isForMeeting: false) ?? "");
-                    //seerに関わらず発動するLowerText
-                    SelfSuffix.Append(CustomRoleManager.GetLowerTextOthers(seer, isForMeeting: false));
-                    //追放者
-                    if (Options.CanseeVoteresult.GetBool() && MeetingVoteManager.Voteresult != "")
-                    {
-                        if (SelfSuffix.ToString() != "") SelfSuffix.Append('\n');
-                        SelfSuffix.Append("<#ffffff><size=75%>" + MeetingVoteManager.Voteresult + "</color></size>");
-                    }
-                    //seer役職が対象のSuffix
-                    if (Amnesiacheck)
-                        SelfSuffix.Append(seerRole?.GetSuffix(seer, isForMeeting: false) ?? "");
-                    //seerに関わらず発動するSuffix
-                    SelfSuffix.Append(CustomRoleManager.GetSuffixOthers(seer, isForMeeting: false));
+                    //名前の後ろに付けるマーカーとSuffix(UtilsTextComponentに集約)
+                    var (selfMark, selfSuffix) = UtilsTextComponent.BuildSelfDecoration(seer, isForMeeting: false);
+                    SelfMark.Clear().Append(selfMark);
+                    SelfSuffix.Clear().Append(selfSuffix);
 
                     //RealNameを取得 なければ現在の名前をRealNamesに書き込む
                     string SeerRealName = seer.GetRealName(false);
@@ -184,6 +144,7 @@ namespace TownOfHost
                         {
                             SelfMark.Clear();
                             SelfSuffix.Clear();
+                            var lover = seer.GetLoverRole();
                             if (lover is not CustomRoles.NotAssigned and not CustomRoles.OneLove) SelfMark.Append(ColorString(GetRoleColor(lover), "♥"));
                         }
                     }
@@ -268,48 +229,16 @@ namespace TownOfHost
                         else
                         {
                             var targetrole = target.GetRoleClass();
-                            //名前の後ろに付けるマーカー
-                            TargetMark.Clear();
 
                             /// targetの名前を一時的に上書きするかのチェック
                             string name = ""; bool nomarker = false;
                             var TemporaryName = targetrole?.GetTemporaryName(ref name, ref nomarker, false, seer, target) ?? false;
 
-                            //seerに関わらず発動するMark
-                            TargetMark.Append(CustomRoleManager.GetMarkOthers(seer, target, false));
-
-                            //ハートマークを付ける(相手に)
-                            var seerri = seer.GetLoverRole();
-                            var tageri = target.GetLoverRole();
-                            var seerisone = seerSubrole.Contains(CustomRoles.OneLove);
+                            //名前の後ろに付けるマーカーとSuffix(UtilsTextComponentに集約)
+                            var (targetMark, targetSuffix) = UtilsTextComponent.BuildTargetDecoration(seer, target, isForMeeting: false);
+                            TargetMark.Clear().Append(targetMark);
+                            TargetSuffix.Clear().Append(targetSuffix);
                             var targetsubrole = target.GetCustomSubRoles();
-                            var seenIsOne = targetsubrole.Contains(CustomRoles.OneLove);
-                            if (seerri == tageri && seer.IsLovers() && !seerisone)
-                                TargetMark.Append(ColorString(GetRoleColor(seerri), "♥"));
-                            else if (seer.Data.IsDead && !seer.Is(tageri) && tageri != CustomRoles.NotAssigned && !seerisone)
-                                TargetMark.Append(ColorString(GetRoleColor(tageri), "♥"));
-
-                            if ((seerisone && seenIsOne)
-                            || ((seer.Data.IsDead || seerisone) && target.PlayerId == Lovers.OneLovePlayer.BelovedId)
-                            )
-                                TargetMark.Append("<#ff7961>♡</color>");
-
-                            if (seerConnecting && targetsubrole.Contains(CustomRoles.Connecting) && (role is not CustomRoles.WolfBoy || !seerisAlive)
-                            || (seer.Data.IsDead && !seerConnecting && targetsubrole.Contains(CustomRoles.Connecting))
-                            ) //狼少年じゃないか死亡なら処理
-                                TargetMark.Append($"<#96514d>Ψ</color>");
-
-                            //インサイダーモードタスク表示
-                            if (Options.InsiderModeCanSeeTask.GetBool())
-                            {
-                                if (target.GetPlayerTaskState() != null && target.GetPlayerTaskState().AllTasksCount > 0)
-                                {
-                                    if (role.IsImpostor())
-                                    {
-                                        TargetMark.Append($"<yellow>({target.GetPlayerTaskState().CompletedTasksCount}/{target.GetPlayerTaskState().GetNeedCountOrAll()})</color>");
-                                    }
-                                }
-                            }
 
                             //他人の役職とタスクは幽霊が他人の役職を見れるようになっていてかつ、seerが死んでいる場合のみ表示されます。それ以外の場合は空になります。
                             var targetRoleData = GetRoleNameAndProgressTextData(seer, target, false);
@@ -323,34 +252,6 @@ namespace TownOfHost
                             if (Triplets.IsTripletWith(seer.PlayerId, target.PlayerId))
                             {
                                 TargetRoleText = GetRoleColorAndtext(CustomRoles.Triplets) + TargetRoleText;
-                            }
-
-                            TargetSuffix.Clear();
-                            //seerに関わらず発動するLowerText
-                            TargetSuffix.Append(CustomRoleManager.GetLowerTextOthers(seer, target, isForMeeting: false));
-
-                            //seerに関わらず発動するSuffix
-                            TargetSuffix.Append(CustomRoleManager.GetSuffixOthers(seer, target, isForMeeting: false));
-                            // 空でなければ先頭に改行を挿入
-                            if (TargetSuffix.Length > 0)
-                                TargetSuffix.Insert(0, "\r\n");
-
-                            if (Amnesiacheck)
-                            {
-                                //seer役職が対象のMark
-                                TargetMark.Append(seerRole?.GetMark(seer, target, false) ?? "");
-                                TargetSuffix.Append(seerRole?.GetSuffix(seer, target, isForMeeting: false) ?? "");
-
-                                if (targetsubrole.Contains(CustomRoles.Workhorse))
-                                {
-                                    if (((seerRole as Alien)?.mode == Alien.AlienMode.ProgressKiller && Alien.ProgressWorkhorseseen)
-                                    || ((seerRole as JackalAlien)?.mode == Alien.AlienMode.ProgressKiller == true && JackalAlien.ProgressWorkhorseseen)
-                                    || (role is CustomRoles.ProgressKiller && ProgressKiller.ProgressWorkhorseseen)
-                                    || ((seerRole as AlienHijack)?.mode == Alien.AlienMode.ProgressKiller && Alien.ProgressWorkhorseseen))
-                                    {
-                                        TargetMark.Append($"<#0000ff>♦</color>");
-                                    }
-                                }
                             }
 
                             //RealNameを取得 なければ現在の名前をRealNamesに書き込む
@@ -467,9 +368,7 @@ namespace TownOfHost
                 var seerRoleInfo = seer.GetCustomRole().GetRoleInfo();
                 var seerSubrole = seer.GetCustomSubRoles();
                 var seerisAlive = seer.IsAlive();
-                var Amnesiacheck = Amnesia.CheckAbility(seer);
                 var seercone = seer.Is(CustomRoles.Connecting);
-                var IsMisidentify = seer.GetMisidentify(out _);
                 RoleAddAddons.GetRoleAddon(role, out var data, seer, subrole: [CustomRoles.Guesser]);
                 var hasgessuer = seerSubrole.Contains(CustomRoles.Guesser)
                             || role is CustomRoles.NiceGuesser or CustomRoles.EvilGuesser
@@ -492,41 +391,14 @@ namespace TownOfHost
                         list = PlayerCatch.AllPlayerControls.ToArray();
                         isMeMinfo = false;
                     }
-                    //名前の後ろに付けるマーカー
-                    SelfMark.Clear();
-
                     //seerの名前を一時的に上書きするかのチェック
                     string name = ""; bool nomarker = false;
                     var TemporaryName = seerRole?.GetTemporaryName(ref name, ref nomarker, true, seer);
 
-                    //seer役職が対象のMark
-                    if (Amnesiacheck && !IsMisidentify)
-                        SelfMark.Append(seerRole?.GetMark(seer, isForMeeting: true) ?? "");
-
-                    //seerに関わらず発動するMark
-                    SelfMark.Append(CustomRoleManager.GetMarkOthers(seer, isForMeeting: true));
-
-                    //ハートマークを付ける(自分に)
-                    var lover = seer.GetLoverRole();
-                    if (lover is not CustomRoles.NotAssigned and not CustomRoles.OneLove) SelfMark.Append(ColorString(GetRoleColor(lover), "♥"));
-
-                    if ((seercone && role is not CustomRoles.WolfBoy)
-                    || (seercone && !seerisAlive)) SelfMark.Append(ColorString(GetRoleColor(CustomRoles.Connecting), "Ψ"));
-
-                    //Markとは違い、改行してから追記されます。
-                    SelfSuffix.Clear();
-
-                    //seer役職が対象のLowerText
-                    if (Amnesiacheck && !IsMisidentify)
-                        SelfSuffix.Append(seerRole?.GetLowerText(seer, isForMeeting: true) ?? "");
-                    //seerに関わらず発動するLowerText
-                    SelfSuffix.Append(CustomRoleManager.GetLowerTextOthers(seer, isForMeeting: true));
-
-                    //seer役職が対象のSuffix
-                    if (Amnesiacheck)
-                        SelfSuffix.Append(seerRole?.GetSuffix(seer, isForMeeting: true) ?? "");
-                    //seerに関わらず発動するSuffix
-                    SelfSuffix.Append(CustomRoleManager.GetSuffixOthers(seer, isForMeeting: true));
+                    //名前の後ろに付けるマーカーとSuffix(UtilsTextComponentに集約)
+                    var (selfMark, selfSuffix) = UtilsTextComponent.BuildSelfDecoration(seer, isForMeeting: true);
+                    SelfMark.Clear().Append(selfMark);
+                    SelfSuffix.Clear().Append(selfSuffix);
 
                     //RealNameを取得 なければ現在の名前をRealNamesに書き込む
                     string SeerRealName = seer.GetRealName(true);
@@ -643,48 +515,16 @@ namespace TownOfHost
                                     tageismodinfo = true;
                             }
                             var targetrole = target.GetRoleClass();
-                            //名前の後ろに付けるマーカー
-                            TargetMark.Clear();
 
                             /// targetの名前を一時的に上書きするかのチェック
                             string name = ""; bool nomarker = false;
                             var TemporaryName = targetrole?.GetTemporaryName(ref name, ref nomarker, true, seer, target) ?? false;
 
-                            //seerに関わらず発動するMark
-                            TargetMark.Append(CustomRoleManager.GetMarkOthers(seer, target, true));
-
-                            //ハートマークを付ける(相手に)
-                            var seerri = seer.GetLoverRole();
-                            var tageri = target.GetLoverRole();
-                            var seerisone = seerSubrole.Contains(CustomRoles.OneLove);
+                            //名前の後ろに付けるマーカーとSuffix(UtilsTextComponentに集約)
+                            var (targetMark, targetSuffix) = UtilsTextComponent.BuildTargetDecoration(seer, target, isForMeeting: true);
+                            TargetMark.Clear().Append(targetMark);
+                            TargetSuffix.Clear().Append(targetSuffix);
                             var targetsubrole = target.GetCustomSubRoles();
-                            var seenIsOne = targetsubrole.Contains(CustomRoles.OneLove);
-                            if (seerri == tageri && seer.IsLovers() && !seerisone)
-                                TargetMark.Append(ColorString(GetRoleColor(seerri), "♥"));
-                            else if (seer.Data.IsDead && !seer.Is(tageri) && tageri is not CustomRoles.NotAssigned and not CustomRoles.OneLove && !seerisone)
-                                TargetMark.Append(ColorString(GetRoleColor(tageri), "♥"));
-
-                            if ((seerisone && seenIsOne)
-                            || ((seer.Data.IsDead || seerisone) && target.PlayerId == Lovers.OneLovePlayer.BelovedId)
-                            )
-                                TargetMark.Append("<#ff7961>♡</color>");
-
-                            if (seercone && targetsubrole.Contains(CustomRoles.Connecting) && (role is not CustomRoles.WolfBoy || !seerisAlive)
-                            || (seer.Data.IsDead && !seercone && targetsubrole.Contains(CustomRoles.Connecting))
-                            ) //狼少年じゃないか死亡なら処理
-                                TargetMark.Append($"<#96514d>Ψ</color>");
-
-                            //インサイダーモードタスク表示
-                            if (Options.InsiderModeCanSeeTask.GetBool())
-                            {
-                                if (target.GetPlayerTaskState() != null && target.GetPlayerTaskState().AllTasksCount > 0)
-                                {
-                                    if (role.IsImpostor())
-                                    {
-                                        TargetMark.Append($"<yellow>({target.GetPlayerTaskState().CompletedTasksCount}/{target.GetPlayerTaskState().GetNeedCountOrAll()})</color>");
-                                    }
-                                }
-                            }
 
                             //他人の役職とタスクは幽霊が他人の役職を見れるようになっていてかつ、seerが死んでいる場合のみ表示されます。それ以外の場合は空になります。
                             var targetRoleData = GetRoleNameAndProgressTextData(seer, target, false);
@@ -713,37 +553,7 @@ namespace TownOfHost
                                 TargetRoleText = $"\r\n";
                             }
 
-                            TargetSuffix.Clear();
-                            //seerに関わらず発動するLowerText
-                            TargetSuffix.Append(CustomRoleManager.GetLowerTextOthers(seer, target, isForMeeting: true));
-
-                            //seerに関わらず発動するSuffix
-                            TargetSuffix.Append(CustomRoleManager.GetSuffixOthers(seer, target, isForMeeting: true));
-                            bool HasData = false;
-                            // 空でなければ先頭に改行を挿入
-                            if (TargetSuffix.Length > 0)
-                            {
-                                TargetSuffix.Insert(0, "\r\n");
-                                HasData = true;
-                            }
-
-                            if (Amnesiacheck)
-                            {
-                                //seer役職が対象のMark
-                                TargetMark.Append(seerRole?.GetMark(seer, target, true) ?? "");
-                                TargetSuffix.Append(seerRole?.GetSuffix(seer, target, isForMeeting: true) ?? "");
-
-                                if (targetsubrole.Contains(CustomRoles.Workhorse))
-                                {
-                                    if (((seerRole as Alien)?.mode == Alien.AlienMode.ProgressKiller == true && Alien.ProgressWorkhorseseen)
-                                    || ((seerRole as JackalAlien)?.mode == Alien.AlienMode.ProgressKiller == true && JackalAlien.ProgressWorkhorseseen)
-                                    || (role is CustomRoles.ProgressKiller && ProgressKiller.ProgressWorkhorseseen)
-                                    || ((seerRole as AlienHijack)?.mode == Alien.AlienMode.ProgressKiller && Alien.ProgressWorkhorseseen))
-                                    {
-                                        TargetMark.Append($"<#0000ff>♦</color>");
-                                    }
-                                }
-                            }
+                            bool HasData = targetSuffix != "";
 
                             //RealNameを取得 なければ現在の名前をRealNamesに書き込む
                             string TargetPlayerName = target.GetRealName(true);

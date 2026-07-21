@@ -7,6 +7,15 @@ namespace TownOfHost
 {
     public static class NameColorManager
     {
+        /// <summary>
+        /// targetのRealNameを取得し、seer視点の色を適用した文字列を返す。
+        /// GetRealName + ApplyNameColorDataの組み合わせがChatCommandPatchやRpcMeetingColorNameで
+        /// 個別に呼ばれていたため共通化。
+        /// </summary>
+        public static string GetColoredRealName(PlayerControl seer, PlayerControl target, bool isMeeting)
+        {
+            return target.GetRealName(isMeeting).ApplyNameColorData(seer, target, isMeeting);
+        }
         public static string ApplyNameColorData(this string name, PlayerControl seer, PlayerControl target, bool isMeeting)
         {
             if (!AmongUsClient.Instance.IsGameStarted) return name;
@@ -145,8 +154,7 @@ namespace TownOfHost
                     sender.StartMessage(clientid);
                     foreach (var seen in PlayerCatch.AllPlayerControls)
                     {
-                        string playername = seen.GetRealName(isMeeting: true);
-                        playername = playername.ApplyNameColorData(seer, seen, true);
+                        string playername = GetColoredRealName(seer, seen, true);
 
                         sender.StartRpc(seen.NetId, (byte)RpcCalls.SetName)
                         .Write(seen.NetId)
@@ -163,8 +171,7 @@ namespace TownOfHost
                 {
                     if (seer.IsModClient()) continue;
                     var clientId = seer.GetClientId();
-                    string playername = pc.GetRealName(isMeeting: true);
-                    playername = playername.ApplyNameColorData(seer, pc, true);
+                    string playername = GetColoredRealName(seer, pc, true);
                     if (clientId == -1) continue;
 
                     var sender = CustomRpcSender.Create("MeetingNameColor", SendOption.None);
