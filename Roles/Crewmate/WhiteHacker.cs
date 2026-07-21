@@ -97,7 +97,7 @@ public sealed class WhiteHacker : RoleBase
         seen ??= seer;
         if (isForMeeting && Player.IsAlive() && Awakened && seer.PlayerId == seen.PlayerId && SelfVoteManager.CanUseAbility() && Maximum > count && MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount))
         {
-            var mes = $"<color={RoleInfo.RoleColorCode}>{GetString("NomalVoteRoleInfoMeg")}</color>";
+            var mes = $"<color={RoleInfo.RoleColorCode}>{GetString("NormalVoteRoleInfoMeg")}</color>";
             return isForHud ? mes : $"<size=40%>{mes}</size>";
         }
         return "";

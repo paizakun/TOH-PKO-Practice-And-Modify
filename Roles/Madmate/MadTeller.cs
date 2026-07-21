@@ -101,7 +101,7 @@ public sealed class MadTeller : RoleBase, IKillFlashSeeable, IDeathReasonSeeable
         seen ??= seer;
         if (isForMeeting && Player.IsAlive() && seer.PlayerId == seen.PlayerId && CanUseAbility() && Max > count && Check())
         {
-            var mes = $"<color={RoleInfo.RoleColorCode}>{(Votemode == AbilityVoteMode.SelfVote ? GetString("SelfVoteRoleInfoMeg") : GetString("NomalVoteRoleInfoMeg"))}</color>";
+            var mes = $"<color={RoleInfo.RoleColorCode}>{(Votemode == AbilityVoteMode.SelfVote ? GetString("SelfVoteRoleInfoMeg") : GetString("NormalVoteRoleInfoMeg"))}</color>";
             return isForHud ? mes : $"<size=40%>{mes}</size>";
         }
         return "";

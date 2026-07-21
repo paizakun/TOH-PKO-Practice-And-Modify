@@ -146,7 +146,7 @@ public sealed class AllArounder : RoleBase, ISystemTypeUpdateHook, IKillFlashSee
         {
             if (NowRole is NowMode.Dictator)
             {
-                var mes = $"<color={RoleInfo.RoleColorCode}>{GetString("NomalVoteRoleInfoMeg")}</color>";
+                var mes = $"<color={RoleInfo.RoleColorCode}>{GetString("NormalVoteRoleInfoMeg")}</color>";
                 return isForHud ? mes : $"<size=40%>{mes}</size>";
             }
             if (NowRole is NowMode.MeetingSheriff)

@@ -368,7 +368,7 @@ public sealed class SuspiciousTeller : RoleBase, ISelfVoter
         if (!isForMeeting || seer.PlayerId != Player.PlayerId || seen.PlayerId != Player.PlayerId) return "";
         if (!CanUseTellAbility()) return "";
 
-        var mes = $"<color={RoleInfo.RoleColorCode}>{(voteMode == AbilityVoteMode.SelfVote ? GetString("SelfVoteRoleInfoMeg") : GetString("NomalVoteRoleInfoMeg"))}</color>";
+        var mes = $"<color={RoleInfo.RoleColorCode}>{(voteMode == AbilityVoteMode.SelfVote ? GetString("SelfVoteRoleInfoMeg") : GetString("NormalVoteRoleInfoMeg"))}</color>";
         return isForHud ? mes : $"<size=40%>{mes}</size>";
     }
 

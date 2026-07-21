@@ -230,7 +230,7 @@ public sealed class NiceEraser : RoleBase, ISelfVoter
         if (!isForMeeting || seer.PlayerId != seen.PlayerId || seer.PlayerId != Player.PlayerId) return "";
         if (!CanUseAbilityNow()) return "";
 
-        var key = voteMode == AbilityVoteMode.SelfVote ? "SelfVoteRoleInfoMeg" : "NomalVoteRoleInfoMeg";
+        var key = voteMode == AbilityVoteMode.SelfVote ? "SelfVoteRoleInfoMeg" : "NormalVoteRoleInfoMeg";
         var mes = $"<color={RoleInfo.RoleColorCode}>{GetString(key)}</color>";
         return isForHud ? mes : $"<size=40%>{mes}</size>";
     }

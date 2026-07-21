@@ -130,7 +130,7 @@ public sealed class PonkotuTeller : RoleBase, ISelfVoter
         seen ??= seer;
         if (isForMeeting && Player.IsAlive() && Awakened && seer.PlayerId == seen.PlayerId && CanUseAbility() && Max > count && MyTaskState.HasCompletedEnoughCountOfTasks(cantaskcount))
         {
-            var mes = $"<color={RoleInfo.RoleColorCode}>{(Votemode == AbilityVoteMode.SelfVote ? GetString("SelfVoteRoleInfoMeg") : GetString("NomalVoteRoleInfoMeg"))}</color>";
+            var mes = $"<color={RoleInfo.RoleColorCode}>{(Votemode == AbilityVoteMode.SelfVote ? GetString("SelfVoteRoleInfoMeg") : GetString("NormalVoteRoleInfoMeg"))}</color>";
             return isForHud ? mes : $"<size=40%>{mes}</size>";
         }
         return "";

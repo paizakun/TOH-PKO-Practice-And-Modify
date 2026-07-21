@@ -2913,7 +2913,7 @@
 "NiceLoggerLower","Let's install sensors.","センサーを設置しよう"
 "FoxRoomMission","Go to {0}","{0}に行け"
 "SelfVoteRoleInfoMeg","Self-voting => RoleAbility","自投票で効果発動"
-"NomalVoteRoleInfoMeg","Voting => RoleAbility","誰かに投票することで効果発動"
+"NormalVoteRoleInfoMeg","Voting => RoleAbility","誰かに投票することで効果発動"
 "ProBowlerInfoTextSet","Set Hole","穴を設置しよう"
 "ProBowlerInfoTextKill","Kill target go to Hole","キル → 設置した穴に死体が残る"
 "TurncoatLowerText","Betray {0}","{0}を裏切れ..."

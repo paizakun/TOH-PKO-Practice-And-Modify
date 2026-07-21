@@ -75,7 +75,7 @@ public sealed class Dictator : RoleBase, ISelfVoter
         seen ??= seer;
         if (isForMeeting && Player.IsAlive() && seer.PlayerId == seen.PlayerId && CanUseAbility())
         {
-            var mes = $"<color={RoleInfo.RoleColorCode}>{(OptionSelfVote.GetBool() ? GetString("SelfVoteRoleInfoMeg") : GetString("NomalVoteRoleInfoMeg"))}</color>";
+            var mes = $"<color={RoleInfo.RoleColorCode}>{(OptionSelfVote.GetBool() ? GetString("SelfVoteRoleInfoMeg") : GetString("NormalVoteRoleInfoMeg"))}</color>";
             return isForHud ? mes : $"<size=40%>{mes}</size>";
         }
         return "";
